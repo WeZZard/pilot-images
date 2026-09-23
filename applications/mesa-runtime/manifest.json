@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "id": "mesa-runtime",
+  "inventoryIds": [
+    "snap:mesa-2404"
+  ],
+  "platforms": {
+    "linux": {
+      "architectures": [
+        "arm64",
+        "x86_64"
+      ],
+      "executable": "/usr/bin/python3",
+      "version": null,
+      "launch": {
+        "mode": "command",
+        "args": [
+          "-I",
+          "-c",
+          "import os; s='#!/usr/bin/env python3\\n\"\"\"Query bundled Mesa EGL without a window, display server, or monitor service.\"\"\"\\nimport ctypes\\nimport json\\nimport os\\nfrom pathlib import Path\\nimport platform\\nimport subprocess\\nimport sys\\n\\nROOT = Path(\\'/snap/mesa-2404/current\\')\\nTRIPLES = {\\'aarch64\\': \\'aarch64-linux-gnu\\', \\'x86_64\\': \\'x86_64-linux-gnu\\'}\\n\\n\\ndef main():\\n    try:\\n        lib = ROOT / \\'usr/lib\\' / TRIPLES[platform.machine()]\\n        if os.environ.get(\\'PILOT_MESA_INFO_CHILD\\') != \\'1\\':\\n            env = dict(os.environ, PILOT_MESA_INFO_CHILD=\\'1\\',\\n                       LD_LIBRARY_PATH=str(lib), LIBGL_DRIVERS_PATH=str(lib / \\'dri\\'),\\n                       EGL_PLATFORM=\\'surfaceless\\', LIBGL_ALWAYS_SOFTWARE=\\'1\\',\\n                       MESA_SHADER_CACHE_DISABLE=\\'true\\',\\n                       __EGL_VENDOR_LIBRARY_FILENAMES=str(ROOT / \\'usr/share/glvnd/egl_vendor.d/50_mesa.json\\'))\\n            # The manifest embeds this same source so no checkout path is required.\\n            source = os.environ.get(\\'PILOT_MESA_INFO_SOURCE\\')\\n            if source is None:\\n                source = Path(__file__).read_text()\\n            env[\\'PILOT_MESA_INFO_SOURCE\\'] = source\\n            run = subprocess.run([sys.executable, \\'-I\\', \\'-c\\', source], env=env,\\n                                 capture_output=True, text=True, timeout=15)\\n            print(run.stdout, end=\\'\\')\\n            if run.stderr:\\n                print(run.stderr, file=sys.stderr, end=\\'\\')\\n            return run.returncode\\n        egl = ctypes.CDLL(str(lib / \\'libEGL.so.1\\'))\\n        egl.eglGetDisplay.argtypes = [ctypes.c_void_p]\\n        egl.eglGetDisplay.restype = ctypes.c_void_p\\n        egl.eglInitialize.argtypes = [ctypes.c_void_p, ctypes.POINTER(ctypes.c_int), ctypes.POINTER(ctypes.c_int)]\\n        egl.eglInitialize.restype = ctypes.c_uint\\n        egl.eglQueryString.argtypes = [ctypes.c_void_p, ctypes.c_int]\\n        egl.eglQueryString.restype = ctypes.c_char_p\\n        egl.eglTerminate.argtypes = [ctypes.c_void_p]\\n        display = egl.eglGetDisplay(None)\\n        major, minor = ctypes.c_int(), ctypes.c_int()\\n        if not display or not egl.eglInitialize(display, ctypes.byref(major), ctypes.byref(minor)):\\n            raise RuntimeError(\\'bundled Mesa surfaceless EGL initialization failed\\')\\n        try:\\n            vendor = (egl.eglQueryString(display, 0x3053) or b\\'\\').decode()\\n            version = (egl.eglQueryString(display, 0x3054) or b\\'\\').decode()\\n            maps = Path(\\'/proc/self/maps\\').read_text()\\n            loaded = sorted({line.split()[-1] for line in maps.splitlines()\\n                             if \\'/snap/mesa-2404/\\' in line})\\n            resolved = str(ROOT.resolve()) + \\'/\\'\\n            if \\'Mesa\\' not in vendor or not version or not any(\\n                    p.startswith(resolved) and \\'/libEGL_mesa.so.\\' in p for p in loaded):\\n                raise RuntimeError(\\'EGL vendor/version or bundled Mesa linkage was not proved\\')\\n            print(json.dumps(dict(status=\\'pass\\', check=\\'bundled-mesa-egl-info\\',\\n                                  vendor=vendor, version=version, loadedLibraries=loaded,\\n                                  scope=\\'surfaceless software EGL; not hardware acceleration\\')))\\n        finally:\\n            egl.eglTerminate(display)\\n        return 0\\n    except (OSError, KeyError, ValueError, RuntimeError, subprocess.SubprocessError) as error:\\n        print(json.dumps(dict(status=\\'fail\\', check=\\'bundled-mesa-egl-info\\', error=str(error))))\\n        return 1\\n\\n\\nif __name__ == \\'__main__\\':\\n    raise SystemExit(main())\\n'; os.environ[\"PILOT_MESA_INFO_SOURCE\"]=s; exec(compile(s, \"mesa-runtime-info\", \"exec\"))"
+        ]
+      },
+      "timeoutSeconds": 30,
+      "extensions": [
+        "service.py"
+      ],
+      "optional": false
+    }
+  }
+}

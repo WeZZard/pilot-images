@@ -1,0 +1,7 @@
+{
+  "schemaVersion": 1, "id": "node", "inventoryIds": ["dpkg:nodejs"],
+  "platforms": {
+    "linux": {"architectures": ["arm64", "x86_64"], "executable": "node", "version": ["--version"], "launch": {"mode": "command", "args": ["-e", "if (!process.versions.node) process.exit(1)"]}, "timeoutSeconds": 10, "extensions": [], "optional": false},
+    "macos": {"architectures": ["arm64"], "executable": "node", "version": ["--version"], "launch": {"mode": "command", "args": ["-e", "if (!process.versions.node) process.exit(1)"]}, "timeoutSeconds": 10, "extensions": [], "optional": false}
+  }
+}

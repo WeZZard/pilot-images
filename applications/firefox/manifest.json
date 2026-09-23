@@ -1,0 +1,4 @@
+{
+ "schemaVersion": 1, "id": "firefox", "inventoryIds": ["firefox"],
+ "platforms": {"linux": {"architectures": ["arm64", "x86_64"], "executable": "/snap/bin/firefox", "version": ["--version"], "launch": {"mode": "process", "args": ["--headless", "--no-remote", "--profile", "{temporary}", "about:blank"]}, "timeoutSeconds": 10, "extensions": [], "optional": false, "temporaryRoot": "~/snap/firefox/common"}}
+}

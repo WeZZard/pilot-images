@@ -1,0 +1,8 @@
+{
+  "schemaVersion": 1,
+  "id": "socat",
+  "inventoryIds": ["dpkg:socat"],
+  "platforms": {
+    "linux": {"architectures": ["arm64", "x86_64"], "executable": "socat", "version": ["-V"], "launch": {"mode": "command", "args": ["-V"]}, "timeoutSeconds": 10, "extensions": [], "optional": false}
+  }
+}

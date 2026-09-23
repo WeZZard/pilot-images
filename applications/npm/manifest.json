@@ -1,0 +1,7 @@
+{
+  "schemaVersion": 1, "id": "npm", "inventoryIds": ["npm:npm"],
+  "platforms": {
+    "linux": {"architectures": ["arm64", "x86_64"], "executable": "npm", "version": ["--version"], "launch": {"mode": "command", "args": ["--version"]}, "timeoutSeconds": 20, "extensions": [], "optional": false},
+    "macos": {"architectures": ["arm64"], "executable": "npm", "version": ["--version"], "launch": {"mode": "command", "args": ["--version"]}, "timeoutSeconds": 20, "extensions": [], "optional": false}
+  }
+}

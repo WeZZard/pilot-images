@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "id": "p11-kit",
+  "inventoryIds": ["dpkg:p11-kit"],
+  "platforms": {
+    "linux": {
+      "architectures": ["arm64", "x86_64"],
+      "executable": "p11-kit",
+      "version": null,
+      "launch": {"mode": "command", "args": ["list-modules"]},
+      "timeoutSeconds": 10,
+      "extensions": [],
+      "optional": false
+    }
+  }
+}

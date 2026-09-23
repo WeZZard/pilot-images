@@ -1,0 +1,4 @@
+{
+  "schemaVersion": 1, "id": "cargo", "inventoryIds": [],
+  "platforms": {"macos": {"architectures": ["arm64"], "executable": "rustup", "version": ["run", "stable", "cargo", "--version"], "launch": {"mode": "command", "args": ["run", "nightly", "cargo", "--version"]}, "timeoutSeconds": 10, "extensions": [], "optional": false}}
+}

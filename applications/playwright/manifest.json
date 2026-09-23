@@ -1,0 +1,7 @@
+{
+  "schemaVersion": 1, "id": "playwright", "inventoryIds": ["npm:playwright", "npm:@playwright/mcp"],
+  "platforms": {
+    "linux": {"architectures": ["arm64", "x86_64"], "executable": "playwright-mcp", "version": ["--version"], "launch": {"mode": "command", "args": ["--help"]}, "timeoutSeconds": 60, "extensions": ["browser.py"], "optional": false},
+    "macos": {"architectures": ["arm64"], "executable": "playwright", "version": ["--version"], "launch": {"mode": "command", "args": ["--help"]}, "timeoutSeconds": 60, "extensions": ["browser.py"], "optional": false}
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "schemaVersion": 1, "id": "gh", "inventoryIds": ["brew-formula:gh", "dpkg:gh"],
+  "platforms": {
+    "macos": {"architectures": ["arm64"], "executable": "gh", "version": ["--version"], "launch": {"mode": "command", "args": ["--version"]}, "timeoutSeconds": 10, "extensions": [], "optional": false},
+    "linux": {"architectures": ["arm64", "x86_64"], "executable": "gh", "version": ["--version"], "launch": {"mode": "command", "args": ["--version"]}, "timeoutSeconds": 10, "extensions": [], "optional": false}
+  }
+}

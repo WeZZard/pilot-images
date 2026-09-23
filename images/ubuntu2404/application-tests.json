@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "image": "ubuntu2404",
+  "scope": "provisioned",
+  "plans": ["node", "npm", "corepack", "socat", "pi", "claude-code", "playwright-cli", "cua-driver", "playwright", "firefox", "chromium", "gh", "jq", "wget", "htop", "vim-terminal", "ubuntu-common"],
+  "dependencies": {},
+  "provisioning": {
+    "gh": {"path": "images/ubuntu2404/guest/00-system.sh", "reason": "The common tooling list explicitly installs GitHub CLI."},
+    "jq": {"path": "images/ubuntu2404/guest/00-system.sh", "reason": "The common tooling list explicitly installs jq."},
+    "wget": {"path": "images/ubuntu2404/guest/00-system.sh", "reason": "The common tooling list explicitly installs wget."},
+    "htop": {"path": "images/ubuntu2404/guest/00-system.sh", "reason": "The common tooling list explicitly installs htop."},
+    "vim-terminal": {"path": "images/ubuntu2404/guest/00-system.sh", "reason": "The common tooling list explicitly installs Vim."},
+    "ubuntu-common": {"path": "images/ubuntu2404/guest/00-system.sh", "reason": "The explicit common utility and certificate additions use bounded startup checks; desktop and service configuration remains covered by image checks."},
+    "node": {"path": "images/ubuntu2404/guest/40-automation.sh", "reason": "The phase installs the NodeSource Node.js runtime."},
+    "npm": {"path": "images/ubuntu2404/guest/40-automation.sh", "reason": "The installed Node.js distribution supplies npm, which provisioning and agents use directly."},
+    "corepack": {"path": "images/ubuntu2404/guest/40-automation.sh", "reason": "Corepack is supplied by the installed Node.js distribution and is an exposed package-manager interface."},
+    "socat": {"path": "images/ubuntu2404/guest/40-automation.sh", "reason": "The phase explicitly installs socat for forwarding."},
+    "pi": {"path": "images/ubuntu2404/guest/50-agents.sh", "reason": "The phase explicitly installs Pi."},
+    "claude-code": {"path": "images/ubuntu2404/guest/50-agents.sh", "reason": "The phase explicitly installs native Claude Code."},
+    "playwright-cli": {"path": "images/ubuntu2404/guest/40-automation.sh", "reason": "The phase installs the pinned Playwright CLI."},
+    "cua-driver": {"path": "images/ubuntu2404/guest/45-capture.sh", "reason": "The phase installs the pinned capture driver and configures desktop startup."},
+    "playwright": {"path": "images/ubuntu2404/guest/40-automation.sh", "reason": "The phase installs pinned Playwright MCP and its browser runtimes."},
+    "firefox": {"path": "images/ubuntu2404/guest/20-browsers.sh", "reason": "The phase explicitly installs the Firefox Snap."},
+    "chromium": {"path": "images/ubuntu2404/guest/20-browsers.sh", "reason": "The phase explicitly installs the Chromium Snap."}
+  }
+}

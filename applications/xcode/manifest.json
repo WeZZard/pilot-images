@@ -1,0 +1,4 @@
+{
+  "schemaVersion": 1, "id": "xcode", "inventoryIds": ["bundle:com.apple.dt.Xcode"],
+  "platforms": {"macos": {"architectures": ["arm64"], "executable": "/Applications/Xcode.app/Contents/Developer/usr/bin/xcodebuild", "version": ["-version"], "launch": {"mode": "command", "args": ["-version"]}, "timeoutSeconds": 20, "extensions": [], "optional": false}}
+}

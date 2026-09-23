@@ -1,0 +1,7 @@
+{
+  "schemaVersion": 1, "id": "jq", "inventoryIds": ["brew-formula:jq", "dpkg:jq"],
+  "platforms": {
+    "macos": {"architectures": ["arm64"], "executable": "jq", "version": ["--version"], "launch": {"mode": "command", "args": ["--version"]}, "timeoutSeconds": 10, "extensions": [], "optional": false},
+    "linux": {"architectures": ["arm64", "x86_64"], "executable": "jq", "version": ["--version"], "launch": {"mode": "command", "args": ["--version"]}, "timeoutSeconds": 10, "extensions": [], "optional": false}
+  }
+}

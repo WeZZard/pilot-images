@@ -1,0 +1,4 @@
+{
+  "schemaVersion": 1, "id": "ffmpeg", "inventoryIds": ["brew-formula:ffmpeg"],
+  "platforms": {"macos": {"architectures": ["arm64"], "executable": "ffmpeg", "version": ["-version"], "launch": {"mode": "command", "args": ["-hide_banner", "-nostdin", "-formats"]}, "timeoutSeconds": 10, "extensions": [], "optional": false}}
+}

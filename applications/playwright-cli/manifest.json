@@ -1,0 +1,6 @@
+{
+  "schemaVersion": 1, "id": "playwright-cli", "inventoryIds": ["npm:@playwright/cli"],
+  "platforms": {
+    "linux": {"architectures": ["arm64", "x86_64"], "executable": "playwright-cli", "version": ["--version"], "launch": {"mode": "command", "args": ["--help"]}, "timeoutSeconds": 20, "extensions": [], "optional": false}
+  }
+}

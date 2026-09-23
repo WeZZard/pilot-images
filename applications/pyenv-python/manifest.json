@@ -1,0 +1,4 @@
+{
+  "schemaVersion": 1, "id": "pyenv-python", "inventoryIds": [],
+  "platforms": {"macos": {"architectures": ["arm64"], "executable": "pyenv", "version": ["exec", "python", "-I", "-S", "--version"], "launch": {"mode": "command", "args": ["exec", "python", "-I", "-S", "-c", "import os, pathlib, sys; root = pathlib.Path(os.environ.get('PYENV_ROOT', '~/.pyenv')).expanduser().resolve() / 'versions'; assert pathlib.Path(sys.executable).resolve().is_relative_to(root), 'not a pyenv-installed interpreter'; print('pyenv-python baseline')"]}, "timeoutSeconds": 10, "extensions": [], "optional": false}}
+}

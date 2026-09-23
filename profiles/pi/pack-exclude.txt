@@ -1,0 +1,5 @@
+# pi auth providers to EXCLUDE from lane credential packs.
+# OBSOLETE since the gateway era (2026-09): packs no longer carry pi-auth.json
+# at all — pi authenticates via LITELLM_API_KEY from env.extra. This file is
+# kept only because host/make-pack.zsh of older checkouts still references it.
+ollama-cloud

@@ -1,0 +1,4 @@
+{
+ "schemaVersion": 1, "id": "google-chrome", "inventoryIds": ["google-chrome", "brew-cask:google-chrome"],
+ "platforms": {"macos": {"architectures": ["arm64"], "executable": "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome", "version": ["--version"], "launch": {"mode": "process", "args": ["--headless", "--no-first-run", "--user-data-dir={temporary}/profile", "about:blank"]}, "timeoutSeconds": 3, "extensions": [], "optional": false}}
+}

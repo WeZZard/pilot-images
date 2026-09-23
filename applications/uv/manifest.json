@@ -1,0 +1,4 @@
+{
+  "schemaVersion": 1, "id": "uv", "inventoryIds": ["brew-formula:uv"],
+  "platforms": {"macos": {"architectures": ["arm64"], "executable": "uv", "version": ["--version"], "launch": {"mode": "command", "args": ["--offline", "--no-cache", "--help"]}, "timeoutSeconds": 10, "extensions": [], "optional": false}}
+}

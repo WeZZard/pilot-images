@@ -1,0 +1,4 @@
+{
+  "//": "Silence built-in app.clipboard.pasteImage so pi-ui-hephaestus owns ctrl+v for image paste.",
+  "app.clipboard.pasteImage": []
+}

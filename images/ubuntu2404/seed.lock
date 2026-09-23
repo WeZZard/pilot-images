@@ -1,0 +1,3 @@
+# Seed provenance — pilot-ubuntu2404. Recorded 2026-08-12.
+SEED_OCI=ghcr.io/cirruslabs/ubuntu:24.04
+SEED_DIGEST=sha256:cb46e37675838d0fbbd4c483654446b450b72d42e90864979e7a78e69428bd57

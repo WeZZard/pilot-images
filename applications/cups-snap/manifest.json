@@ -1,0 +1,8 @@
+{
+  "schemaVersion": 1,
+  "id": "cups-snap",
+  "inventoryIds": ["snap:cups"],
+  "platforms": {
+    "linux": {"architectures": ["arm64", "x86_64"], "executable": "/snap/bin/cups.lpstat", "version": null, "launch": {"mode": "command", "args": ["-r"]}, "timeoutSeconds": 15, "extensions": ["service.py"], "optional": false}
+  }
+}

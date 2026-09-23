@@ -1,0 +1,4 @@
+{
+  "schemaVersion": 1, "id": "pyenv", "inventoryIds": ["brew-formula:pyenv"],
+  "platforms": {"macos": {"architectures": ["arm64"], "executable": "pyenv", "version": ["--version"], "launch": {"mode": "command", "args": ["versions", "--bare"]}, "timeoutSeconds": 10, "extensions": [], "optional": false}}
+}

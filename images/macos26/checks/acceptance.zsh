@@ -1,0 +1,197 @@
+#!/bin/zsh
+# Acceptance checks for the macOS 26 golden image. Run in-guest; exits nonzero on failure.
+# Deliberately NOT set -e: collect every failure in one pass.
+# Use the image's real noninteractive environment. Prepending Homebrew here
+# selects its transitive Node instead of the explicitly provisioned runtime.
+# Runtime-specific checks invoke their manager explicitly rather than repairing PATH.
+
+FAIL=0
+ok()  { print -- "PASS  $1" }
+bad() { print -- "FAIL  $1"; FAIL=1 }
+check() { local desc="$1"; shift; if "$@" >/dev/null 2>&1; then ok "$desc"; else bad "$desc"; fi }
+
+# --- always-on unlocked session (doctrine) ---
+if [[ "$(defaults read /Library/Preferences/com.apple.loginwindow autoLoginUser 2>/dev/null)" == "$USER" ]]; then
+  ok "auto-login -> $USER"
+else
+  bad "auto-login not configured for $USER"
+fi
+if pmset -g custom | grep -qE ' sleep +0'; then ok "system sleep disabled"; else bad "system sleep not disabled"; fi
+if [[ "$(defaults -currentHost read com.apple.screensaver askForPassword 2>/dev/null)" == 0 ]]; then ok "lock screen password disabled"; else bad "lock screen still requires password"; fi
+if [[ "$(defaults -currentHost read com.apple.screensaver idleTime 2>/dev/null)" == 0 ]]; then ok "screen saver disabled (idleTime 0)"; else bad "screen saver not disabled"; fi
+# display: DISPLAY_W x DISPLAY_H logical @ Retina 2x (px = 2x), 60 Hz
+_dw="${DISPLAY_W:-1920}"; _dh="${DISPLAY_H:-1080}"
+cat > /tmp/dispchk.swift <<'SWIFT'
+import CoreGraphics
+let W = Int(CommandLine.arguments[1])!, H = Int(CommandLine.arguments[2])!
+let d = CGMainDisplayID()
+guard let m = CGDisplayCopyDisplayMode(d) else { exit(1) }
+if m.width == W, m.height == H, m.pixelWidth == W*2, Int(m.refreshRate) == 60 { print("OK") }
+else { print("\(m.width)x\(m.height) px=\(m.pixelWidth)x\(m.pixelHeight) @\(Int(m.refreshRate))") }
+SWIFT
+if swiftc /tmp/dispchk.swift -o /tmp/dispchk -framework CoreGraphics 2>/dev/null && [[ "$(/tmp/dispchk $_dw $_dh)" == OK ]]; then
+  ok "display ${_dw}x${_dh} HiDPI @ 60Hz"
+else
+  bad "display not ${_dw}x${_dh} HiDPI @ 60Hz (got: $(/tmp/dispchk $_dw $_dh 2>/dev/null))"
+fi
+rm -f /tmp/dispchk /tmp/dispchk.swift
+
+# --- first-launch dialogs (nothing headless can answer a modal) ---
+typeset -a QUARANTINED
+QUARANTINED=()
+setopt null_glob
+for app in /Applications/*.app; do
+  if xattr -p com.apple.quarantine "$app" >/dev/null 2>&1; then QUARANTINED+=("${app:t}"); fi
+done
+unsetopt null_glob
+if (( ${#QUARANTINED} == 0 )); then
+  ok "no quarantined app bundles in /Applications"
+else
+  bad "quarantined bundles would prompt Gatekeeper on first launch: ${QUARANTINED[*]}"
+fi
+_sa_unseen=0
+for k in DidSeeCloudSetup DidSeeSiriSetup DidSeePrivacy DidSeeAppearanceSetup DidSeeTouchIDSetup DidSeeScreenTime; do
+  if [[ "$(defaults read com.apple.SetupAssistant "$k" 2>/dev/null)" != 1 ]]; then
+    _sa_unseen=$(( _sa_unseen + 1 ))
+  fi
+done
+if (( _sa_unseen == 0 )); then
+  ok "Setup Assistant onboarding panes marked seen"
+else
+  bad "Setup Assistant onboarding not suppressed ($_sa_unseen of 6 keys unseen)"
+fi
+if [[ "$(defaults read com.apple.SetupAssistant PreviousSystemVersion 2>/dev/null)" == "$(sw_vers -productVersion)" ]]; then
+  ok "Setup Assistant version gate matches running macOS"
+else
+  bad "Setup Assistant version gate stale — panes re-show after an OS update"
+fi
+for m in /var/db/.AppleSetupDone /var/db/.AppleDiagnosticsSetupDone; do
+  if [[ -e "$m" ]]; then ok "system setup marker present: ${m:t}"; else bad "system setup marker missing: ${m:t}"; fi
+done
+
+# --- no modal is covering the desktop -----------------------------------
+# The direct assertion. Every indirect signal (auto-login, console session,
+# Dock, Finder) reported healthy on 2026-09-12 while Setup Assistant sat on
+# top of the desktop with a Continue button, so check the process itself.
+if pgrep -f "Setup Assistant.app/Contents/MacOS" >/dev/null 2>&1; then
+  bad "Setup Assistant (MiniBuddy) is running — a modal is covering the desktop"
+else
+  ok "no Setup Assistant/MiniBuddy modal running"
+fi
+
+# --- macOS updates: assert what is enforceable, report what is not ------
+# AutomaticCheckEnabled is deliberately NOT asserted. macOS 26 DELETES that key
+# on every boot when no configuration profile supplies it (verified 2026-09-12:
+# written and read back as 0, absent again after reboot, plist rewritten at boot
+# time). A check that can never pass would just be permanently red. The four
+# below do persist, and they are the ones that matter: they stop the image
+# downloading or installing anything by itself, which is the reproducibility
+# guarantee a golden image owes its clones. Checking alone only populates a
+# list.
+_su=/Library/Preferences/com.apple.SoftwareUpdate
+_su_on=0
+for k in AutomaticDownload AutomaticallyInstallMacOSUpdates CriticalUpdateInstall ConfigDataInstall; do
+  if [[ "$(sudo defaults read "$_su" "$k" 2>/dev/null)" != 0 ]]; then
+    _su_on=$(( _su_on + 1 ))
+    print -- "        still enabled: $k"
+  fi
+done
+if (( _su_on == 0 )); then
+  ok "macOS updates never self-install (4 enforceable switches off)"
+else
+  bad "macOS update automation partly on ($_su_on of 4) — image can self-update and diverge from its clones"
+fi
+if [[ "$(sudo defaults read "$_su" AutomaticCheckEnabled 2>/dev/null)" == 0 ]]; then
+  print -- "NOTE  update checking also off (survived this boot; macOS usually drops this key)"
+else
+  print -- "NOTE  update checking is on — macOS drops AutomaticCheckEnabled at boot without an"
+  print -- "      MDM profile. Harmless here: checking only lists updates, and the four"
+  print -- "      switches above prevent download and install. A queued offer is expected."
+fi
+
+# --- terminal & shell ---
+check "homebrew" brew --version
+check "oh-my-zsh" test -d "$HOME/.oh-my-zsh"
+check "ghostty" test -d /Applications/Ghostty.app
+
+# --- languages & tools ---
+check "node" node --version
+check "pnpm" pnpm --version
+check "playwright cli" playwright --version
+check "python" python3 --version
+check "uv" uv --version
+check "rustc" rustc --version
+check "cargo" cargo --version
+check "ffmpeg" ffmpeg -version
+check "gh" gh --version
+check "jq" jq --version
+check "google chrome" test -d "/Applications/Google Chrome.app"
+if brew list --cask blackhole-2ch >/dev/null 2>&1; then ok "blackhole-2ch audio driver"; else bad "blackhole-2ch missing"; fi
+if [[ -f "/Library/Application Support/Google/Chrome/External Extensions/lfmkphfpdbjijhpomgecfikhfohaoine.json" ]]; then ok "chrome Perfetto UI extension (external-ext)"; else bad "chrome Perfetto UI extension not configured"; fi
+
+# --- agents ---
+check "claude" "$HOME/.local/bin/claude" --version
+check "pi" pi --version
+check "cua-driver" "$HOME/.local/bin/cua-driver" --version
+if [[ -f "$HOME/Library/LaunchAgents/com.trycua.driver.serve.plist" ]]; then ok "cua-driver serve LaunchAgent installed"; else bad "cua-driver serve LaunchAgent missing"; fi
+# Grant check needs the daemon up as its own responsible process (LaunchAgent).
+# Missing daemon attribution is a build failure, not an optional GUI repair.
+if "$HOME/.local/bin/cua-driver" permissions status --json 2>/dev/null | grep -q '"attribution": "driver-daemon"'; then
+  granted=$("$HOME/.local/bin/cua-driver" permissions status --json 2>/dev/null | grep -cE '"(accessibility|screen_recording)": true')
+  if [[ "$granted" == 2 ]]; then ok "cua-driver TCC grants (accessibility + screen recording)"; else bad "cua-driver TCC grants incomplete ($granted/2)"; fi
+else
+  bad "cua-driver daemon is not independently attributed in the login session"
+fi
+if pi list 2>/dev/null | grep -q "pi-web-access"; then ok "pi extensions synced"; else bad "pi extensions not synced"; fi
+if "$HOME/.local/bin/claude" mcp list 2>/dev/null | grep -q "cua-driver"; then ok "claude MCP registrations"; else bad "claude MCP registrations"; fi
+
+# --- codex + bundled-browser pinning ---
+check "codex" codex --version
+if [[ -f "$HOME/.codex/config.toml" ]] && grep -q 'mcp_servers.playwright' "$HOME/.codex/config.toml" && grep -q 'mcp_servers.chrome-devtools' "$HOME/.codex/config.toml" && grep -q 'mcp_servers.cua-driver' "$HOME/.codex/config.toml"; then
+  ok "codex MCP servers (playwright + chrome-devtools + cua-driver)"
+else
+  bad "codex MCP servers not configured"
+fi
+if ls "$HOME/Library/Caches/ms-playwright/chromium-"*/chrome-mac-arm64/*.app >/dev/null 2>&1; then ok "playwright Chrome for Testing present"; else bad "playwright Chrome for Testing missing"; fi
+if ls "$HOME/.cache/puppeteer/chrome/mac_arm-"*/chrome-mac-arm64/*.app >/dev/null 2>&1; then ok "puppeteer Chrome for Testing present"; else bad "puppeteer Chrome for Testing missing"; fi
+# Claude Code MCP stays bare (matches host); the browser pinning is Codex-only.
+if "$HOME/.local/bin/claude" mcp get playwright 2>/dev/null | grep -q 'executable-path'; then bad "claude playwright unexpectedly pinned (host parity: should be bare)"; else ok "claude playwright bare (host parity)"; fi
+
+# --- updates ---
+if crontab -l 2>/dev/null | grep -q "crontab.d"; then ok "update crontab installed"; else bad "update crontab missing"; fi
+
+# --- Xcode (reports SKIP when phase 20 has not run yet) ---
+if [[ -d /Applications/Xcode.app ]]; then
+  if xcodebuild -version 2>/dev/null | grep -q "${XCODE_VERSION:-26.6}"; then
+    ok "xcodebuild ${XCODE_VERSION:-26.6}"
+  else
+    bad "xcodebuild version mismatch (want ${XCODE_VERSION:-26.6}: $(xcodebuild -version 2>/dev/null | head -1))"
+  fi
+  for p in iOS watchOS tvOS visionOS; do
+    if xcrun simctl list runtimes 2>/dev/null | grep -q "$p"; then ok "simulator runtime: $p"; else bad "simulator runtime: $p"; fi
+  done
+  print 'kernel void k(){}' > /tmp/probe.metal
+  if xcrun -sdk macosx metal -c /tmp/probe.metal -o /tmp/probe.air 2>/dev/null; then
+    ok "Metal toolchain compiles"
+  else
+    bad "Metal toolchain missing or broken"
+  fi
+  rm -f /tmp/probe.metal /tmp/probe.air
+else
+  print -- "SKIP  Xcode not installed in this pass (phase 20 pending)"
+fi
+
+# --- playwright headless smoke ---
+PW_ROOT="$(npm root -g 2>/dev/null)/playwright"
+if node -e "const {chromium}=require('$PW_ROOT');(async()=>{const b=await chromium.launch({headless:true,timeout:20000});try{const p=await b.newPage();await p.goto('data:text/html,<title>ok</title>');if(await p.title()!=='ok')throw Error('Unexpected smoke page title');}finally{await b.close();}})().catch(e=>{console.error(e);process.exit(1)})"; then
+  ok "playwright chromium headless smoke"
+else
+  bad "playwright chromium smoke failed"
+fi
+
+print --
+print -- "Manual doctrine checks before promoting (wall-clock, cannot be scripted):"
+print -- "  - reboot -> lands in unlocked desktop without password"
+print -- "  - idle past the former/default timeout -> session still unlocked"
+print -- "  - Capture must pass the application extension without interactive permission repair"
+exit $FAIL

@@ -1,0 +1,7 @@
+build-logs/
+__pycache__/
+.DS_Store
+*.tgz
+.handoff/
+.plans/
+.reviews/

@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "id": "htop",
+  "inventoryIds": ["dpkg:htop"],
+  "platforms": {
+    "linux": {
+      "architectures": ["arm64", "x86_64"],
+      "executable": "htop",
+      "version": ["--version"],
+      "launch": {"mode": "command", "args": ["--help"]},
+      "timeoutSeconds": 10,
+      "extensions": [],
+      "optional": false
+    }
+  }
+}

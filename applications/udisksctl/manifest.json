@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "id": "udisksctl",
+  "inventoryIds": ["dpkg:udisks2"],
+  "platforms": {
+    "linux": {
+      "architectures": ["arm64", "x86_64"],
+      "executable": "udisksctl",
+      "version": null,
+      "launch": {"mode": "command", "args": ["status"]},
+      "timeoutSeconds": 10,
+      "extensions": [],
+      "optional": false
+    }
+  }
+}

@@ -1,0 +1,4 @@
+{
+  "schemaVersion": 1, "id": "rustc", "inventoryIds": [],
+  "platforms": {"macos": {"architectures": ["arm64"], "executable": "rustup", "version": ["run", "stable", "rustc", "--version"], "launch": {"mode": "command", "args": ["run", "nightly", "rustc", "--version"]}, "timeoutSeconds": 10, "extensions": [], "optional": false}}
+}

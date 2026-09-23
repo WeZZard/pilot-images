@@ -1,0 +1,11 @@
+{
+  "schemaVersion": 1,
+  "version": "0.28.2",
+  "os": "linux",
+  "architecture": "arm64",
+  "url": "https://github.com/trycua/cua/releases/download/cua-driver-rs-v0.28.2/cua-driver-rs-0.28.2-linux-arm64-binary.tar.gz",
+  "sha256": "55e8a32839a4ac369a773df4dac87b345bd4567779221ade4a5e39223a45a2e8",
+  "sourceCommit": "fc188250b4ca8549b8e61f937fdb1fb560770e86",
+  "checksumUrl": "https://github.com/trycua/cua/releases/download/cua-driver-rs-v0.28.2/checksums.txt",
+  "upstreamStatus": "Linux preview build; pinned binary provenance does not establish guest runtime acceptance"
+}

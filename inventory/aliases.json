@@ -1,0 +1,6 @@
+{
+  "snap:firefox": {"id": "firefox", "name": "Firefox", "aliases": ["Mozilla Firefox"]},
+  "bundle:org.mozilla.firefox": {"id": "firefox", "name": "Firefox", "aliases": ["Mozilla Firefox"]},
+  "snap:chromium": {"id": "chromium", "name": "Chromium", "aliases": ["Chromium Browser"]},
+  "bundle:com.google.Chrome": {"id": "google-chrome", "name": "Google Chrome", "aliases": ["Chrome"]}
+}

@@ -1,0 +1,4 @@
+{
+  "schemaVersion": 1, "id": "rustup", "inventoryIds": [],
+  "platforms": {"macos": {"architectures": ["arm64"], "executable": "rustup", "version": ["--version"], "launch": {"mode": "command", "args": ["toolchain", "list"]}, "timeoutSeconds": 10, "extensions": [], "optional": false}}
+}

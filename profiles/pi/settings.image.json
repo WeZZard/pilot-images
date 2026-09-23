@@ -1,0 +1,31 @@
+{
+  "theme": "dark",
+  "packages": [
+    "npm:pi-web-access",
+    "npm:@zigai/pi-prompt-history",
+    "git:github.com/WeZZard/workflows",
+    "npm:@juicesharp/rpiv-ask-user-question",
+    "npm:pi-subagents",
+    "npm:@juicesharp/rpiv-todo",
+    "npm:pi-cc-extensions",
+    "npm:pi-provider-litellm"
+  ],
+  "defaultProvider": "litellm",
+  "defaultModel": "glm-5.3-flash",
+  "defaultThinkingLevel": "xhigh",
+  "hideThinkingBlock": false,
+  "retry": {
+    "enabled": true
+  },
+  "compaction": {
+    "enabled": true
+  },
+  "litellm": {
+    "providers": {
+      "litellm": {
+        "apiKey": "$LITELLM_API_KEY",
+        "allowInsecureHttp": true
+      }
+    }
+  }
+}

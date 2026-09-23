@@ -1,0 +1,4 @@
+{
+  "schemaVersion": 1, "id": "pnpm", "inventoryIds": [],
+  "platforms": {"macos": {"architectures": ["arm64"], "executable": "/usr/bin/env", "version": ["COREPACK_ENABLE_NETWORK=0", "COREPACK_ENABLE_PROJECT_SPEC=0", "COREPACK_ENABLE_AUTO_PIN=0", "pnpm", "--version"], "launch": {"mode": "command", "args": ["COREPACK_ENABLE_NETWORK=0", "COREPACK_ENABLE_PROJECT_SPEC=0", "COREPACK_ENABLE_AUTO_PIN=0", "pnpm", "--version"]}, "timeoutSeconds": 10, "extensions": [], "optional": false}}
+}

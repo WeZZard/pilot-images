@@ -1,0 +1,4 @@
+{
+ "schemaVersion": 1, "id": "chromium", "inventoryIds": ["chromium"],
+ "platforms": {"linux": {"architectures": ["arm64", "x86_64"], "executable": "/snap/bin/chromium", "version": ["--version"], "launch": {"mode": "process", "args": ["--headless", "--no-first-run", "--user-data-dir={temporary}/profile", "about:blank"]}, "timeoutSeconds": 10, "extensions": [], "optional": false}}
+}

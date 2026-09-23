@@ -1,0 +1,7 @@
+{
+  "schemaVersion": 1, "id": "wget", "inventoryIds": ["brew-formula:wget", "dpkg:wget"],
+  "platforms": {
+    "macos": {"architectures": ["arm64"], "executable": "wget", "version": ["--version"], "launch": {"mode": "command", "args": ["--version"]}, "timeoutSeconds": 10, "extensions": [], "optional": false},
+    "linux": {"architectures": ["arm64", "x86_64"], "executable": "wget", "version": ["--version"], "launch": {"mode": "command", "args": ["--version"]}, "timeoutSeconds": 10, "extensions": [], "optional": false}
+  }
+}

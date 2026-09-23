@@ -1,0 +1,4 @@
+{
+  "schemaVersion": 1, "id": "blackhole", "inventoryIds": ["brew-cask:blackhole-2ch"],
+  "platforms": {"macos": {"architectures": ["arm64"], "executable": "/usr/sbin/system_profiler", "version": null, "launch": {"mode": "command", "args": ["-listDataTypes"]}, "timeoutSeconds": 30, "extensions": ["device.py"], "optional": false}}
+}

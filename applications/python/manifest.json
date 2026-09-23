@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "id": "python",
+  "inventoryIds": ["dpkg:python3", "brew-formula:python@3.14"],
+  "platforms": {
+    "linux": {
+      "architectures": ["arm64", "x86_64"],
+      "executable": "python3",
+      "version": ["-I", "-S", "--version"],
+      "launch": {"mode": "command", "args": ["-I", "-S", "-c", "import sys; print(sys.version)"]},
+      "timeoutSeconds": 10,
+      "extensions": [],
+      "optional": false
+    },
+    "macos": {
+      "architectures": ["arm64"],
+      "executable": "/opt/homebrew/opt/python@3.14/bin/python3.14",
+      "version": ["-I", "-S", "--version"],
+      "launch": {"mode": "command", "args": ["-I", "-S", "-c", "import sys; print(sys.version)"]},
+      "timeoutSeconds": 10,
+      "extensions": [],
+      "optional": false
+    }
+  }
+}

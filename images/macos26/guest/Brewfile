@@ -1,0 +1,11 @@
+# pilot-macos26 golden image — Homebrew manifest.
+# node comes via nvm (phase 30), python via pyenv (phase 40), rust via rustup (phase 40).
+brew "gh"
+brew "jq"
+brew "ffmpeg"
+brew "pyenv"
+brew "uv"
+brew "wget"
+cask "google-chrome"
+cask "ghostty"
+cask "blackhole-2ch"   # virtual audio loopback driver (HAL plugin)

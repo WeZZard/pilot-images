@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "id": "ubuntu-common",
+  "inventoryIds": ["dpkg:curl", "dpkg:git", "dpkg:gnupg", "dpkg:lsb-release", "dpkg:net-tools", "dpkg:dconf-cli", "dpkg:x11-utils", "dpkg:fontconfig", "dpkg:unzip", "dpkg:ca-certificates"],
+  "platforms": {
+    "linux": {
+      "architectures": ["arm64", "x86_64"],
+      "executable": "/usr/bin/python3",
+      "version": ["-I", "-c", "import sys; print(sys.version)"],
+      "launch": {"mode": "command", "args": ["-I", "-c", "import sys; print('Ubuntu common check interpreter ready'); sys.exit(0)"]},
+      "timeoutSeconds": 120,
+      "extensions": ["tools.py"],
+      "optional": false
+    }
+  }
+}

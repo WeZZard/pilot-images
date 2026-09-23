@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "image": "macos26",
+  "scope": "provisioned",
+  "plans": ["node", "npm", "corepack", "pnpm", "nvm", "pi", "claude-code", "codex", "cua-driver", "playwright", "google-chrome", "gh", "jq", "ffmpeg", "pyenv", "pyenv-python", "uv", "wget", "rustup", "rustc", "cargo", "xcode", "ghostty", "blackhole"],
+  "dependencies": {},
+  "provisioning": {
+    "node": {"path": "images/macos26/guest/30-node.zsh", "reason": "Installs the selected Node.js runtime."},
+    "npm": {"path": "images/macos26/guest/30-node.zsh", "reason": "npm is supplied with the deliberately installed Node.js runtime and used directly."},
+    "corepack": {"path": "images/macos26/guest/30-node.zsh", "reason": "Explicitly enables Corepack."},
+    "pnpm": {"path": "images/macos26/guest/30-node.zsh", "reason": "Explicitly prepares pnpm."},
+    "nvm": {"path": "images/macos26/guest/30-node.zsh", "reason": "Installs nvm to manage the image's Node runtime."},
+    "pi": {"path": "images/macos26/guest/50-agents.zsh", "reason": "Explicitly installs Pi."},
+    "claude-code": {"path": "images/macos26/guest/50-agents.zsh", "reason": "Explicitly installs native Claude Code."},
+    "codex": {"path": "images/macos26/guest/55-codex.zsh", "reason": "Explicitly installs Codex CLI."},
+    "cua-driver": {"path": "images/macos26/guest/60-cua-driver.zsh", "reason": "Installs the capture driver and its daemon configuration."},
+    "playwright": {"path": "images/macos26/guest/30-node.zsh", "reason": "Installs Playwright and its managed browser runtimes."},
+    "google-chrome": {"path": "images/macos26/guest/Brewfile", "reason": "Chrome is a direct cask selection."},
+    "gh": {"path": "images/macos26/guest/Brewfile", "reason": "GitHub CLI is a direct formula selection."},
+    "jq": {"path": "images/macos26/guest/Brewfile", "reason": "jq is a direct formula selection."},
+    "ffmpeg": {"path": "images/macos26/guest/Brewfile", "reason": "FFmpeg is a direct formula selection."},
+    "pyenv": {"path": "images/macos26/guest/Brewfile", "reason": "pyenv is a direct formula selection."},
+    "pyenv-python": {"path": "images/macos26/guest/40-languages.zsh", "reason": "Tests the Python interpreter explicitly built by pyenv, not the OS interpreter."},
+    "uv": {"path": "images/macos26/guest/Brewfile", "reason": "uv is a direct formula selection."},
+    "wget": {"path": "images/macos26/guest/Brewfile", "reason": "wget is a direct formula selection."},
+    "rustup": {"path": "images/macos26/guest/40-languages.zsh", "reason": "Installs rustup and explicitly prepares stable and nightly toolchains."},
+    "rustc": {"path": "images/macos26/guest/40-languages.zsh", "reason": "Tests both deliberately installed compiler toolchains without installation."},
+    "cargo": {"path": "images/macos26/guest/40-languages.zsh", "reason": "Tests Cargo in both deliberately installed toolchains."},
+    "xcode": {"path": "images/macos26/guest/20-xcode.zsh", "reason": "Installs Xcode and development components; image acceptance retains component checks."},
+    "ghostty": {"path": "images/macos26/guest/Brewfile", "reason": "Ghostty is a direct cask selection."},
+    "blackhole": {"path": "images/macos26/guest/Brewfile", "reason": "BlackHole 2ch is a direct HAL driver cask selection, verified by its dedicated device extension."}
+  }
+}

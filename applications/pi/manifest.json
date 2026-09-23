@@ -1,0 +1,7 @@
+{
+  "schemaVersion": 1, "id": "pi", "inventoryIds": ["npm:@earendil-works/pi-coding-agent"],
+  "platforms": {
+    "linux": {"architectures": ["arm64", "x86_64"], "executable": "pi", "version": ["--version"], "launch": {"mode": "command", "args": ["--version"]}, "timeoutSeconds": 20, "extensions": [], "optional": false},
+    "macos": {"architectures": ["arm64"], "executable": "pi", "version": ["--version"], "launch": {"mode": "command", "args": ["--version"]}, "timeoutSeconds": 20, "extensions": [], "optional": false}
+  }
+}

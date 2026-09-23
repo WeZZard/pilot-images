@@ -1,0 +1,4 @@
+{
+  "schemaVersion": 1, "id": "nvm", "inventoryIds": [],
+  "platforms": {"macos": {"architectures": ["arm64"], "executable": "/bin/bash", "version": ["--noprofile", "--norc", "-c", ". \"$HOME/.nvm/nvm.sh\"; nvm --version"], "launch": {"mode": "command", "args": ["--noprofile", "--norc", "-c", ". \"$HOME/.nvm/nvm.sh\"; nvm --version"]}, "timeoutSeconds": 10, "extensions": [], "optional": false}}
+}

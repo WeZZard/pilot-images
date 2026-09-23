@@ -1,0 +1,9 @@
+{
+  "schemaVersion": 1,
+  "id": "corepack",
+  "inventoryIds": ["npm:corepack"],
+  "platforms": {
+    "linux": {"architectures": ["arm64", "x86_64"], "executable": "corepack", "version": ["--version"], "launch": {"mode": "command", "args": ["--help"]}, "timeoutSeconds": 10, "extensions": [], "optional": false},
+    "macos": {"architectures": ["arm64"], "executable": "corepack", "version": ["--version"], "launch": {"mode": "command", "args": ["--help"]}, "timeoutSeconds": 10, "extensions": [], "optional": false}
+  }
+}

@@ -1,0 +1,916 @@
+{
+  "schemaVersion": 1,
+  "image": "macos26",
+  "inventory": {
+    "schemaVersion": 1,
+    "os": "macos",
+    "architecture": "arm64",
+    "collectedAt": "2026-09-17T03:14:59.775872Z",
+    "sources": [
+      {
+        "id": "bundles",
+        "status": "available",
+        "roots": [
+          "/Applications",
+          "/System/Applications"
+        ]
+      },
+      {
+        "id": "brew",
+        "status": "available",
+        "command": [
+          "brew",
+          "info",
+          "--json=v2",
+          "--installed"
+        ]
+      },
+      {
+        "id": "npm",
+        "status": "available",
+        "command": [
+          "npm",
+          "list",
+          "--global",
+          "--json",
+          "--depth=0"
+        ]
+      }
+    ],
+    "applications": [
+      {
+        "id": "brew-cask:blackhole-2ch",
+        "name": "blackhole-2ch",
+        "aliases": [],
+        "version": "0.7.1"
+      },
+      {
+        "id": "brew-cask:ghostty",
+        "name": "ghostty",
+        "aliases": [],
+        "version": "1.3.1"
+      },
+      {
+        "id": "brew-cask:git-credential-manager",
+        "name": "git-credential-manager",
+        "aliases": [],
+        "version": "2.9.1"
+      },
+      {
+        "id": "brew-cask:google-chrome",
+        "name": "google-chrome",
+        "aliases": [],
+        "version": "153.0.8010.48"
+      },
+      {
+        "id": "brew-formula:autoconf",
+        "name": "autoconf",
+        "aliases": [],
+        "version": "2.73"
+      },
+      {
+        "id": "brew-formula:awscli",
+        "name": "awscli",
+        "aliases": [],
+        "version": "2.36.18"
+      },
+      {
+        "id": "brew-formula:brotli",
+        "name": "brotli",
+        "aliases": [],
+        "version": "1.2.0"
+      },
+      {
+        "id": "brew-formula:c-ares",
+        "name": "c-ares",
+        "aliases": [],
+        "version": "1.34.8"
+      },
+      {
+        "id": "brew-formula:ca-certificates",
+        "name": "ca-certificates",
+        "aliases": [],
+        "version": "2026-08-13"
+      },
+      {
+        "id": "brew-formula:cmake",
+        "name": "cmake",
+        "aliases": [],
+        "version": "4.4.2"
+      },
+      {
+        "id": "brew-formula:curl",
+        "name": "curl",
+        "aliases": [],
+        "version": "8.21.0"
+      },
+      {
+        "id": "brew-formula:dav1d",
+        "name": "dav1d",
+        "aliases": [],
+        "version": "1.5.4"
+      },
+      {
+        "id": "brew-formula:ffmpeg",
+        "name": "ffmpeg",
+        "aliases": [],
+        "version": "9.0.1_1"
+      },
+      {
+        "id": "brew-formula:gcc",
+        "name": "gcc",
+        "aliases": [],
+        "version": "16.1.0"
+      },
+      {
+        "id": "brew-formula:gettext",
+        "name": "gettext",
+        "aliases": [],
+        "version": "1.0"
+      },
+      {
+        "id": "brew-formula:gh",
+        "name": "gh",
+        "aliases": [],
+        "version": "2.101.0"
+      },
+      {
+        "id": "brew-formula:git-lfs",
+        "name": "git-lfs",
+        "aliases": [],
+        "version": "3.7.1"
+      },
+      {
+        "id": "brew-formula:gitlab-runner",
+        "name": "gitlab-runner",
+        "aliases": [],
+        "version": "19.2.1"
+      },
+      {
+        "id": "brew-formula:gmp",
+        "name": "gmp",
+        "aliases": [],
+        "version": "6.3.0"
+      },
+      {
+        "id": "brew-formula:hdrhistogram_c",
+        "name": "hdrhistogram_c",
+        "aliases": [],
+        "version": "0.11.10"
+      },
+      {
+        "id": "brew-formula:icu4c@78",
+        "name": "icu4c@78",
+        "aliases": [],
+        "version": "78.3"
+      },
+      {
+        "id": "brew-formula:isl",
+        "name": "isl",
+        "aliases": [],
+        "version": "0.28"
+      },
+      {
+        "id": "brew-formula:jq",
+        "name": "jq",
+        "aliases": [],
+        "version": "1.8.2"
+      },
+      {
+        "id": "brew-formula:json-c",
+        "name": "json-c",
+        "aliases": [],
+        "version": "0.19"
+      },
+      {
+        "id": "brew-formula:lame",
+        "name": "lame",
+        "aliases": [],
+        "version": "4.0"
+      },
+      {
+        "id": "brew-formula:libidn2",
+        "name": "libidn2",
+        "aliases": [],
+        "version": "2.3.8"
+      },
+      {
+        "id": "brew-formula:libmpc",
+        "name": "libmpc",
+        "aliases": [],
+        "version": "1.4.1"
+      },
+      {
+        "id": "brew-formula:libnghttp2",
+        "name": "libnghttp2",
+        "aliases": [],
+        "version": "1.70.0"
+      },
+      {
+        "id": "brew-formula:libnghttp3",
+        "name": "libnghttp3",
+        "aliases": [],
+        "version": "1.18.0"
+      },
+      {
+        "id": "brew-formula:libngtcp2",
+        "name": "libngtcp2",
+        "aliases": [],
+        "version": "1.25.0"
+      },
+      {
+        "id": "brew-formula:libpsl",
+        "name": "libpsl",
+        "aliases": [],
+        "version": "0.23.1"
+      },
+      {
+        "id": "brew-formula:libssh2",
+        "name": "libssh2",
+        "aliases": [],
+        "version": "1.11.1_4"
+      },
+      {
+        "id": "brew-formula:libunistring",
+        "name": "libunistring",
+        "aliases": [],
+        "version": "1.4.2"
+      },
+      {
+        "id": "brew-formula:libuv",
+        "name": "libuv",
+        "aliases": [],
+        "version": "1.52.1"
+      },
+      {
+        "id": "brew-formula:libvmaf",
+        "name": "libvmaf",
+        "aliases": [],
+        "version": "3.2.1"
+      },
+      {
+        "id": "brew-formula:libvpx",
+        "name": "libvpx",
+        "aliases": [],
+        "version": "1.17.0"
+      },
+      {
+        "id": "brew-formula:libyaml",
+        "name": "libyaml",
+        "aliases": [],
+        "version": "0.2.5"
+      },
+      {
+        "id": "brew-formula:lz4",
+        "name": "lz4",
+        "aliases": [],
+        "version": "1.10.0"
+      },
+      {
+        "id": "brew-formula:m4",
+        "name": "m4",
+        "aliases": [],
+        "version": "1.4.21"
+      },
+      {
+        "id": "brew-formula:mise",
+        "name": "mise",
+        "aliases": [],
+        "version": "2026.8.2"
+      },
+      {
+        "id": "brew-formula:mpdecimal",
+        "name": "mpdecimal",
+        "aliases": [],
+        "version": "4.0.1"
+      },
+      {
+        "id": "brew-formula:mpfr",
+        "name": "mpfr",
+        "aliases": [],
+        "version": "4.2.2"
+      },
+      {
+        "id": "brew-formula:mpg123",
+        "name": "mpg123",
+        "aliases": [],
+        "version": "1.33.7"
+      },
+      {
+        "id": "brew-formula:node@24",
+        "name": "node@24",
+        "aliases": [],
+        "version": "24.19.0"
+      },
+      {
+        "id": "brew-formula:oniguruma",
+        "name": "oniguruma",
+        "aliases": [],
+        "version": "6.9.10"
+      },
+      {
+        "id": "brew-formula:openssl@3",
+        "name": "openssl@3",
+        "aliases": [],
+        "version": "3.6.4"
+      },
+      {
+        "id": "brew-formula:opus",
+        "name": "opus",
+        "aliases": [],
+        "version": "1.6.1"
+      },
+      {
+        "id": "brew-formula:pkgconf",
+        "name": "pkgconf",
+        "aliases": [],
+        "version": "3.0.7"
+      },
+      {
+        "id": "brew-formula:pyenv",
+        "name": "pyenv",
+        "aliases": [],
+        "version": "2.8.5"
+      },
+      {
+        "id": "brew-formula:python@3.14",
+        "name": "python@3.14",
+        "aliases": [],
+        "version": "3.14.6"
+      },
+      {
+        "id": "brew-formula:rbenv",
+        "name": "rbenv",
+        "aliases": [],
+        "version": "1.3.2"
+      },
+      {
+        "id": "brew-formula:readline",
+        "name": "readline",
+        "aliases": [],
+        "version": "8.3.3"
+      },
+      {
+        "id": "brew-formula:ruby-build",
+        "name": "ruby-build",
+        "aliases": [],
+        "version": "20260716"
+      },
+      {
+        "id": "brew-formula:sdl2-compat",
+        "name": "sdl2-compat",
+        "aliases": [],
+        "version": "2.32.72"
+      },
+      {
+        "id": "brew-formula:sdl3",
+        "name": "sdl3",
+        "aliases": [],
+        "version": "3.4.16"
+      },
+      {
+        "id": "brew-formula:simdjson",
+        "name": "simdjson",
+        "aliases": [],
+        "version": "4.6.6"
+      },
+      {
+        "id": "brew-formula:sqlite",
+        "name": "sqlite",
+        "aliases": [],
+        "version": "3.53.4"
+      },
+      {
+        "id": "brew-formula:svt-av1",
+        "name": "svt-av1",
+        "aliases": [],
+        "version": "4.2.0"
+      },
+      {
+        "id": "brew-formula:unzip",
+        "name": "unzip",
+        "aliases": [],
+        "version": "6.0_8"
+      },
+      {
+        "id": "brew-formula:usage",
+        "name": "usage",
+        "aliases": [],
+        "version": "5.0.0"
+      },
+      {
+        "id": "brew-formula:uv",
+        "name": "uv",
+        "aliases": [],
+        "version": "0.12.15"
+      },
+      {
+        "id": "brew-formula:uvwasi",
+        "name": "uvwasi",
+        "aliases": [],
+        "version": "0.0.23"
+      },
+      {
+        "id": "brew-formula:wget",
+        "name": "wget",
+        "aliases": [],
+        "version": "1.25.0"
+      },
+      {
+        "id": "brew-formula:x264",
+        "name": "x264",
+        "aliases": [],
+        "version": "r3222"
+      },
+      {
+        "id": "brew-formula:x265",
+        "name": "x265",
+        "aliases": [],
+        "version": "4.3"
+      },
+      {
+        "id": "brew-formula:xz",
+        "name": "xz",
+        "aliases": [],
+        "version": "5.8.3"
+      },
+      {
+        "id": "brew-formula:yq",
+        "name": "yq",
+        "aliases": [],
+        "version": "4.53.3"
+      },
+      {
+        "id": "brew-formula:zip",
+        "name": "zip",
+        "aliases": [],
+        "version": "3.0_1"
+      },
+      {
+        "id": "brew-formula:zstd",
+        "name": "zstd",
+        "aliases": [],
+        "version": "1.5.7_1"
+      },
+      {
+        "id": "bundle:com.apple.ActivityMonitor",
+        "name": "Activity Monitor",
+        "aliases": [],
+        "version": "10.14"
+      },
+      {
+        "id": "bundle:com.apple.AddressBook",
+        "name": "Contacts",
+        "aliases": [],
+        "version": "14.0"
+      },
+      {
+        "id": "bundle:com.apple.AppStore",
+        "name": "App Store",
+        "aliases": [],
+        "version": "3.0"
+      },
+      {
+        "id": "bundle:com.apple.Automator",
+        "name": "Automator",
+        "aliases": [],
+        "version": "2.10"
+      },
+      {
+        "id": "bundle:com.apple.BluetoothFileExchange",
+        "name": "Bluetooth File Exchange",
+        "aliases": [],
+        "version": "9.0"
+      },
+      {
+        "id": "bundle:com.apple.Chess",
+        "name": "Chess",
+        "aliases": [],
+        "version": "3.18"
+      },
+      {
+        "id": "bundle:com.apple.ColorSyncUtility",
+        "name": "ColorSync Utility",
+        "aliases": [],
+        "version": "12.2.0"
+      },
+      {
+        "id": "bundle:com.apple.Console",
+        "name": "Console",
+        "aliases": [],
+        "version": "1.1"
+      },
+      {
+        "id": "bundle:com.apple.Dictionary",
+        "name": "Dictionary",
+        "aliases": [],
+        "version": "2.3.0"
+      },
+      {
+        "id": "bundle:com.apple.DigitalColorMeter",
+        "name": "Digital Color Meter",
+        "aliases": [],
+        "version": "6.11"
+      },
+      {
+        "id": "bundle:com.apple.DiskUtility",
+        "name": "Disk Utility",
+        "aliases": [],
+        "version": "22.7"
+      },
+      {
+        "id": "bundle:com.apple.FaceTime",
+        "name": "FaceTime",
+        "aliases": [],
+        "version": "36"
+      },
+      {
+        "id": "bundle:com.apple.FontBook",
+        "name": "Font Book",
+        "aliases": [],
+        "version": "11.0"
+      },
+      {
+        "id": "bundle:com.apple.GenerativePlaygroundApp",
+        "name": "Image Playground",
+        "aliases": [],
+        "version": "1.0"
+      },
+      {
+        "id": "bundle:com.apple.Home",
+        "name": "Home",
+        "aliases": [],
+        "version": "10.0"
+      },
+      {
+        "id": "bundle:com.apple.Image_Capture",
+        "name": "Image Capture",
+        "aliases": [],
+        "version": "8.0"
+      },
+      {
+        "id": "bundle:com.apple.Magnifier",
+        "name": "Magnifier",
+        "aliases": [],
+        "version": "1.0"
+      },
+      {
+        "id": "bundle:com.apple.Maps",
+        "name": "Maps",
+        "aliases": [],
+        "version": "3.0"
+      },
+      {
+        "id": "bundle:com.apple.MigrateAssistant",
+        "name": "Migration Assistant",
+        "aliases": [],
+        "version": "26.6"
+      },
+      {
+        "id": "bundle:com.apple.MobileSMS",
+        "name": "Messages",
+        "aliases": [],
+        "version": "26.0"
+      },
+      {
+        "id": "bundle:com.apple.Music",
+        "name": "Music",
+        "aliases": [],
+        "version": "1.6.6"
+      },
+      {
+        "id": "bundle:com.apple.Notes",
+        "name": "Notes",
+        "aliases": [],
+        "version": "4.13"
+      },
+      {
+        "id": "bundle:com.apple.Passwords",
+        "name": "Passwords",
+        "aliases": [],
+        "version": "2.6"
+      },
+      {
+        "id": "bundle:com.apple.PhotoBooth",
+        "name": "Photo Booth",
+        "aliases": [],
+        "version": "13.1"
+      },
+      {
+        "id": "bundle:com.apple.Photos",
+        "name": "Photos",
+        "aliases": [],
+        "version": "11.0"
+      },
+      {
+        "id": "bundle:com.apple.Preview",
+        "name": "Preview",
+        "aliases": [],
+        "version": "11.0"
+      },
+      {
+        "id": "bundle:com.apple.QuickTimePlayerX",
+        "name": "QuickTime Player",
+        "aliases": [],
+        "version": "10.5"
+      },
+      {
+        "id": "bundle:com.apple.Safari",
+        "name": "Safari",
+        "aliases": [],
+        "version": "26.6"
+      },
+      {
+        "id": "bundle:com.apple.ScreenContinuity",
+        "name": "iPhone Mirroring",
+        "aliases": [],
+        "version": "1.6"
+      },
+      {
+        "id": "bundle:com.apple.ScreenSharing",
+        "name": "Screen Sharing",
+        "aliases": [],
+        "version": "6.1"
+      },
+      {
+        "id": "bundle:com.apple.ScriptEditor2",
+        "name": "Script Editor",
+        "aliases": [],
+        "version": "2.11"
+      },
+      {
+        "id": "bundle:com.apple.Stickies",
+        "name": "Stickies",
+        "aliases": [],
+        "version": "10.3"
+      },
+      {
+        "id": "bundle:com.apple.SystemProfiler",
+        "name": "System Information",
+        "aliases": [],
+        "version": "11.0"
+      },
+      {
+        "id": "bundle:com.apple.TV",
+        "name": "TV",
+        "aliases": [],
+        "version": "1.6.6"
+      },
+      {
+        "id": "bundle:com.apple.Terminal",
+        "name": "Terminal",
+        "aliases": [],
+        "version": "2.15"
+      },
+      {
+        "id": "bundle:com.apple.TextEdit",
+        "name": "TextEdit",
+        "aliases": [],
+        "version": "1.20"
+      },
+      {
+        "id": "bundle:com.apple.VoiceMemos",
+        "name": "VoiceMemos",
+        "aliases": [],
+        "version": "3.2"
+      },
+      {
+        "id": "bundle:com.apple.VoiceOverUtility",
+        "name": "VoiceOver Utility",
+        "aliases": [],
+        "version": "10"
+      },
+      {
+        "id": "bundle:com.apple.airport.airportutility",
+        "name": "AirPort Utility",
+        "aliases": [],
+        "version": "6.3.9"
+      },
+      {
+        "id": "bundle:com.apple.apps.launcher",
+        "name": "Apps",
+        "aliases": [],
+        "version": "1.0"
+      },
+      {
+        "id": "bundle:com.apple.audio.AudioMIDISetup",
+        "name": "Audio MIDI Setup",
+        "aliases": [],
+        "version": "3.8"
+      },
+      {
+        "id": "bundle:com.apple.backup.launcher",
+        "name": "Time Machine",
+        "aliases": [],
+        "version": "1.3"
+      },
+      {
+        "id": "bundle:com.apple.bootcampassistant",
+        "name": "Boot Camp Assistant",
+        "aliases": [],
+        "version": "6.1.0"
+      },
+      {
+        "id": "bundle:com.apple.calculator",
+        "name": "Calculator",
+        "aliases": [],
+        "version": "12.0"
+      },
+      {
+        "id": "bundle:com.apple.clock",
+        "name": "Clock",
+        "aliases": [],
+        "version": "1.1"
+      },
+      {
+        "id": "bundle:com.apple.dt.Xcode",
+        "name": "Xcode",
+        "aliases": [],
+        "version": "26.6"
+      },
+      {
+        "id": "bundle:com.apple.exposelauncher",
+        "name": "Mission Control",
+        "aliases": [],
+        "version": "1.2"
+      },
+      {
+        "id": "bundle:com.apple.findmy",
+        "name": "FindMy",
+        "aliases": [],
+        "version": "4.0"
+      },
+      {
+        "id": "bundle:com.apple.freeform",
+        "name": "Freeform",
+        "aliases": [],
+        "version": "4.5"
+      },
+      {
+        "id": "bundle:com.apple.games",
+        "name": "Games",
+        "aliases": [],
+        "version": "1.0"
+      },
+      {
+        "id": "bundle:com.apple.grapher",
+        "name": "Grapher",
+        "aliases": [],
+        "version": "2.8"
+      },
+      {
+        "id": "bundle:com.apple.helpviewer",
+        "name": "Tips",
+        "aliases": [],
+        "version": "26.6"
+      },
+      {
+        "id": "bundle:com.apple.iBooksX",
+        "name": "Books",
+        "aliases": [],
+        "version": "8.5"
+      },
+      {
+        "id": "bundle:com.apple.iCal",
+        "name": "Calendar",
+        "aliases": [],
+        "version": "16.0"
+      },
+      {
+        "id": "bundle:com.apple.journal",
+        "name": "Journal",
+        "aliases": [],
+        "version": "2.0"
+      },
+      {
+        "id": "bundle:com.apple.mail",
+        "name": "Mail",
+        "aliases": [],
+        "version": "16.0"
+      },
+      {
+        "id": "bundle:com.apple.mobilephone",
+        "name": "Phone",
+        "aliases": [],
+        "version": "1.0"
+      },
+      {
+        "id": "bundle:com.apple.news",
+        "name": "News",
+        "aliases": [],
+        "version": "11.5"
+      },
+      {
+        "id": "bundle:com.apple.podcasts",
+        "name": "Podcasts",
+        "aliases": [],
+        "version": "1.1.0"
+      },
+      {
+        "id": "bundle:com.apple.printcenter",
+        "name": "Print Center",
+        "aliases": [],
+        "version": "1.0"
+      },
+      {
+        "id": "bundle:com.apple.reminders",
+        "name": "Reminders",
+        "aliases": [],
+        "version": "7.0"
+      },
+      {
+        "id": "bundle:com.apple.screenshot.launcher",
+        "name": "Screenshot",
+        "aliases": [],
+        "version": "1.0"
+      },
+      {
+        "id": "bundle:com.apple.shortcuts",
+        "name": "Shortcuts",
+        "aliases": [],
+        "version": "7.0"
+      },
+      {
+        "id": "bundle:com.apple.siri.launcher",
+        "name": "Siri",
+        "aliases": [],
+        "version": "1.0"
+      },
+      {
+        "id": "bundle:com.apple.stocks",
+        "name": "Stocks",
+        "aliases": [],
+        "version": "8.5"
+      },
+      {
+        "id": "bundle:com.apple.systempreferences",
+        "name": "System Settings",
+        "aliases": [],
+        "version": "15.0"
+      },
+      {
+        "id": "bundle:com.apple.weather",
+        "name": "Weather",
+        "aliases": [],
+        "version": "6.0"
+      },
+      {
+        "id": "bundle:com.mitchellh.ghostty",
+        "name": "Ghostty",
+        "aliases": [],
+        "version": "1.3.1"
+      },
+      {
+        "id": "bundle:com.trycua.driver",
+        "name": "Cua Driver",
+        "aliases": [],
+        "version": "0.12.6"
+      },
+      {
+        "id": "google-chrome",
+        "name": "Google Chrome",
+        "aliases": [
+          "Chrome"
+        ],
+        "version": "153.0.8010.48"
+      },
+      {
+        "id": "npm:@earendil-works/pi-coding-agent",
+        "name": "@earendil-works/pi-coding-agent",
+        "aliases": [],
+        "version": "0.85.1"
+      },
+      {
+        "id": "npm:@openai/codex",
+        "name": "@openai/codex",
+        "aliases": [],
+        "version": "0.154.0"
+      },
+      {
+        "id": "npm:corepack",
+        "name": "corepack",
+        "aliases": [],
+        "version": "0.34.6"
+      },
+      {
+        "id": "npm:npm",
+        "name": "npm",
+        "aliases": [],
+        "version": "10.9.8"
+      },
+      {
+        "id": "npm:playwright",
+        "name": "playwright",
+        "aliases": [],
+        "version": "1.63.0"
+      }
+    ]
+  },
+  "provenance": {
+    "extractionMode": "work",
+    "evidenceId": "macos26-fRpzfely",
+    "rawSha256": "644950de772485709b54020b2be5f2578465da1f4bd3f9a3fa021e86ea13a9db",
+    "collectorSha256": "54497d48f69d6b12f653a3a6efbbe87310345329edd17d0894570f243fec4e40",
+    "aliasesSha256": "fb88e6b824c4d17578f498a265333f56a580d974c8f07a547d715a2744cdbed5"
+  }
+}
