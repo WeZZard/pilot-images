@@ -122,6 +122,10 @@ print(json.dumps(dict(schemaVersion=1,image='fixture',os=observed['os'],architec
         self.env = dict(os.environ, TART_HOME=str(self.root / 'tart'),
                         FIXTURE_JSON=json.dumps(self.data), HOME=str(self.root))
         self.env['PILOT_IMAGES_STATE_DIR'] = str(self.root / 'state-dir')
+        # A stand-in bundle: macOS builds pack the host's CuaDriver.app.
+        cua = self.root / 'host-apps' / 'CuaDriver.app'
+        cua.mkdir(parents=True)
+        self.env['CUA_DRIVER_APP'] = str(cua)
         self.store = self.root / 'state-dir/stores' / hashlib.sha256(str(self.vms).encode()).hexdigest()
         self.work = self.store / 'work/fixture.json'
         self.base = self.store / 'base/fixture.json'

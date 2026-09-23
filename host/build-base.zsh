@@ -146,12 +146,14 @@ if [[ -f "$HOME/.ssh/id_ed25519.pub" ]]; then
 fi
 
 if [[ "$LINE_KIND" == macos ]]; then
-  if [[ -d /Applications/CuaDriver.app ]]; then
+  HOST_CUA_DRIVER_APP="${CUA_DRIVER_APP:-/Applications/CuaDriver.app}"
+  [[ "$HOST_CUA_DRIVER_APP" == /*/CuaDriver.app ]] || die "CUA_DRIVER_APP must be an absolute path ending in CuaDriver.app"
+  if [[ -d "$HOST_CUA_DRIVER_APP" ]]; then
     log "packing CuaDriver.app from host"
-    tar -C /Applications -czf "$LOG_DIR/CuaDriver.app.tgz" CuaDriver.app
+    tar -C "${HOST_CUA_DRIVER_APP:h}" -czf "$LOG_DIR/CuaDriver.app.tgz" CuaDriver.app
     vscp_retry "$IP" "$LOG_DIR/CuaDriver.app.tgz" /tmp/payload/
   else
-    die "required /Applications/CuaDriver.app is missing; capture is not optional"
+    die "required $HOST_CUA_DRIVER_APP is missing; capture is not optional"
   fi
 
   HOST_XCODE_APP="${XCODE_APP:-/Applications/Xcode.app}"
