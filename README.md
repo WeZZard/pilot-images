@@ -55,6 +55,7 @@ See [profiles/pi/litellm.env.example.md](profiles/pi/litellm.env.example.md).
 
 - The builder resolves `seed.lock` to an immutable digest rather than cloning a mutable tag. It never promotes automatically.
 - `--from-phase NN` resumes that phase and all later phases on an existing stopped work VM. Inspect the prior result before resuming; it is not an automatic replay policy.
+- `--phase 60` and `--phase 65` (the headless TCC grants: cua-driver capture, and Apple Events for `osascript` run over SSH) reboot the work VM before the checks, so the grant is asserted after a fresh login, as a clone meets it. To add such a grant to an existing base, clone the base to the work VM, run the single phase, then follow the normal evidence and promotion steps; keep the previous base under a `-prev-<date>` name.
 - `XCODE_APP=/absolute/path/Xcode.app` selects a host-supplied Xcode bundle when a `.xip` is unavailable. This is an explicit build input, not a claim of a self-contained external build. CuaDriver's macOS bundle remains a host-supplied prerequisite.
 - `CUA_DRIVER_APP=/absolute/path/CuaDriver.app` selects the host-supplied CuaDriver bundle; the default is `/Applications/CuaDriver.app`.
 - Headless Tart runs in a separate process session from the build so cancelling a build does not implicitly stop its VM. The maintenance lock remains held by the VM until it stops; failures preserve the work disk for diagnosis.

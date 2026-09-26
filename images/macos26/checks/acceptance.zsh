@@ -142,6 +142,27 @@ if "$HOME/.local/bin/cua-driver" permissions status --json 2>/dev/null | grep -q
 else
   bad "cua-driver daemon is not independently attributed in the login session"
 fi
+# --- Apple Events (Automation) for osascript over SSH (phase 65) --------
+# This SSH session's responsible process is sshd-keygen-wrapper, the client
+# phase 65 grants, so these probes exercise exactly what clones rely on. A
+# timeout IS the consent modal that nothing headless can answer. Only System
+# Events and Finder are scripted: they carry no user-facing state, so the base
+# stays clean; do not add apps that would be launched by the probe.
+_ae_db="$HOME/Library/Application Support/com.apple.TCC/TCC.db"
+_ae_rows=$(sqlite3 "$_ae_db" "SELECT count(*) FROM access WHERE service='kTCCServiceAppleEvents' AND client='/usr/libexec/sshd-keygen-wrapper' AND client_type=1 AND auth_value=2;" 2>/dev/null)
+if [[ "${_ae_rows:-0}" -gt 0 ]]; then
+  ok "Apple Events grant rows for sshd-keygen-wrapper ($_ae_rows targets)"
+else
+  bad "no Apple Events grant rows for sshd-keygen-wrapper in the user TCC.db"
+fi
+for _ae_probe in "System Events:get name of every process" "Finder:get name of startup disk"; do
+  _ae_app="${_ae_probe%%:*}"
+  if perl -e 'alarm 20; exec @ARGV' osascript -e "tell application \"$_ae_app\" to ${_ae_probe#*:}" >/dev/null 2>&1; then
+    ok "osascript -> $_ae_app over SSH (no consent modal, under 20 s)"
+  else
+    bad "osascript -> $_ae_app over SSH timed out or failed — the Automation consent modal would block clones"
+  fi
+done
 if pi list 2>/dev/null | grep -q "pi-web-access"; then ok "pi extensions synced"; else bad "pi extensions not synced"; fi
 if "$HOME/.local/bin/claude" mcp list 2>/dev/null | grep -q "cua-driver"; then ok "claude MCP registrations"; else bad "claude MCP registrations"; fi
 

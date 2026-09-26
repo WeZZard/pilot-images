@@ -50,6 +50,7 @@ vssh() {
     *'ls /tmp/payload/guest/40-'*) print /tmp/payload/guest/40-automation.sh ;;
     *'ls /tmp/payload/guest/45-'*) print /tmp/payload/guest/45-capture.sh ;;
     *'ls /tmp/payload/guest/50-'*) print /tmp/payload/guest/50-agents.sh ;;
+    *'ls /tmp/payload/guest/65-'*) print /tmp/payload/guest/65-automation.sh ;;
     *'ls /tmp/payload/checks/acceptance.'*) print /tmp/payload/checks/acceptance.sh ;;
     *'ls /tmp/payload/checks/no-secrets.'*) print /tmp/payload/checks/no-secrets.sh ;;
     *'bash /tmp/payload/guest/00-system.sh'*) [[ "${FAIL:-}" != phase ]] ;;
@@ -438,6 +439,18 @@ elif args[0] not in ('exec','push'): raise RuntimeError(args)
         self.assertNotIn('bash /tmp/payload/guest/00-system.sh', events)
         self.assertNotIn('tart clone', events)
         self.assertTrue(self.work.exists())
+
+    def test_tcc_grant_phases_reboot_before_checks(self):
+        # Phases 60 and 65 write TCC rows; the checks must run after a fresh
+        # login, as a clone would see them, so a single-phase run reboots first.
+        events = self.run_script('build-base.zsh', '--phase', '65')
+        self.assertIn('bash /tmp/payload/guest/65-automation.sh', events)
+        self.assertLess(events.index('bash /tmp/payload/guest/65-automation.sh'), events.index('ssh sudo reboot'))
+        self.assertLess(events.index('ssh sudo reboot'), events.index('acceptance.'))
+        (self.root / 'events').write_text('')
+        events = self.run_script('build-base.zsh', '--phase', '50')
+        self.assertIn('bash /tmp/payload/guest/50-agents.sh', events)
+        self.assertNotIn('ssh sudo reboot', events)
 
     def test_build_rejects_bad_seed_lock_before_mutating_work(self):
         lock = self.root / 'images/fixture/seed.lock'

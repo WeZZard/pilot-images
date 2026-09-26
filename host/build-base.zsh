@@ -237,8 +237,10 @@ for ph in "${PHASES[@]}"; do
   log "=== phase $ph done ==="
 done
 
-# A new desktop session must inherit image-level capture startup settings.
-if [[ -z "$ONLY_PHASE" || "$ONLY_PHASE" == 45 || "$ONLY_PHASE" == 60 ]]; then
+# A new desktop session must inherit image-level capture startup settings, and
+# the headless TCC grants (phases 60 and 65) are checked the way a clone meets
+# them: after a fresh boot and login, not in the session that wrote them.
+if [[ -z "$ONLY_PHASE" || "$ONLY_PHASE" == 45 || "$ONLY_PHASE" == 60 || "$ONLY_PHASE" == 65 ]]; then
   vssh "$IP" 'sudo reboot' || true
   sleep 20
   IP=$(wait_ip "$WORK_VM") || die "no IP after capture configuration reboot"

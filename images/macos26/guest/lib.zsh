@@ -33,3 +33,29 @@ su_manual_only() {
   done
   sudo killall softwareupdated >/dev/null 2>&1 || true
 }
+
+# Designated code requirement of a bundle or executable, printed as the hex
+# blob TCC stores in `csreq` / `indirect_object_code_identity`. Used by the
+# headless TCC grants (phases 60 and 65). A tiny Swift helper is compiled once
+# per phase; swiftc is present because Xcode/CLT are provisioned before either.
+csreq_hex() {  # csreq_hex <path>
+  if [[ -z "${_CSREQ_BIN:-}" || ! -x "${_CSREQ_BIN:-}" ]]; then
+    local tmp
+    tmp=$(mktemp -d) || return 1
+    cat > "$tmp/csreq.swift" <<'SWIFT'
+import Foundation
+import Security
+let url = URL(fileURLWithPath: CommandLine.arguments[1])
+var code: SecStaticCode?
+guard SecStaticCodeCreateWithPath(url as CFURL, [], &code) == errSecSuccess, let code = code else { exit(1) }
+var req: SecRequirement?
+guard SecCodeCopyDesignatedRequirement(code, [], &req) == errSecSuccess, let req = req else { exit(2) }
+var data: CFData?
+guard SecRequirementCopyData(req, [], &data) == errSecSuccess, let data = data else { exit(3) }
+print((data as Data).map { String(format: "%02x", $0) }.joined())
+SWIFT
+    swiftc "$tmp/csreq.swift" -o "$tmp/csreq" -framework Security || return 1
+    _CSREQ_BIN="$tmp/csreq"
+  fi
+  "$_CSREQ_BIN" "$1"
+}

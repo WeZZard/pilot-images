@@ -68,10 +68,12 @@ ARE the standard image. See `README.md` for the full model.
 Xcode 26.6 + all four simulator runtimes + Metal toolchain; Homebrew; Node LTS
 via nvm + pnpm; Python via pyenv + uv; Rust via rustup; ffmpeg, gh, jq;
 Ghostty, Chrome; Oh My Zsh; Claude Code + pi + Codex CLI (all credential-free)
-with playwright/chrome-devtools/cua-driver MCP registered; cua-driver. Playwright
-and Chrome DevTools MCP are pinned to bundled Chrome-for-Testing binaries
-(Playwright's managed Chromium; a Puppeteer-managed Chrome) for BOTH Claude Code
-and Codex user-scope config (`~/.codex/config.toml`, MCP servers only — no auth).
+with playwright/chrome-devtools/cua-driver MCP registered; cua-driver; headless
+TCC grants for cua-driver (phase 60) and for SSH-run `osascript` (phase 65).
+Playwright and Chrome DevTools MCP are pinned to bundled Chrome-for-Testing
+binaries (Playwright's managed Chromium; a Puppeteer-managed Chrome) for BOTH
+Claude Code and Codex user-scope config (`~/.codex/config.toml`, MCP servers
+only — no auth).
 
 ### cua-driver TCC (headless, no GUI pass)
 
@@ -83,6 +85,40 @@ process at auto-login (a shell-spawned daemon inherits the shell and stays
 untrusted). The grant's csreq is identifier+team based, so it survives
 cua-driver self-updates. Verified: `permissions status` → accessibility+screen
 recording true, `responsible_ppid: 1`.
+
+### Apple Events (Automation) grant for SSH-run `osascript` (headless)
+
+Apple Events sent from an SSH session are attributed to the session's
+responsible process, `/usr/libexec/sshd-keygen-wrapper`, and the first script
+against each app raises `"sshd-keygen-wrapper" wants access to control "<App>"`
+on the console. Measured 2026-09-26 in a relay clone (macOS 26.6.1): `osascript
+-e 'tell application "Reminders" to quit'` hung on that sheet until the relay's
+60 s timeout. Same class of defect as the modals below, same kind of fix as the
+cua-driver grant above, in guest phase 65 (`65-automation.zsh`):
+
+- Rows go into the USER store, `~/Library/Application Support/com.apple.TCC/
+  TCC.db`, where `kTCCServiceAppleEvents` (Automation) decisions live. One row
+  per target: every app bundle under `/Applications`, `/System/Applications`,
+  their `Utilities`, plus System Events, Finder and Shortcuts Events.
+- Row shape that macOS 26 honours: client is the wrapper's path with
+  `client_type` 1; `auth_value` 2, `auth_reason` 2, `auth_version` 1; target
+  keyed by bundle id (`indirect_object_identifier_type` 0); `csreq` and
+  `indirect_object_code_identity` carry the client's and the target's designated
+  requirements (`csreq_hex` in `guest/lib.zsh`, shared with phase 60), so a
+  replaced binary on either side does not inherit the grant.
+- `INSERT OR REPLACE` keeps reruns idempotent; a `PRAGMA table_info(access)`
+  gate refuses to write if a column it fills is missing or an unknown NOT NULL
+  column has no default. The user `tccd` is restarted afterwards.
+- Only sshd-keygen-wrapper is granted. No other client, no wildcard.
+- SIP-off only, like phase 60. `host/build-base.zsh --phase 65` reboots the
+  work VM before the checks so the grant is proven after a fresh login, the way
+  a clone meets it.
+
+Acceptance scripts System Events and Finder over SSH under a 20 s alarm; a
+timeout is the modal. Those two carry no user-facing state, so acceptance
+never launches anything that would dirty the base. Apps like Reminders, Notes
+and Contacts are covered by the same rows and are verified on a clone, not in
+the build.
 
 ### First-launch dialogs (headless)
 
