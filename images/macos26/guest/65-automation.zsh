@@ -14,7 +14,10 @@
 # (kTCCServiceAppleEvents) live in the USER database, one per (client, target
 # app). Only sshd-keygen-wrapper is granted, and only towards app bundles that
 # ship in the image; both sides are pinned to their designated code requirement
-# so a replaced binary does not inherit the grant. Idempotent: reruns replace.
+# so a replaced binary does not inherit the grant. Apps whose data TCC classes
+# as private (Reminders, Contacts, Calendar, Photos, Music library) sit behind a
+# second, per-user data-class consent; the same client gets those five rows
+# too. Idempotent: reruns replace.
 source "${0:A:h}/lib.zsh"
 
 if ! csrutil status 2>/dev/null | grep -qi 'disabled'; then
@@ -90,6 +93,21 @@ for app in "${TARGETS[@]}"; do
   print -r -- "INSERT OR REPLACE INTO access (service,client,client_type,auth_value,auth_reason,auth_version,csreq,indirect_object_identifier_type,indirect_object_identifier,indirect_object_code_identity,flags,last_modified) VALUES ('kTCCServiceAppleEvents','$CLIENT',1,2,2,1,X'$CLIENT_REQ',0,'$bid',X'$req',0,strftime('%s','now'));" >> "$SQL"
   GRANTED=$(( GRANTED + 1 ))
 done
+# --- data-class rows for the same client ---------------------------------------
+# Automation alone is not enough for apps whose data TCC classes as private.
+# Measured 2026-09-26 on macOS 26.6.1 with all 73 Automation rows in place:
+# `tell application "Reminders" to get name of every list` still raised
+# "sshd-keygen-wrapper would like to access your Reminders", Contacts likewise,
+# while Notes, System Events and Finder already worked. These are per-user
+# services keyed by client only (indirect object stays at its 'UNUSED'
+# default); with the five rows below Reminders, Contacts, Calendar and Music
+# answered within 2 s. Photos is granted on the same basis, unverified.
+typeset -a DATA_SERVICES
+DATA_SERVICES=(kTCCServiceReminders kTCCServiceAddressBook kTCCServiceCalendar
+               kTCCServicePhotos kTCCServiceMediaLibrary)
+for svc in "${DATA_SERVICES[@]}"; do
+  print -r -- "INSERT OR REPLACE INTO access (service,client,client_type,auth_value,auth_reason,auth_version,csreq,indirect_object_identifier_type,flags,last_modified) VALUES ('$svc','$CLIENT',1,2,2,1,X'$CLIENT_REQ',0,0,strftime('%s','now'));" >> "$SQL"
+done
 print -r -- 'COMMIT;' >> "$SQL"
 (( GRANTED > 0 )) || { glog "no target could be granted"; exit 1 }
 sqlite3 "$DB" < "$SQL" || { glog "writing Apple Events rows to $DB failed"; exit 1 }
@@ -97,11 +115,13 @@ rm -f "$SQL"
 # The user tccd caches decisions; restart it so the rows apply to this session.
 launchctl kickstart -k "gui/$(id -u)/com.apple.tccd" 2>/dev/null || killall tccd 2>/dev/null || true
 sleep 2
-glog "Apple Events rows written for $CLIENT: $GRANTED targets, $SKIPPED skipped"
+glog "Apple Events rows written for $CLIENT: $GRANTED targets, $SKIPPED skipped; data-class rows: ${#DATA_SERVICES}"
 
 # --- verify from this SSH session: its responsible process IS the client ------
 ROWS=$(sqlite3 "$DB" "SELECT count(*) FROM access WHERE service='kTCCServiceAppleEvents' AND client='$CLIENT' AND client_type=1 AND auth_value=2;")
 (( ROWS >= GRANTED )) || { glog "expected at least $GRANTED Apple Events rows, found $ROWS"; exit 1 }
+DATA_ROWS=$(sqlite3 "$DB" "SELECT count(*) FROM access WHERE client='$CLIENT' AND client_type=1 AND auth_value=2 AND service IN ('${(j:',':)DATA_SERVICES}');")
+(( DATA_ROWS == ${#DATA_SERVICES} )) || { glog "expected ${#DATA_SERVICES} data-class rows, found $DATA_ROWS"; exit 1 }
 for probe in 'tell application "System Events" to get name of every process' \
              'tell application "Finder" to get name of startup disk'; do
   if ! perl -e 'alarm 20; exec @ARGV' osascript -e "$probe" >/dev/null; then

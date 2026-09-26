@@ -29,8 +29,10 @@ class AutomationGrantPhaseTests(unittest.TestCase):
         source = PHASE.read_text()
         self.assertIn("csrutil status", source)
         self.assertIn("CLIENT=/usr/libexec/sshd-keygen-wrapper", source)
-        # Exactly one client literal is granted; no bundle-id or wildcard client.
-        self.assertEqual(source.count("'$CLIENT',1,"), 1)
+        # Every row written names that one client by path; no bundle-id or
+        # wildcard client anywhere.
+        self.assertEqual(source.count("VALUES ("), source.count("'$CLIENT',1,"))
+        self.assertEqual(source.count("VALUES ("), 2)
         self.assertNotIn('com.openssh', source)
         self.assertIn('kTCCServiceAppleEvents', source)
         self.assertIn('com.apple.TCC/TCC.db', source)
@@ -46,6 +48,14 @@ class AutomationGrantPhaseTests(unittest.TestCase):
         self.assertIn('com.apple.tccd', source)
         for target in ('/Applications', '/System/Applications', 'System Events.app', 'Finder.app', 'Shortcuts Events.app'):
             self.assertIn(target, source)
+
+    def test_data_class_rows_cover_the_private_data_apps_for_the_same_client(self):
+        source = PHASE.read_text()
+        for service in ('kTCCServiceReminders', 'kTCCServiceAddressBook', 'kTCCServiceCalendar', 'kTCCServicePhotos', 'kTCCServiceMediaLibrary'):
+            self.assertIn(service, source)
+        row = re.search(r"VALUES \('\$svc','\$CLIENT',1,2,2,1,X'\$CLIENT_REQ',0,0,", source)
+        self.assertIsNotNone(row, 'data-class rows: same client, path type, allowed, pinned, no indirect object')
+        self.assertIn('DATA_ROWS == ${#DATA_SERVICES}', source)
 
     def test_phase_verifies_over_the_same_ssh_path_with_a_hard_timeout(self):
         source = PHASE.read_text()
@@ -63,6 +73,8 @@ class AutomationGrantAcceptanceTests(unittest.TestCase):
         self.assertIn('Finder:get name of startup disk', block)
         self.assertIn("kTCCServiceAppleEvents", block)
         self.assertIn("client='/usr/libexec/sshd-keygen-wrapper'", block)
+        for service in ('kTCCServiceReminders', 'kTCCServiceAddressBook', 'kTCCServiceCalendar', 'kTCCServicePhotos', 'kTCCServiceMediaLibrary'):
+            self.assertIn(service, block)
         # Acceptance must not launch stateful apps into the base.
         for app in ('Reminders', 'Notes', 'Contacts', 'Calendar', 'Music', 'Safari'):
             self.assertNotIn('"' + app + '"', block)

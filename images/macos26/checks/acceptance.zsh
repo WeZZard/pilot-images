@@ -155,6 +155,17 @@ if [[ "${_ae_rows:-0}" -gt 0 ]]; then
 else
   bad "no Apple Events grant rows for sshd-keygen-wrapper in the user TCC.db"
 fi
+_ae_missing=""
+for _ae_svc in kTCCServiceReminders kTCCServiceAddressBook kTCCServiceCalendar kTCCServicePhotos kTCCServiceMediaLibrary; do
+  if [[ "$(sqlite3 "$_ae_db" "SELECT count(*) FROM access WHERE service='$_ae_svc' AND client='/usr/libexec/sshd-keygen-wrapper' AND client_type=1 AND auth_value=2;" 2>/dev/null)" != 1 ]]; then
+    _ae_missing="$_ae_missing $_ae_svc"
+  fi
+done
+if [[ -z "$_ae_missing" ]]; then
+  ok "data-class grant rows for sshd-keygen-wrapper (Reminders, Contacts, Calendar, Photos, media library)"
+else
+  bad "data-class grant rows missing for sshd-keygen-wrapper:$_ae_missing — scripting those apps would prompt"
+fi
 for _ae_probe in "System Events:get name of every process" "Finder:get name of startup disk"; do
   _ae_app="${_ae_probe%%:*}"
   if perl -e 'alarm 20; exec @ARGV' osascript -e "tell application \"$_ae_app\" to ${_ae_probe#*:}" >/dev/null 2>&1; then

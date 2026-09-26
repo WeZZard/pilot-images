@@ -109,6 +109,16 @@ cua-driver grant above, in guest phase 65 (`65-automation.zsh`):
 - `INSERT OR REPLACE` keeps reruns idempotent; a `PRAGMA table_info(access)`
   gate refuses to write if a column it fills is missing or an unknown NOT NULL
   column has no default. The user `tccd` is restarted afterwards.
+- Automation alone is not enough for apps whose data TCC classes as private.
+  Measured 2026-09-26 with all 73 Automation rows in place: Notes, System
+  Events and Finder answered, but Reminders and Contacts raised a second sheet,
+  `"sshd-keygen-wrapper" would like to access your Reminders`. That is the
+  per-user data-class consent, so the same client also gets one row each for
+  `kTCCServiceReminders`, `kTCCServiceAddressBook`, `kTCCServiceCalendar`,
+  `kTCCServicePhotos` and `kTCCServiceMediaLibrary` (client-only rows, indirect
+  object at its `UNUSED` default). Reminders, Contacts, Calendar and Music then
+  answered within 2 s. Full Disk Access for the wrapper already ships in the
+  seed's system store, which is why file-bound scripting never prompted.
 - Only sshd-keygen-wrapper is granted. No other client, no wildcard.
 - SIP-off only, like phase 60. `host/build-base.zsh --phase 65` reboots the
   work VM before the checks so the grant is proven after a fresh login, the way
