@@ -76,12 +76,18 @@ fi
 mkdir -p "$LOG_DIR"
 
 # ---- seed handling: the downloaded image stays pristine ----------------------
-if ! tart list 2>/dev/null | grep -Fq -- "$SEED_SOURCE"; then
-  die "pinned seed not present — run: tart pull $SEED_SOURCE"
-fi
-if ! vm_exists "$SEED_LOCAL"; then
-  log "creating pristine local seed copy: $SEED_LOCAL (never boot, never modify)"
-  tart clone "$SEED_SOURCE" "$SEED_LOCAL"
+# Only a fresh build clones from the seed. --phase / --from-phase re-runs target
+# the existing work VM and never touch the seed, so a purged OCI cache must not
+# block them (measured 2026-09-26: the cache had been emptied to reclaim disk
+# while the pristine local copy, which is what the doctrine preserves, remained).
+if [[ -z "$ONLY_PHASE" && -z "$FROM_PHASE" ]]; then
+  if ! tart list 2>/dev/null | grep -Fq -- "$SEED_SOURCE"; then
+    die "pinned seed not present — run: tart pull $SEED_SOURCE"
+  fi
+  if ! vm_exists "$SEED_LOCAL"; then
+    log "creating pristine local seed copy: $SEED_LOCAL (never boot, never modify)"
+    tart clone "$SEED_SOURCE" "$SEED_LOCAL"
+  fi
 fi
 
 # ---- work VM -----------------------------------------------------------------

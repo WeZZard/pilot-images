@@ -67,6 +67,7 @@ tart() {
   event "tart $*"
   case "$1" in
     list) local listing='local fixture-seed@sha256:0000000000000000000000000000000000000000000000000000000000000000 stopped'
+      if [[ -n "${NO_OCI_SEED:-}" ]]; then listing='local unrelated stopped'; fi
       for vm in work base seed; do
         if vm_exists "$vm"; then listing+=$'\n'"local $vm $(<"$REPO_ROOT/state")"; fi
       done
@@ -439,6 +440,19 @@ elif args[0] not in ('exec','push'): raise RuntimeError(args)
         self.assertNotIn('bash /tmp/payload/guest/00-system.sh', events)
         self.assertNotIn('tart clone', events)
         self.assertTrue(self.work.exists())
+
+    def test_phase_reruns_do_not_need_the_oci_seed_entry(self):
+        # The OCI cache can be purged while the pristine local seed remains; a
+        # phase re-run never touches either, a fresh build still needs the OCI.
+        self.env['NO_OCI_SEED'] = '1'
+        events = self.run_script('build-base.zsh', '--phase', '00')
+        self.assertIn('bash /tmp/payload/guest/00-system.sh', events)
+        self.assertNotIn('tart clone', events)
+        (self.root / 'events').write_text('')
+        shutil.rmtree(self.vms / 'work')
+        events = self.run_script('build-base.zsh', success=False)
+        self.assertNotIn('start', events)
+        self.assertNotIn('tart clone', events)
 
     def test_tcc_grant_phases_reboot_before_checks(self):
         # Phases 60 and 65 write TCC rows; the checks must run after a fresh
