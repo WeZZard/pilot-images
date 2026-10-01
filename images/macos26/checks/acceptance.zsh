@@ -189,8 +189,25 @@ if ls "$HOME/.cache/puppeteer/chrome/mac_arm-"*/chrome-mac-arm64/*.app >/dev/nul
 # Claude Code MCP stays bare (matches host); the browser pinning is Codex-only.
 if "$HOME/.local/bin/claude" mcp get playwright 2>/dev/null | grep -q 'executable-path'; then bad "claude playwright unexpectedly pinned (host parity: should be bare)"; else ok "claude playwright bare (host parity)"; fi
 
-# --- updates ---
-if crontab -l 2>/dev/null | grep -q "crontab.d"; then ok "update crontab installed"; else bad "update crontab missing"; fi
+# --- updates: a VM never updates itself; a physical Mac refreshes nightly ---
+if [[ "$(sysctl -n kern.hv_vmm_present 2>/dev/null)" == 1 ]]; then
+  if crontab -l >/dev/null 2>&1; then bad "VM has a crontab (no self-update)"; else ok "VM has no crontab"; fi
+  if [[ -e "$HOME/.crontab.d" ]]; then bad "VM still has ~/.crontab.d"; else ok "VM has no ~/.crontab.d"; fi
+  if [[ -x "$HOME/.refresh.d/com.wezzard.crontab.dev/cua_driver_update" ]]; then ok "maintenance refresh scripts (~/.refresh.d)"; else bad "maintenance refresh scripts missing"; fi
+  if [[ "$(defaults read /Library/Preferences/com.apple.commerce AutoUpdate 2>/dev/null)" == 0 ]]; then ok "App Store auto-update off"; else bad "App Store auto-update not off"; fi
+  if zsh -c 'source ~/.zshenv; [[ "${HOMEBREW_NO_AUTO_UPDATE:-}" == 1 && "${PI_SKIP_VERSION_CHECK:-}" == 1 ]]'; then ok "Homebrew auto-update and pi version check off"; else bad "Homebrew auto-update or pi version check not off"; fi
+  if python3 -c 'import json,pathlib,sys; s=json.loads((pathlib.Path.home()/".claude/settings.json").read_text()); sys.exit(s.get("env",{}).get("DISABLE_AUTOUPDATER")!="1")' 2>/dev/null; then ok "Claude Code auto-updater off"; else bad "Claude Code auto-updater not off"; fi
+  if grep -qx 'check_for_update_on_startup = false' "$HOME/.codex/config.toml" 2>/dev/null; then ok "Codex update check off"; else bad "Codex update check not off"; fi
+  if grep -qx 'auto-update = off' "$HOME/.config/ghostty/config" 2>/dev/null; then ok "Ghostty auto-update off"; else bad "Ghostty auto-update not off"; fi
+  if [[ "$(/usr/libexec/PlistBuddy -c 'Print :updatePolicies:global:UpdateDefault' '/Library/Managed Preferences/com.google.Keystone.plist' 2>/dev/null)" == 3 ]]; then ok "Chrome updates never applied"; else bad "Chrome update policy missing"; fi
+  if grep -q '@latest' "$HOME/.codex/config.toml" 2>/dev/null || "$HOME/.local/bin/claude" mcp get playwright 2>/dev/null | grep -q '@latest' || "$HOME/.local/bin/claude" mcp get chrome-devtools 2>/dev/null | grep -q '@latest'; then
+    bad "an npx MCP server still resolves @latest"
+  else
+    ok "npx MCP servers pinned"
+  fi
+else
+  if crontab -l 2>/dev/null | grep -q "crontab.d"; then ok "update crontab installed (metal)"; else bad "update crontab missing (metal)"; fi
+fi
 
 # --- Xcode (reports SKIP when phase 20 has not run yet) ---
 if [[ -d /Applications/Xcode.app ]]; then

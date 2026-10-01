@@ -54,7 +54,8 @@ vssh() {
     *'ls /tmp/payload/checks/acceptance.'*) print /tmp/payload/checks/acceptance.sh ;;
     *'ls /tmp/payload/checks/no-secrets.'*) print /tmp/payload/checks/no-secrets.sh ;;
     *'bash /tmp/payload/guest/00-system.sh'*) [[ "${FAIL:-}" != phase ]] ;;
-    *'for s in ~/.crontab.d/'*) [[ "${FAIL:-}" != update ]] ;;
+    *'for s in "$d"/'*) [[ "${FAIL:-}" != update ]] ;;
+    *'70-no-self-update.zsh'*) [[ "${FAIL:-}" != freeze ]] ;;
     *'acceptance.'*) [[ "${FAIL:-}" != acceptance ]] ;;
     *'no-secrets.'*) [[ "${FAIL:-}" != secrets ]] ;;
     *'collect.py --aliases'*) [[ "${FAIL:-}" != extract ]] ;;
@@ -425,7 +426,7 @@ elif args[0] not in ('exec','push'): raise RuntimeError(args)
 
     def test_refresh_failure_invalidation_and_success_publication(self):
         (self.vms / 'work').rename(self.vms / 'base')
-        for fail in ('update', 'acceptance', 'secrets', 'extract', 'apps', 'stop'):
+        for fail in ('update', 'freeze', 'acceptance', 'secrets', 'extract', 'apps', 'stop'):
             self.stale(self.base)
             self.run_script('refresh-base.zsh', fail=fail, success=False)
             self.assertFalse(self.base.exists())

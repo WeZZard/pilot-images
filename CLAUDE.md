@@ -190,7 +190,8 @@ itself means two clones of one base are not the same machine.
 
 `su_manual_only()` in `guest/lib.zsh` is the single implementation. It runs in
 `_setup-account.zsh` before the image account exists, in phase 00, and again in
-phase 70 — the last call is the one that decides the promoted state. Four traps,
+phase 70 (`metal/updates.zsh` on a physical Mac) — the last call is the one
+that decides the promoted state. Four traps,
 all measured on 2026-09-12:
 
 - **Provisioning re-enables it.** Homebrew's Command Line Tools check in phase
@@ -224,8 +225,24 @@ all measured on 2026-09-12:
 
 ### Update policy
 
-- In-image nightly crontab (`~/.crontab.d/`, phase 70) refreshes brew, rustup,
-  npm globals, pi + pi extensions, Claude Code, cua-driver.
+- **A VM image never updates its own software** (owner decision, 2026-10-01).
+  Clones are disposable; a clone that updates itself is no longer the image it
+  was cloned from. A nightly `cua-driver update --apply` once replaced the
+  binary under a running `cua-driver serve` in the middle of a relay run.
+  Phase 70 (`70-no-self-update.zsh`) removes the crontab and turns off every
+  built-in updater: App Store auto-update, Homebrew auto-update, pi's and
+  Codex's startup version checks, Claude Code's background updater
+  (`DISABLE_AUTOUPDATER`), Ghostty's updater, Chrome's updater (managed
+  preferences, `com.google.Keystone`, `UpdateDefault` 3), and the `@latest` npx
+  MCP registrations of Claude Code and Codex, which it pins to a version.
+  Acceptance asserts each of these when `kern.hv_vmm_present` is 1.
+- The refresh scripts (brew, rustup, npm globals, pi + pi extensions, Claude
+  Code, cua-driver) live in `~/.refresh.d/` and run only in a maintenance boot
+  (`refresh-base.zsh`), which then re-runs phase 70.
+- **Physical Macs keep the nightly crontab** (`~/.crontab.d/`,
+  `metal/updates.zsh`, run by `metal/bootstrap.zsh` in place of phase 70).
+  They are long-lived machines, not clones; the split is an owner decision of
+  2026-10-01.
 - EXCLUDED from automation: macOS point updates and Xcode — applied only during
   a controlled maintenance boot via `refresh-base.zsh`.
 - Base refresh cadence: a **monthly controlled maintenance boot**, run

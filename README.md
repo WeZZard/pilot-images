@@ -119,8 +119,13 @@ VM_ENVIRONMENT_FILE=/absolute/profiles/image-dev.json \
 
 ## Update policy
 
-- Inside every image: nightly crontab (`~/.crontab.d/`, phase 70) refreshes
-  brew, rustup, npm globals, pi + pi extensions, Claude Code, cua-driver.
+- A VM image never updates its own software: phase 70 removes the crontab,
+  turns off every built-in updater and pins the npx MCP servers. Its refresh
+  scripts (`~/.refresh.d/`: brew, rustup, npm globals, pi + pi extensions,
+  Claude Code, cua-driver) run only in a maintenance boot
+  (`host/refresh-base.zsh`), which then re-runs phase 70.
+- Physical Macs (`metal/bootstrap.zsh`) keep a nightly crontab
+  (`~/.crontab.d/`, `metal/updates.zsh`) in place of phase 70.
 - Excluded from automation: macOS point updates (maintenance boots via
   `host/refresh-base.zsh` only) and Xcode (new xip via `--phase 20`).
   A new macOS major = a new line + new base, never an in-place upgrade.

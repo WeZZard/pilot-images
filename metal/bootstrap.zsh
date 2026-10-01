@@ -43,7 +43,9 @@ fi
 SKIP_XCODE=1
 if [[ -f /tmp/payload/Xcode.xip ]]; then SKIP_XCODE=0; fi
 
-for ph in 00 10 20 30 40 50 60 70; do
+# Phase 70 is the VM image's no-self-update phase; a physical Mac gets the
+# nightly crontab instead (metal/updates.zsh, after the phases).
+for ph in 00 10 20 30 40 50 60; do
   if [[ -n "${SKIP[$ph]:-}" ]]; then print -- "=== phase $ph SKIPPED (--skip-phase)"; continue; fi
   setopt null_glob
   typeset -a script
@@ -54,6 +56,13 @@ for ph in 00 10 20 30 40 50 60 70; do
   SKIP_XCODE=$SKIP_XCODE GUEST_PASS="" NODE_MAJOR=$NODE_MAJOR NVM_VERSION=$NVM_VERSION \
     PYTHON_VERSION=$PYTHON_VERSION XCODE_VERSION=$XCODE_VERSION zsh "${script[1]}"
 done
+
+if [[ -n "${SKIP[70]:-}" ]]; then
+  print -- "=== updates SKIPPED (--skip-phase 70)"
+else
+  print -- "=== updates: metal/updates.zsh"
+  zsh "$REPO_ROOT/metal/updates.zsh"
+fi
 
 print -- "=== checks"
 XCODE_VERSION=$XCODE_VERSION NODE_MAJOR=$NODE_MAJOR PYTHON_VERSION=$PYTHON_VERSION \

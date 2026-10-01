@@ -25,16 +25,24 @@ vm_start_headless "$BASE_VM"
 IP=$(wait_ip "$BASE_VM") || die "no IP"
 wait_ssh "$IP" || die "no SSH"
 
-log "refreshing managed software (same scripts the clones run nightly)"
-vssh "$IP" 'for s in ~/.crontab.d/*/*; do echo "== $s"; /bin/sh "$s" || exit 1; done' \
+# The only place a VM image's software changes (docs/decisions.md, 2026-10-01):
+# clones never update themselves. ~/.refresh.d holds the scripts a physical Mac
+# runs nightly; a base built before that decision still has them in ~/.crontab.d.
+log "refreshing managed software (~/.refresh.d, maintenance boot only)"
+vssh "$IP" 'd=~/.refresh.d; [ -d "$d" ] || d=~/.crontab.d; for s in "$d"/*/*; do echo "== $s"; /bin/sh "$s" || exit 1; done' \
   || die "managed update failed — inventory remains invalidated"
+
+log "re-asserting phase 70 (no self-update, pinned MCP servers)"
+vssh "$IP" "rm -rf /tmp/payload && mkdir -p /tmp/payload"
+vscp "$IP" "$REPO_ROOT/images/$LINE/guest" /tmp/payload/
+vssh "$IP" "$GUEST_SHELL /tmp/payload/guest/70-no-self-update.zsh" \
+  || die "phase 70 failed — inventory remains invalidated"
 
 log "macOS point updates available (informational):"
 vssh "$IP" "softwareupdate -l 2>&1 || true"
 print -- "To apply point updates: ssh $GUEST_USER@$IP 'sudo softwareupdate -i -a'  then re-run this script."
 
 log "re-running checks"
-vssh "$IP" "rm -rf /tmp/payload && mkdir -p /tmp/payload"
 vscp "$IP" "$REPO_ROOT/images/$LINE/checks" /tmp/payload/
 vssh "$IP" "XCODE_VERSION=$XCODE_VERSION NODE_MAJOR=$NODE_MAJOR PYTHON_VERSION=$PYTHON_VERSION zsh /tmp/payload/checks/acceptance.zsh" \
   || die "acceptance failures — investigate before cloning from this base"
