@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.trycua.driver.serve</string>
+    <key>ProgramArguments</key>
+    <array>
+        <string>/Users/admin/.local/bin/cua-driver</string>
+        <string>serve</string>
+    </array>
+    <!-- Run as a proper launchd job in the GUI login session so the daemon is
+         its OWN TCC responsible process; only then does the com.trycua.driver
+         Accessibility/Screen-Recording grant take effect (a shell-spawned
+         daemon inherits the shell as responsible process and is untrusted). -->
+    <key>RunAtLoad</key>
+    <true/>
+    <key>KeepAlive</key>
+    <true/>
+    <key>ProcessType</key>
+    <string>Interactive</string>
+    <key>StandardOutPath</key>
+    <string>/tmp/com.trycua.driver.serve.out</string>
+    <key>StandardErrorPath</key>
+    <string>/tmp/com.trycua.driver.serve.err</string>
+</dict>
+</plist>

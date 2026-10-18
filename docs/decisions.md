@@ -2,6 +2,40 @@
 
 Owner decisions that shape the images in this repo. Newest first.
 
+## 2026-10-18 — macOS 15 and macOS 27 lines
+
+- **Decision (WeZZard):** build golden images for macOS 15 and macOS 27 beside
+  macos26, with the same applications, promote them, and test end to end on
+  them. Rationale: a product must work on the macOS versions its customers
+  run, and only macos26 had an image.
+- **Decision (WeZZard, 2026-10-18):** Interope supports macOS 26 and 27 only;
+  testing it on macos15 was a mistake.
+- **Default applied (2026-10-18, agent):** the macos15 line and its promoted
+  base stay, for products that do support macOS 15.
+- **Default applied (2026-10-18, agent):** each is a new line built from a
+  fresh Cirrus seed, as the new-major doctrine requires: `macos15` from
+  `macos-sequoia-base`, `macos27` from `macos-golden-gate-base`, both pinned by
+  digest in `seed.lock`. Their guest phases and checks start as copies of
+  macos26's. Clones get the prefixes `pilot-mac15-` and `pilot-mac27-` so a
+  clone's name tells its line.
+- **Default applied (2026-10-18, agent):** phase 20 downloads the Metal
+  toolchain component only for Xcode 26 and later; earlier Xcodes bundle it.
+- **Default applied (2026-10-18, agent):** macOS 27 keeps the per-user TCC
+  store in a protected container the user owns, not in `~/Library`. Phase 65
+  and acceptance find it by ownership (`user_tcc_db` in the macos27 guest
+  library).
+- **Default applied (2026-10-18, agent):** macos27 records the Setup Assistant
+  version gate as three components (`27.0.0`). On 27.0 it compared
+  `27.0.0` with the two-part `sw_vers` value and showed "Software Update
+  Complete" at every login.
+- **Default applied (2026-10-18, agent), flagged for the owner:** macOS 15
+  and macOS 27 delete every file in `/Library/Managed Preferences` that no configuration
+  profile delivered, at each boot, so the Chrome no-update policy did not
+  survive a reboot. A profile needs a person's approval in System Settings, so
+  phase 70 keeps the policy beside it and installs a root LaunchDaemon,
+  `dev.pilot-images.keystone-policy`, that puts it back at boot and whenever the
+  directory changes.
+
 ## 2026-10-01 — VM images never update their own software
 
 - **Decision (WeZZard):** a VM image, and every clone of it, never updates its

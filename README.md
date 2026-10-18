@@ -139,6 +139,12 @@ VM_ENVIRONMENT_FILE=/absolute/profiles/image-dev.json \
   creates it as the auto-login default and removes the seed's `admin` before
   provisioning (see `guest/_setup-account.zsh`). Host-local NAT only; auto-login
   + lock-screen-off per the always-on-unlocked doctrine.
+- `images/macos15/` — macOS 15. Seed: cirruslabs macos-sequoia-base; Xcode
+  16.4 (`Xcode_16.4.xip`). Same account, phases and checks as macos26; clones
+  are `pilot-mac15-<purpose>`.
+- `images/macos27/` — macOS 27. Seed: cirruslabs macos-golden-gate-base; Xcode
+  27.1 (`Xcode_27.1.xip`). Same account, phases and checks as macos26; clones
+  are `pilot-mac27-<purpose>`.
 - `images/ubuntu2404/` — adoption of the existing `pilot-ubuntu-base`; see its
   README.
 
