@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1,
+  "image": "macos26-games",
+  "scope": "provisioned",
+  "plans": ["unity-editor"],
+  "dependencies": {},
+  "provisioning": {
+    "unity-editor": {"path": "images/macos26-games/guest/80-unity.zsh", "reason": "Installs the pinned Unity Editor with WebGL build support. Everything else is the macos26 base, accepted by that line."}
+  }
+}

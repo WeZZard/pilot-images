@@ -28,4 +28,9 @@ inventory_bind "$BASE_VM" "$BASE_INVENTORY" "$WORK_INVENTORY"
 inventory_invalidate "$WORK_INVENTORY"
 log "promoted: $BASE_VM"
 print -- "Doctrine: never authenticate $BASE_VM. Clones only: host/new-clone.zsh <purpose>."
-print -- "Pristine seed preserved as: $SEED_LOCAL (and the untouched OCI entry $SEED_OCI)."
+if [[ -n "${PARENT_LINE:-}" ]]; then
+  # A derived line has no seed of its own; its work VM was cloned from the parent's base.
+  print -- "Derived from: $PARENT_BASE (line $PARENT_LINE), left untouched."
+else
+  print -- "Pristine seed preserved as: $SEED_LOCAL (and the untouched OCI entry $SEED_OCI)."
+fi

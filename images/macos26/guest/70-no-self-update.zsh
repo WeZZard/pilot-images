@@ -58,9 +58,20 @@ ensure_line "$HOME/.config/ghostty/config" 'auto-update = off'
 # (support.google.com/chrome/a/answer/7591084); UpdateDefault 3 means "updates
 # are never applied".
 glog "Chrome: updates never applied (managed preferences, com.google.Keystone)"
+# macOS 15, 26 and 27 delete every file in /Library/Managed Preferences that no
+# configuration profile delivered, at each boot (measured 2026-10-18 on 15.7.7
+# and 27.0, and 2026-10-20 on 26: written, verified, gone after the reboot). A
+# profile cannot be installed without a person approving it in System
+# Settings, so the policy is kept
+# beside it and a root LaunchDaemon puts it back at boot and whenever the
+# directory changes.
 KEYSTONE="/Library/Managed Preferences/com.google.Keystone.plist"
-sudo mkdir -p "/Library/Managed Preferences"
-sudo tee "$KEYSTONE" >/dev/null <<'PLIST'
+POLICY_DIR="/Library/Application Support/pilot-images"
+POLICY="$POLICY_DIR/com.google.Keystone.plist"
+RESTORE=/usr/local/libexec/pilot-keystone-policy
+DAEMON=/Library/LaunchDaemons/dev.pilot-images.keystone-policy.plist
+sudo mkdir -p "$POLICY_DIR" "${RESTORE:h}"
+sudo tee "$POLICY" >/dev/null <<'PLIST'
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
@@ -81,9 +92,36 @@ sudo tee "$KEYSTONE" >/dev/null <<'PLIST'
 </dict>
 </plist>
 PLIST
-sudo chown root:wheel "$KEYSTONE"
-sudo chmod 644 "$KEYSTONE"
-plutil -lint "$KEYSTONE"
+plutil -lint "$POLICY"
+sudo tee "$RESTORE" >/dev/null <<'SH'
+#!/bin/zsh
+# Puts the Chrome update policy back after macOS clears /Library/Managed Preferences.
+SRC="/Library/Application Support/pilot-images/com.google.Keystone.plist"
+DST="/Library/Managed Preferences/com.google.Keystone.plist"
+cmp -s "$SRC" "$DST" && exit 0
+mkdir -p "${DST:h}"
+cp "$SRC" "$DST" && chown root:wheel "$DST" && chmod 644 "$DST"
+SH
+sudo tee "$DAEMON" >/dev/null <<'PLIST'
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key><string>dev.pilot-images.keystone-policy</string>
+  <key>ProgramArguments</key><array><string>/usr/local/libexec/pilot-keystone-policy</string></array>
+  <key>RunAtLoad</key><true/>
+  <key>WatchPaths</key><array><string>/Library/Managed Preferences</string></array>
+</dict>
+</plist>
+PLIST
+sudo chown root:wheel "$POLICY" "$RESTORE" "$DAEMON"
+sudo chmod 644 "$POLICY" "$DAEMON"
+sudo chmod 755 "$RESTORE"
+plutil -lint "$DAEMON"
+sudo launchctl bootout system/dev.pilot-images.keystone-policy 2>/dev/null || true
+sudo launchctl bootstrap system "$DAEMON"
+sleep 2
+sudo cmp -s "$POLICY" "$KEYSTONE" || { glog "Chrome policy was not restored into $KEYSTONE"; exit 1 }
 
 # `npx -y <package>@latest` fetches whatever is newest at each launch. Pin the
 # Claude Code and Codex registrations to the version @latest names now, and

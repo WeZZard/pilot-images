@@ -2,6 +2,56 @@
 
 Owner decisions that shape the images in this repo. Newest first.
 
+## 2026-10-20 — macos26-games line (Unity, Unreal)
+
+- **Decision (WeZZard):** download Unreal Engine and Unity and install them as
+  applications in the macOS images, for game design and development golden
+  cases.
+- **Default applied (2026-10-20, agent):** the engines go in a new DERIVED line,
+  `macos26-games`, whose work VM is a clone of the promoted
+  `pilot-macos26-base` rather than a seed. Rationale: the engines add tens of
+  GB, and most relay work never needs them, so the general base stays as it
+  is. `host/build-base.zsh` gained `PARENT_LINE`/`PARENT_BASE`: a derived line
+  skips the seed, account setup, capture and Xcode staging, runs only its own
+  phases, and its checks run the parent's acceptance and no-secrets first, so
+  every macos26 guarantee is re-proven on the derived image. Clones are
+  `pilot-mac26g-<purpose>`. The macos27 base was not used: its disk is 90 GB
+  with 89 GB used.
+- **Default applied (2026-10-20, agent):** Unity Editor 6000.3.26f1 (the newest
+  LTS stream, Apple silicon) with WebGL build support, downloaded from Unity's
+  public CDN without a Unity ID. Phase 80 pins the version, sizes and Unity's
+  published MD5s in `guest/unity.lock`, requires a Developer ID Installer
+  signature from Unity Technologies, and lays the editor out the way Unity Hub
+  does (`/Applications/Unity/Hub/Editor/<version>/`), with
+  `/Applications/Unity.app` linking to it because the inventory collector reads
+  only direct `.app` children of `/Applications`.
+- **Default applied (2026-10-20, agent):** Unity Hub is NOT installed. Its
+  updater cannot be turned off
+  (https://discussions.unity.com/t/unity-hub-prevent-update/752015), which
+  breaks the 2026-10-01 rule that an image never updates its own software.
+- **Default applied (2026-10-20, agent):** no Unity license is in the image. A
+  Personal license is activated only by signing in to Unity Hub; batch-mode
+  `-serial` activation is for Plus and Pro serials
+  (https://docs.unity3d.com/2023.2/Documentation/Manual/ManagingYourUnityLicense.html).
+  A license is a credential and arrives only in a purpose clone, never in the
+  base. Flagged for the owner.
+- **Default applied (2026-10-20, agent), flagged for the owner:** macOS 26
+  also deletes the unprofiled `/Library/Managed Preferences` files at each
+  boot (measured 2026-10-20: the first boot of the games work VM found the
+  directory empty, and the parent's "Chrome updates never applied" check
+  failed). The 2026-10-18 restore daemon was ported to
+  `images/macos26/guest/70-no-self-update.zsh`, and the games line installs it
+  in its own phase 75, because the promoted `pilot-macos26-base` predates it.
+  A fresh clone of `pilot-macos26-games-base` was booted and the policy was
+  back (`UpdateDefault` 3). `pilot-macos26-base` itself still loses the policy
+  on boot until the owner runs `host/refresh-base.zsh macos26`.
+- **Blocked on the owner (2026-10-20):** Unreal Engine. Epic distributes the
+  macOS editor only through the Epic Games Launcher, which needs an Epic sign-in,
+  and the GitHub source needs an Epic account linked to GitHub
+  (https://www.unrealengine.com/tech-blog/unreal-engine-5-2-brings-native-support-for-apple-silicon-and-other-developments-for-macos).
+  No agent may sign in on the owner's behalf. The line's README names the one
+  step that unblocks it.
+
 ## 2026-10-18 — macOS 15 and macOS 27 lines
 
 - **Decision (WeZZard):** build golden images for macOS 15 and macOS 27 beside

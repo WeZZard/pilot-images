@@ -44,6 +44,18 @@ source "$LINE_DIR/line.conf"
 : ${GUEST_SHELL:=zsh}
 : ${SEED_USER:=$GUEST_USER}   # seed's default account (== image account when no rename)
 : ${SEED_PASS:=$GUEST_PASS}
+# A DERIVED line (PARENT_LINE set) starts from the parent line's promoted base
+# instead of a seed: the account already exists, capture and Xcode are already
+# provisioned, and only the line's own phases run on top. Its checks run the
+# parent's checks first, so every parent guarantee is re-proven.
+PARENT_LINE="${PARENT_LINE:-}"
+if [[ -n "$PARENT_LINE" ]]; then
+  PARENT_DIR="$REPO_ROOT/images/$PARENT_LINE"
+  [[ -f "$PARENT_DIR/line.conf" ]] || die "no parent line: $PARENT_LINE"
+  [[ -n "${PARENT_BASE:-}" ]] || die "derived line $LINE must name PARENT_BASE"
+  [[ -f "$PARENT_DIR/checks/acceptance.zsh" && -f "$PARENT_DIR/checks/no-secrets.zsh" ]] \
+    || die "parent line $PARENT_LINE has no checks to inherit"
+else
 # A cached mutable tag is not provenance. Resolve the checked-in lock before
 # touching a work image and always clone the immutable OCI digest.
 [[ -f "$LINE_DIR/seed.lock" ]] || die "missing seed.lock for $LINE"
@@ -52,9 +64,11 @@ source "$LINE_DIR/seed.lock"
 [[ "$SEED_OCI" == "$EXPECTED_SEED_OCI" ]] || die "seed.lock does not match configured seed"
 [[ "${SEED_DIGEST:-}" =~ '^sha256:[0-9a-f]{64}$' ]] || die "invalid seed digest in seed.lock"
 SEED_SOURCE="${SEED_OCI%:*}@${SEED_DIGEST}"
+fi
 # Fresh builds connect as the seed account, switch to the image account after
-# account setup; --phase re-runs target an already-migrated work VM.
-if [[ -n "$ONLY_PHASE" || -n "$FROM_PHASE" ]]; then
+# account setup; --phase re-runs target an already-migrated work VM, and a
+# derived line's work VM is a clone of a base that already has the account.
+if [[ -n "$ONLY_PHASE" || -n "$FROM_PHASE" || -n "$PARENT_LINE" ]]; then
   SSH_USER="$GUEST_USER"; SSH_PASS="$GUEST_PASS"
 else
   SSH_USER="$SEED_USER"; SSH_PASS="$SEED_PASS"
@@ -80,7 +94,7 @@ mkdir -p "$LOG_DIR"
 # the existing work VM and never touch the seed, so a purged OCI cache must not
 # block them (measured 2026-09-26: the cache had been emptied to reclaim disk
 # while the pristine local copy, which is what the doctrine preserves, remained).
-if [[ -z "$ONLY_PHASE" && -z "$FROM_PHASE" ]]; then
+if [[ -z "$ONLY_PHASE" && -z "$FROM_PHASE" && -z "$PARENT_LINE" ]]; then
   if ! tart list 2>/dev/null | grep -Fq -- "$SEED_SOURCE"; then
     die "pinned seed not present — run: tart pull $SEED_SOURCE"
   fi
@@ -95,8 +109,15 @@ if [[ -z "$ONLY_PHASE" && -z "$FROM_PHASE" ]]; then
   if vm_exists "$WORK_VM"; then
     die "$WORK_VM already exists. Inspect it, or remove explicitly: tart delete $WORK_VM"
   fi
-  log "cloning $SEED_LOCAL -> $WORK_VM  (cpu=$CPU mem=${MEMORY_MB}MB disk=${DISK_GB}GB)"
-  tart clone "$SEED_LOCAL" "$WORK_VM"
+  if [[ -n "$PARENT_LINE" ]]; then
+    vm_exists "$PARENT_BASE" || die "parent base $PARENT_BASE does not exist; build and promote $PARENT_LINE first"
+    inventory_stopped "$PARENT_BASE"
+    log "cloning parent base $PARENT_BASE -> $WORK_VM  (cpu=$CPU mem=${MEMORY_MB}MB disk=${DISK_GB}GB)"
+    tart clone "$PARENT_BASE" "$WORK_VM"
+  else
+    log "cloning $SEED_LOCAL -> $WORK_VM  (cpu=$CPU mem=${MEMORY_MB}MB disk=${DISK_GB}GB)"
+    tart clone "$SEED_LOCAL" "$WORK_VM"
+  fi
   tart set "$WORK_VM" --cpu "$CPU" --memory "$MEMORY_MB" --disk-size "$DISK_GB"
   # Set the VM display (guests default to a tiny mode otherwise). macOS treats
   # the value as points (=> Retina 2x; a guest phase selects the HiDPI mode);
@@ -116,7 +137,7 @@ log "IP: $IP — waiting for SSH..."
 wait_ssh "$IP" || die "SSH not reachable on $IP"
 
 # ---- account setup (fresh builds only): seed account -> image account --------
-if [[ -z "$ONLY_PHASE" && -z "$FROM_PHASE" && "$GUEST_USER" != "$SEED_USER" && -f "$LINE_DIR/guest/_setup-account.zsh" ]]; then
+if [[ -z "$ONLY_PHASE" && -z "$FROM_PHASE" && -z "$PARENT_LINE" && "$GUEST_USER" != "$SEED_USER" && -f "$LINE_DIR/guest/_setup-account.zsh" ]]; then
   log "account setup: creating $GUEST_USER (auto-login), removing seed $SEED_USER"
   vssh_retry "$IP" "rm -rf /tmp/acct && mkdir -p /tmp/acct" || die "account-setup: SSH not stable as $SEED_USER"
   vscp_retry "$IP" "$LINE_DIR/guest/_setup-account.zsh" /tmp/acct/ || die "account-setup: staging _setup-account failed"
@@ -147,11 +168,18 @@ vssh_retry "$IP" "rm -rf /tmp/payload && mkdir -p /tmp/payload" || die "payload 
 vscp_retry "$IP" "$LINE_DIR/guest" /tmp/payload/ || die "payload staging: guest copy failed"
 vscp_retry "$IP" "$REPO_ROOT/profiles" /tmp/payload/ || die "payload staging: profiles copy failed"
 vscp_retry "$IP" "$LINE_DIR/checks" /tmp/payload/ || die "payload staging: checks copy failed"
+stage_parent_checks() {
+  [[ -n "$PARENT_LINE" ]] || return 0
+  vssh_retry "$IP" "rm -rf /tmp/payload/parent-checks && mkdir -p /tmp/payload/parent-checks" || return 1
+  vscp_retry "$IP" "$PARENT_DIR/checks/acceptance.zsh" "$PARENT_DIR/checks/no-secrets.zsh" /tmp/payload/parent-checks/
+}
+stage_parent_checks || die "payload staging: parent checks copy failed"
 if [[ -f "$HOME/.ssh/id_ed25519.pub" ]]; then
   vscp_retry "$IP" "$HOME/.ssh/id_ed25519.pub" /tmp/payload/host_key.pub
 fi
 
-if [[ "$LINE_KIND" == macos ]]; then
+# A derived line inherits capture and Xcode from its parent base.
+if [[ "$LINE_KIND" == macos && -z "$PARENT_LINE" ]]; then
   HOST_CUA_DRIVER_APP="${CUA_DRIVER_APP:-/Applications/CuaDriver.app}"
   [[ "$HOST_CUA_DRIVER_APP" == /*/CuaDriver.app ]] || die "CUA_DRIVER_APP must be an absolute path ending in CuaDriver.app"
   if [[ -d "$HOST_CUA_DRIVER_APP" ]]; then
@@ -253,6 +281,8 @@ if [[ -z "$ONLY_PHASE" || "$ONLY_PHASE" == 45 || "$ONLY_PHASE" == 60 || "$ONLY_P
   wait_ssh "$IP" || die "no SSH after capture configuration reboot"
   vssh_retry "$IP" 'mkdir -p /tmp/payload' || die "post-reboot payload directory failed"
   vscp_retry "$IP" "$LINE_DIR/checks" /tmp/payload/ || die "post-reboot checks staging failed"
+  vscp_retry "$IP" "$LINE_DIR/guest" /tmp/payload/ || die "post-reboot guest staging failed"
+  stage_parent_checks || die "post-reboot parent checks staging failed"
 fi
 
 # ---- checks ------------------------------------------------------------------

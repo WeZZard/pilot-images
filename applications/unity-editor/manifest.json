@@ -1,0 +1,4 @@
+{
+ "schemaVersion": 1, "id": "unity-editor", "inventoryIds": ["bundle:com.unity3d.UnityEditor5.x"],
+ "platforms": {"macos": {"architectures": ["arm64"], "executable": "/Applications/Unity.app/Contents/MacOS/Unity", "version": ["-version"], "launch": {"mode": "command", "args": ["-version"]}, "timeoutSeconds": 60, "extensions": [], "optional": false}}
+}

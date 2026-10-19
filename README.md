@@ -145,6 +145,10 @@ VM_ENVIRONMENT_FILE=/absolute/profiles/image-dev.json \
 - `images/macos27/` — macOS 27. Seed: cirruslabs macos-golden-gate-base; Xcode
   27.1 (`Xcode_27.1.xip`). Same account, phases and checks as macos26; clones
   are `pilot-mac27-<purpose>`.
+- `images/macos26-games/` — derived from the promoted macos26 base (not a
+  seed): Unity Editor 6000.3.26f1 + WebGL build support, no license; Unreal is
+  blocked on an Epic sign-in. `host/build-base.zsh` treats a line with
+  `PARENT_LINE` as derived. See its README.
 - `images/ubuntu2404/` — adoption of the existing `pilot-ubuntu-base`; see its
   README.
 
