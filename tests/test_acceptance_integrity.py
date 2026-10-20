@@ -1,4 +1,4 @@
-"""Host-only regression boundaries: no real guest, Tart, or vm-service calls."""
+"""Host-only regression boundaries: no real guest, Tart, or machine-service calls."""
 import importlib.util
 import json
 import hashlib
@@ -53,9 +53,9 @@ class AcceptanceIntegrityTests(unittest.TestCase):
                         path.write_bytes(original)
         # A new clone attempt must reject bad work evidence before acquisition.
         Path(receipt['imageChecks'][0]['result']).unlink()
-        before = (self.root / 'vmctl-events').read_bytes()
+        before = (self.root / 'machctl-events').read_bytes()
         self.certify(success=False)
-        self.assertEqual((self.root / 'vmctl-events').read_bytes(), before)
+        self.assertEqual((self.root / 'machctl-events').read_bytes(), before)
         self.assertFalse(self.fresh_receipt.exists())
 
     def test_check_result_from_another_attempt_cannot_be_rebound(self):

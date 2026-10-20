@@ -33,9 +33,9 @@ class EnvironmentTests(unittest.TestCase):
         self.events = self.root / 'events.jsonl'
         self.bin = self.root / 'selected bin'
         self.bin.mkdir()
-        self.vmctl = self.bin / 'vmctl'
+        self.machctl = self.bin / 'machctl'
         self.tart = self.bin / 'tart'
-        self.vmctl.write_text('#!' + sys.executable + '\n' + '''import json,os,sys
+        self.machctl.write_text('#!' + sys.executable + '\n' + '''import json,os,sys
 from pathlib import Path
 if sys.argv[1:]==['environment','--json']:
  print(Path(os.environ['VM_ENVIRONMENT_FILE']+'.response').read_text())
@@ -75,18 +75,18 @@ if sys.argv[1]=='list':
  print('local pilot-existing stopped')
 elif sys.argv[1]=='ip': print('192.0.2.1')
 ''')
-        self.vmctl.chmod(0o755)
+        self.machctl.chmod(0o755)
         self.tart.chmod(0o755)
         trap = self.root / 'hostile-bin'
         trap.mkdir()
-        for name in ('tart', 'vmctl'):
+        for name in ('tart', 'machctl', 'vmctl'):
             path = trap / name
             path.write_text('#!/bin/sh\nexit 99\n')
             path.chmod(0o755)
-        self.profile = dict(schemaVersion=1, id='fixture', vmServiceUrl='http://127.0.0.1:9876',
+        self.profile = dict(schemaVersion=2, id='fixture', vmServiceUrl='http://127.0.0.1:9876',
             imageRepository=str(REPO), tartHome=str(self.root / "store 'quoted' $(false)"),
             serviceStateDir=str(self.root / 'service'), imageStateDir=str(self.root / 'images-state'),
-            relayStateDir=str(self.root / 'relay'), vmctlPath=str(self.vmctl), tartPath=str(self.tart))
+            relayStateDir=str(self.root / 'relay'), machctlPath=str(self.machctl), tartPath=str(self.tart))
         self.selector = self.root / 'profile.json'
         self.save()
         self.env = dict(os.environ, VM_ENVIRONMENT_FILE=str(self.selector),
@@ -94,7 +94,8 @@ elif sys.argv[1]=='ip': print('192.0.2.1')
             PYTHONDONTWRITEBYTECODE='1')
         for key in bootstrap.EXPORTS:
             self.env[key] = str(self.root / 'hostile' / key)
-        self.env.update(VM_SERVICE_HOST='wrong', VM_SERVICE_PORT='1')
+        self.env.update(MACHINE_SERVICE_HOST='wrong', MACHINE_SERVICE_PORT='1',
+                        VMCTL=str(trap / 'vmctl'))
 
     def response(self):
         p = self.profile
@@ -102,7 +103,8 @@ elif sys.argv[1]=='ip': print('192.0.2.1')
         identity['fingerprint'] = hashlib.sha256(json.dumps(p, sort_keys=True,
             separators=(',', ':'), ensure_ascii=False).encode()).hexdigest()
         exported = {key: p[field] for key, field in bootstrap.EXPORTS.items()}
-        exported.update(VM_ENVIRONMENT_FILE=str(self.selector), VM_ENVIRONMENT_FINGERPRINT=identity['fingerprint'], VM_SERVICE_HOST='127.0.0.1', VM_SERVICE_PORT='9876')
+        exported.update(VM_ENVIRONMENT_FILE=str(self.selector), VM_ENVIRONMENT_FINGERPRINT=identity['fingerprint'],
+                        MACHINE_SERVICE_HOST='127.0.0.1', MACHINE_SERVICE_PORT='9876')
         return dict(profile=p, identity=identity, environment=exported)
 
     def save(self, response=None):
@@ -133,6 +135,60 @@ elif sys.argv[1]=='ip': print('192.0.2.1')
             self.assertFalse(Path(self.profile[key]).exists())
         self.assertFalse(self.events.exists())
         self.assertEqual(json.loads(self.run_cli('environment.py').stdout), exports)
+
+    def assert_refused_with_fix(self, run_in_process=True):
+        """AC-45: one refusal, naming the fix, before anything is executed."""
+        if run_in_process:
+            with patch.object(bootstrap.subprocess, 'run', side_effect=AssertionError('refused profile executed a CLI')):
+                with self.assertRaises(ValueError) as caught:
+                    bootstrap.resolve(self.env)
+            self.assertIn('machctlPath', str(caught.exception))
+            self.assertIn('schemaVersion 2', str(caught.exception))
+        result = self.run_cli('environment.py', '--shell', success=False)
+        self.assertEqual(result.stdout, '')
+        self.assertIn('machctlPath', result.stderr)
+        self.assertIn('schemaVersion 2', result.stderr)
+        result = self.run_shell('source "$1"; tart list', HOST / 'lib/common.zsh', success=False)
+        self.assertIn('machctlPath', result.stderr)
+        self.assertIn('schemaVersion 2', self.run_cli('check-clone.py', 'ubuntu2404', success=False).stderr)
+        self.assertFalse(self.events.exists())
+
+    def test_ac45_schema_1_profile_with_vmctl_path_is_refused_with_its_fix(self):
+        # The old profile names a working CLI; it is still never executed.
+        old = dict(self.profile, schemaVersion=1, vmctlPath=self.profile['machctlPath'])
+        del old['machctlPath']
+        self.selector.write_text(json.dumps(old))
+        self.assert_refused_with_fix()
+
+    def test_ac45_vmctl_path_or_schema_1_alone_is_refused_without_fallback(self):
+        for change in (dict(vmctlPath=str(self.machctl)), dict(schemaVersion=1), dict(schemaVersion='2'),
+                       dict(schemaVersion=True)):
+            with self.subTest(change=change):
+                self.profile.update(change)
+                self.save()
+                self.assert_refused_with_fix()
+                self.setUp()
+        del self.profile['machctlPath']
+        self.selector.write_text(json.dumps(self.profile))
+        self.assert_refused_with_fix()
+
+    def test_ac45_resolver_answering_an_old_profile_is_refused(self):
+        response = self.response()
+        response['profile'] = dict(response['profile'], schemaVersion=1)
+        self.save(response)
+        result = self.run_cli('environment.py', '--shell', success=False)
+        self.assertEqual(result.stdout, '')
+        self.assertIn('machctlPath', result.stderr)
+
+    def test_ac45_schema_2_profile_exports_machctl_and_no_old_names(self):
+        exports = bootstrap.resolve(self.env)
+        self.assertEqual(exports['MACHCTL'], str(self.machctl))
+        self.assertNotIn('VMCTL', exports)
+        self.assertFalse([key for key in exports if key.startswith('VM_SERVICE_')])
+        self.assertEqual((exports['MACHINE_SERVICE_HOST'], exports['MACHINE_SERVICE_PORT']), ('127.0.0.1', '9876'))
+        shell = self.run_cli('environment.py', '--shell').stdout
+        self.assertIn('export MACHCTL=', shell)
+        self.assertNotIn('VMCTL', shell)
 
     def test_explicit_blank_selection_refuses_instead_of_using_legacy_store(self):
         with self.assertRaises(ValueError):
@@ -179,10 +235,10 @@ elif sys.argv[1]=='ip': print('192.0.2.1')
             self.assertIn('invoke that checkout', result.stderr)
         self.run_shell('source "$1"; tart clone a b', HOST / 'lib/common.zsh', success=False)
         self.assertFalse(self.events.exists())
-        self.profile['vmctlPath'] = 'vmctl'
+        self.profile['machctlPath'] = 'machctl'
         self.save()
         self.run_cli('environment.py', success=False)
-        self.profile['vmctlPath'] = str(self.root / 'hostile-bin/vmctl')
+        self.profile['machctlPath'] = str(self.root / 'hostile-bin/machctl')
         self.save()
         self.run_cli('environment.py', success=False)
         self.assertFalse(Path(self.profile['tartHome']).exists())
@@ -205,11 +261,11 @@ elif sys.argv[1]=='ip': print('192.0.2.1')
         self.assertTrue({'clone', 'set', 'run', 'list', 'ip'} <= {row['args'][0] for row in rows})
         self.assertTrue(all(row['binary'] == str(self.tart) and row['store'] == self.profile['tartHome'] for row in rows))
 
-    def test_standalone_clone_uses_selected_vmctl_for_full_lifecycle(self):
+    def test_standalone_clone_uses_selected_machctl_for_full_lifecycle(self):
         self.run_cli('check-clone.py', 'ubuntu2404')
         rows = self.recorded()
         self.assertEqual({row['args'][0] for row in rows}, {'acquire', 'exec', 'push', 'pull', 'release'})
-        self.assertTrue(all(row['binary'] == str(self.vmctl) and row['store'] == self.profile['tartHome']
+        self.assertTrue(all(row['binary'] == str(self.machctl) and row['store'] == self.profile['tartHome']
                             and row['state'] == self.profile['imageStateDir'] for row in rows))
         self.assertEqual(rows[-1]['args'], ['release', 'pilot-fixture'])
         pushes = [row['args'][2] for row in rows if row['args'][0] == 'push']

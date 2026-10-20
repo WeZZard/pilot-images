@@ -20,7 +20,7 @@
 - `PILOT_IMAGES_STATE_DIR` selects the state root when nonempty.
 - Otherwise, the state root is `$XDG_STATE_HOME/pilot-images` when `XDG_STATE_HOME` is nonempty, or `~/.local/state/pilot-images`.
 - The store namespace is the lowercase full SHA-256 hex digest of the UTF-8 canonical absolute Tart VM-store root. The VM-store root is `${TART_HOME:-$HOME/.tart}/vms`.
-- The publisher and vm-service must use the same environment configuration. The following paths are relative to the state root:
+- The publisher and machine-service must use the same environment configuration. The following paths are relative to the state root:
 
 | Path | Purpose |
 | --- | --- |
@@ -58,11 +58,11 @@
 - Independent Tart users and remote daemons are outside this advisory protocol. Operators must prevent concurrent clone or image mutation activity during maintenance.
 - Background package updates are not transactionally frozen by these checks. The fingerprint and report are bounded observations, not a guarantee against independent writers.
 - Refresh remains macOS-only. Linux maintenance requires a controlled rebuild.
-- `host/check-clone.py` offers fresh-base clone checks through vm-service and retains evidence before release. The current service cannot acquire an unpromoted work image. Therefore the promotion gate uses work-guest checks, not a claim of fresh-work-clone verification. Completing that pre-promotion requirement needs a separately authorized candidate-image service workflow.
+- `host/check-clone.py` offers fresh-base clone checks through machine-service and retains evidence before release. The current service cannot acquire an unpromoted work image. Therefore the promotion gate uses work-guest checks, not a claim of fresh-work-clone verification. Completing that pre-promotion requirement needs a separately authorized candidate-image service workflow.
 
 ## Coordinated deployment and rollback
 
-1. Prepare the pilot-images and vm-service changes together. Verify the shared state-root environment and canonical store namespace in fixtures.
+1. Prepare the pilot-images and machine-service changes together. Verify the shared state-root environment and canonical store namespace in fixtures.
 2. During a separately authorized maintenance window, prevent new acquisitions and maintenance operations. Preserve existing local state and evidence before switching code.
 3. Deploy the image tree and backend reader together. There is no compatibility symlink or second authoritative `lines/` tree. Keep public image IDs, `line.conf`, and Tart VM names unchanged.
 4. Restart the backend only with explicit deployment authorization. A checkout containing historical observations without associations should produce an actionable missing-path diagnostic.

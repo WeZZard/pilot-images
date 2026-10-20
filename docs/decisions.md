@@ -8,6 +8,35 @@ Owner decisions that shape the images in this repo. Newest first.
 - **[User] Decision (WeZZard):** every user signs in to Unity in their own purpose clone. The owner's Unity licence and sign-in stay in the owner's local `pilot-mac-unity`; no licence pack and no lease-time injection is built (the earlier proposal is dropped).
 - **[User] Decision (WeZZard):** Unreal Engine is installed on the evaluation host, not in an image: the Epic Games Launcher crashed inside a VM (an OpenGL Slate shader assertion), and Tart's paravirtual GPU has no Metal 3. Evaluations that need it run directly on that Mac. The host's setup is a recipe in the README too.
 
+## 2026-10-21 — switch to machine-service and `machctl`
+
+- **[User] Decision (WeZZard):** pilot-images switches to the renamed service
+  in machine-service's one coordinated milestone, with no compatibility
+  window: vm-service is machine-service, `vmctl` is `machctl`, and the
+  selected-environment profile's `vmctlPath` is `machctlPath` at
+  `schemaVersion` 2, exported as `MACHCTL` (machine-service DC-33, DC-35,
+  DC-37, DC-41, DC-42; the pilot-images row of its `docs/arch/rename.md`
+  MG-3 callers table).
+- **[User] Decision (WeZZard):** a profile at `schemaVersion` 1, or one that
+  carries `vmctlPath`, is refused with an error that names `machctlPath` and
+  `schemaVersion` 2. No reader falls back to the old field, and no tool
+  rewrites a profile (machine-service DC-42, AC-45).
+- **[Agent] Default applied (2026-10-21):** `host/environment.py` refuses the
+  old shape from the profile file itself, before it executes anything, since
+  a version 1 profile names no `machctl` to ask. It applies the same check to
+  the profile the resolver answers.
+- **[Agent] Default applied (2026-10-21):** the bootstrap's
+  `VM_SERVICE_STATE`, `VM_SERVICE_HOST` and `VM_SERVICE_PORT` exports become
+  `MACHINE_SERVICE_STATE`, `MACHINE_SERVICE_HOST` and `MACHINE_SERVICE_PORT`,
+  following MG-1's `VM_SERVICE_*` to `MACHINE_SERVICE_*` rule; the daemon
+  refuses to start beside any `VM_SERVICE_*` variable. `VM_ENVIRONMENT_FILE`,
+  `VM_ENVIRONMENT_FINGERPRINT`, `VM_RELAY_*` and the profile's `vmServiceUrl`
+  field keep their names, because MG-1 does not rename them. The bootstrap
+  compares the resolver's exports exactly, so machine-service's `environment`
+  crate must emit the same names.
+- **[Agent] Default applied (2026-10-21):** the optional sibling-backend tests
+  look for `../machine-service`, the renamed repository's checkout name.
+
 ## 2026-10-20 — one macOS 26 image (macos26-games merged into macos26)
 
 - **[User] Decision (WeZZard):** "Merge them": one macOS 26 image, not a base

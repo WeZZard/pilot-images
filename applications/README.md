@@ -69,8 +69,8 @@ python3 host/check-clone.py ubuntu2404 --source work
 python3 host/check-clone.py macos26 --source work
 ```
 
-- The live command acquires a fresh credential-free clone through vmctl, copies only the check payload, collects inventory, executes the checks without task-specific shell setup, pulls the report, and releases the owned clone in `finally`. Command logs and any pulled report remain in the unique state-directory attempt.
-- Work-source checks hold the image maintenance lock, require a stopped work association, and request only vm-service's configured `WORK_VM` with an expected source fingerprint. A fresh receipt is written only after successful checks, cleanup, and source revalidation. Promotion requires that receipt before renaming the work image.
+- The live command acquires a fresh credential-free clone through machctl, copies only the check payload, collects inventory, executes the checks without task-specific shell setup, pulls the report, and releases the owned clone in `finally`. Command logs and any pulled report remain in the unique state-directory attempt.
+- Work-source checks hold the image maintenance lock, require a stopped work association, and request only machine-service's configured `WORK_VM` with an expected source fingerprint. A fresh receipt is written only after successful checks, cleanup, and source revalidation. Promotion requires that receipt before renaming the work image.
 - The default base-source check remains useful for deployed-image checks, but it cannot substitute for the work-source receipt. See [fresh-work acceptance](../host/FRESH-WORK-ACCEPTANCE.md).
 
 ## Coverage status
@@ -78,4 +78,4 @@ python3 host/check-clone.py macos26 --source work
 - Explicit plans cover Python, Node, npm, pi, Codex on macOS, Playwright CLI on Ubuntu, CuaDriver, Playwright, Chrome on macOS, and Firefox and Chromium on Ubuntu. Python's baseline uses isolated interpreter startup rather than a separate test for every Python library.
 - Both images select deliberately provisioned applications, not whole package-manager sources. Plans cover provisioning additions even when the inventory collector does not discover an installation, such as native Claude Code.
 - Historical inventory-wide failures remain retained as diagnostics. They are not relabelled as successful tests. Only a new run with the revised explicit scope can establish acceptance of our provisioning work.
-- Fixture results prove runner behavior, path agreement, publication ordering, report integrity, and mocked vmctl orchestration. They do not prove actual application startup, native capture, browser operation, reboot readiness, or complete image acceptance.
+- Fixture results prove runner behavior, path agreement, publication ordering, report integrity, and mocked machctl orchestration. They do not prove actual application startup, native capture, browser operation, reboot readiness, or complete image acceptance.

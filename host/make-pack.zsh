@@ -40,4 +40,4 @@ EOF
 fi
 
 log "pack ready: $DEST"
-print -- "Inject with: host/inject-credentials.zsh <vm> $DEST  (or vmctl acquire --lane $PACK)"
+print -- "Inject with: host/inject-credentials.zsh <vm> $DEST  (or machctl acquire --lane $PACK)"
