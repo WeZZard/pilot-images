@@ -14,6 +14,13 @@ absent "$HOME/.config/zsh/secrets.zsh"
 absent "$HOME/.claude/.credentials.json"
 absent "$HOME/.config/gh/hosts.yml"
 
+# A Unity license and a Unity or Epic sign-in are credentials too; they arrive
+# only in purpose clones (the Unity editor ships in the image, phase 80).
+absent "/Library/Application Support/Unity/Unity_lic.ulf"
+absent "$HOME/Library/Unity/licenses"
+absent "$HOME/Library/Application Support/UnityHub/userInfoKey.json"
+absent "$HOME/Library/Application Support/Epic/EpicGamesLauncher"
+
 if gh auth status >/dev/null 2>&1; then
   print -- "FAIL  gh is authenticated"; FAIL=1
 else

@@ -17,7 +17,7 @@ ensure_line() {  # ensure_line <file> <literal-line>
 # (phase 20) both drive Apple's update machinery, which re-offers updates and
 # DELETES the AutomaticCheckEnabled key. Measured on 2026-09-12: an offer was
 # recorded during phase 10 and the plist rewritten again during phase 20, so an
-# early-only call does not survive provisioning. Phase 70 (metal: metal/updates.zsh) runs last, and its
+# early-only call does not survive provisioning. Phase 70 (metal: metal/updates.zsh) is the last phase to touch them, and its
 # call is what decides the promoted image's state.
 su_manual_only() {
   local dom=/Library/Preferences/com.apple.SoftwareUpdate k

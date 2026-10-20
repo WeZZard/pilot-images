@@ -55,7 +55,7 @@ See [profiles/pi/litellm.env.example.md](profiles/pi/litellm.env.example.md).
 
 - The builder resolves `seed.lock` to an immutable digest rather than cloning a mutable tag. It never promotes automatically.
 - `--from-phase NN` resumes that phase and all later phases on an existing stopped work VM. Inspect the prior result before resuming; it is not an automatic replay policy.
-- `--phase 60` and `--phase 65` (the headless TCC grants: cua-driver capture, and Apple Events for `osascript` run over SSH) reboot the work VM before the checks, so the grant is asserted after a fresh login, as a clone meets it. To add such a grant to an existing base, clone the base to the work VM, run the single phase, then follow the normal evidence and promotion steps; keep the previous base under a `-prev-<date>` name.
+- `--phase 60` and `--phase 65` (the headless TCC grants: cua-driver capture, and Apple Events for `osascript` run over SSH) reboot the work VM before the checks, so the grant is asserted after a fresh login, as a clone meets it. To add such a grant to an existing base, clone the base to the work VM, run the single phase, then follow the normal evidence and promotion steps; keep the previous base under a `-prev-<date>` name unless the owner says otherwise (the 2026-10-20 Unity merge kept none, to save the disk). The Unity merge ran `--from-phase 70`, because the base predated phase 70's Chrome policy restore daemon.
 - `XCODE_APP=/absolute/path/Xcode.app` selects a host-supplied Xcode bundle when a `.xip` is unavailable. This is an explicit build input, not a claim of a self-contained external build. CuaDriver's macOS bundle remains a host-supplied prerequisite.
 - `CUA_DRIVER_APP=/absolute/path/CuaDriver.app` selects the host-supplied CuaDriver bundle; the default is `/Applications/CuaDriver.app`.
 - Headless Tart runs in a separate process session from the build so cancelling a build does not implicitly stop its VM. The maintenance lock remains held by the VM until it stops; failures preserve the work disk for diagnosis.
@@ -138,19 +138,53 @@ VM_ENVIRONMENT_FILE=/absolute/profiles/image-dev.json \
   `admin`/`admin` account). Image account: **`station`/`station`** — build-base
   creates it as the auto-login default and removes the seed's `admin` before
   provisioning (see `guest/_setup-account.zsh`). Host-local NAT only; auto-login
-  + lock-screen-off per the always-on-unlocked doctrine.
+  + lock-screen-off per the always-on-unlocked doctrine. Carries the Unity
+  editor (phase 80; see "Unity in macos26" below).
 - `images/macos15/` — macOS 15. Seed: cirruslabs macos-sequoia-base; Xcode
   16.4 (`Xcode_16.4.xip`). Same account, phases and checks as macos26; clones
   are `pilot-mac15-<purpose>`.
 - `images/macos27/` — macOS 27. Seed: cirruslabs macos-golden-gate-base; Xcode
   27.1 (`Xcode_27.1.xip`). Same account, phases and checks as macos26; clones
   are `pilot-mac27-<purpose>`.
-- `images/macos26-games/` — derived from the promoted macos26 base (not a
-  seed): Unity Editor 6000.3.26f1 + WebGL build support, no license; Unreal is
-  blocked on an Epic sign-in. `host/build-base.zsh` treats a line with
-  `PARENT_LINE` as derived. See its README.
 - `images/ubuntu2404/` — adoption of the existing `pilot-ubuntu-base`; see its
   README.
+
+## Unity in macos26
+
+| Engine | Version | Where | State |
+|---|---|---|---|
+| Unity Editor (Apple silicon) + WebGL build support | 6000.3.26f1 (LTS) | `/Applications/Unity/Hub/Editor/6000.3.26f1/`, linked as `/Applications/Unity.app` | installed; needs a license to open a project |
+| Unity Hub | — | — | not installed: its updater cannot be turned off |
+| Unreal Engine 5 | — | — | blocked: needs an Epic sign-in to download |
+
+Phase 80 (`images/macos26/guest/80-unity.zsh`) downloads the installers pinned
+in `guest/unity.lock` from Unity's public CDN, checks size, MD5 and the Unity
+Developer ID Installer signature, and lays the editor out the way Unity Hub
+does. It runs in VM images only; physical Macs run phases 00-60, and the
+acceptance rows for Unity run only when `kern.hv_vmm_present` is 1. The
+no-secrets check refuses a Unity license or a Unity or Epic sign-in in the
+image.
+
+The license is a credential, so it never goes in the image. For a licensed
+purpose clone:
+
+- **Unity Personal:** `host/new-clone.zsh unity` (it becomes
+  `pilot-mac-unity`), install Unity Hub in that clone, sign in once and
+  activate Personal. The activation is tied to that clone's machine
+  identity, so it does not survive into another clone.
+- **Plus or Pro:** put the serial, the Unity ID email and its password in a
+  credential pack (`~/.config/vm-credentials/<pack>/unity.env`). Injection
+  does not read that file yet: `host/inject-credentials.zsh` needs a Unity
+  step that runs
+  `Unity -batchmode -quit -serial <serial> -username <email> -password <password>`
+  in the purpose clone, and returns the seat with `-returnlicense` before the
+  clone is discarded.
+
+Unreal Engine: Epic distributes the macOS editor only through the Epic Games
+Launcher, which needs an Epic sign-in. Sign in on this Mac, install UE 5
+(Apple silicon) to `/Users/Shared/Epic Games/UE_5.x`, and tell the agent the
+path. A phase then streams that folder into the work VM the way phase 20
+streams a host Xcode, and no Epic credential ever enters the image.
 
 ## Networking
 

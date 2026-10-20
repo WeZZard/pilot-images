@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "image": "macos26",
   "scope": "provisioned",
-  "plans": ["node", "npm", "corepack", "pnpm", "nvm", "pi", "claude-code", "codex", "cua-driver", "playwright", "google-chrome", "gh", "jq", "ffmpeg", "pyenv", "pyenv-python", "uv", "wget", "rustup", "rustc", "cargo", "xcode", "ghostty", "blackhole"],
+  "plans": ["node", "npm", "corepack", "pnpm", "nvm", "pi", "claude-code", "codex", "cua-driver", "playwright", "google-chrome", "gh", "jq", "ffmpeg", "pyenv", "pyenv-python", "uv", "wget", "rustup", "rustc", "cargo", "xcode", "ghostty", "blackhole", "unity-editor"],
   "dependencies": {},
   "provisioning": {
     "node": {"path": "images/macos26/guest/30-node.zsh", "reason": "Installs the selected Node.js runtime."},
@@ -28,6 +28,7 @@
     "cargo": {"path": "images/macos26/guest/40-languages.zsh", "reason": "Tests Cargo in both deliberately installed toolchains."},
     "xcode": {"path": "images/macos26/guest/20-xcode.zsh", "reason": "Installs Xcode and development components; image acceptance retains component checks."},
     "ghostty": {"path": "images/macos26/guest/Brewfile", "reason": "Ghostty is a direct cask selection."},
-    "blackhole": {"path": "images/macos26/guest/Brewfile", "reason": "BlackHole 2ch is a direct HAL driver cask selection, verified by its dedicated device extension."}
+    "blackhole": {"path": "images/macos26/guest/Brewfile", "reason": "BlackHole 2ch is a direct HAL driver cask selection, verified by its dedicated device extension."},
+    "unity-editor": {"path": "images/macos26/guest/80-unity.zsh", "reason": "Installs the pinned Unity Editor with WebGL build support (no Unity Hub, no license)."}
   }
 }

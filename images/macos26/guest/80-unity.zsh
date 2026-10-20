@@ -14,6 +14,11 @@
 # discussions.unity.com/t/unity-hub-prevent-update/752015), which breaks the
 # rule that an image never updates its own software. No license is installed:
 # a Unity license is a credential and arrives only in a purpose clone.
+#
+# VM image only. Physical Macs (metal/bootstrap.zsh) run phases 00-60, so they
+# never get the editor, and acceptance checks it only when kern.hv_vmm_present
+# is 1. This phase runs after 70 and touches no update switch: it installs two
+# signed packages and starts nothing that stays running.
 set -e -u -o pipefail
 export PATH="/opt/homebrew/bin:/usr/local/bin:$PATH"
 glog() { print -- "[guest $(date +%H:%M:%S)] $*" }
@@ -106,4 +111,4 @@ pkill -f 'Unity.Licensing.Client' 2>/dev/null || true
 pkill -f "$EDITOR_ROOT/Unity.app/Contents/MacOS/Unity" 2>/dev/null || true
 
 rm -rf "$WORK"
-glog "phase 80 done: Unity $UNITY_VERSION at $EDITOR_ROOT (no license; see the line README)"
+glog "phase 80 done: Unity $UNITY_VERSION at $EDITOR_ROOT (no license; see README.md, "Unity in macos26")"

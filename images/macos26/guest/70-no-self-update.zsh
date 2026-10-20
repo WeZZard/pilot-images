@@ -7,8 +7,9 @@
 # Software changes only in a controlled maintenance boot (host/refresh-base.zsh),
 # which runs the ~/.refresh.d scripts and then this phase again. Physical Macs
 # keep their nightly crontab: metal/bootstrap.zsh runs metal/updates.zsh in place
-# of this phase. This phase runs last, so it also decides the promoted image's
-# macOS update switches.
+# of this phase. This is the last phase that touches the macOS update switches
+# (phase 80, Unity, after it, touches none), so it decides the promoted image's
+# state.
 source "${0:A:h}/lib.zsh"
 export NVM_DIR="$HOME/.nvm"
 source "$NVM_DIR/nvm.sh"
@@ -145,7 +146,7 @@ glog "  @playwright/mcp@$PW_MCP, chrome-devtools-mcp@$CD_MCP"
 
 # Last word on macOS updates, after Homebrew and Xcode have had their chance to
 # re-enable checking and re-offer a point update during provisioning.
-glog "re-asserting manual-only macOS updates (final phase)"
+glog "re-asserting manual-only macOS updates (last update-touching phase)"
 su_manual_only
 for _k in AutomaticCheckEnabled AutomaticDownload AutomaticallyInstallMacOSUpdates \
           CriticalUpdateInstall ConfigDataInstall; do

@@ -69,7 +69,11 @@ Xcode 26.6 + all four simulator runtimes + Metal toolchain; Homebrew; Node LTS
 via nvm + pnpm; Python via pyenv + uv; Rust via rustup; ffmpeg, gh, jq;
 Ghostty, Chrome; Oh My Zsh; Claude Code + pi + Codex CLI (all credential-free)
 with playwright/chrome-devtools/cua-driver MCP registered; cua-driver; headless
-TCC grants for cua-driver (phase 60) and for SSH-run `osascript` (phase 65).
+TCC grants for cua-driver (phase 60) and for SSH-run `osascript` (phase 65);
+the Unity editor with WebGL build support, without Unity Hub and without a
+license (phase 80, VM images only; see `README.md`, "Unity in macos26").
+There is one macOS 26 image: the separate `macos26-games` line was merged
+into this one on 2026-10-20 (owner decision, `docs/decisions.md`).
 Playwright and Chrome DevTools MCP are pinned to bundled Chrome-for-Testing
 binaries (Playwright's managed Chromium; a Puppeteer-managed Chrome) for BOTH
 Claude Code and Codex user-scope config (`~/.codex/config.toml`, MCP servers

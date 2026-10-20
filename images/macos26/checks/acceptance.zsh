@@ -209,6 +209,30 @@ else
   if crontab -l 2>/dev/null | grep -q "crontab.d"; then ok "update crontab installed (metal)"; else bad "update crontab missing (metal)"; fi
 fi
 
+# --- Unity Editor (phase 80; VM image only, metal runs phases 00-60) ---
+# The pin is guest/unity.lock: beside the checks in a build's payload, under
+# images/macos26/ in an extraction's payload.
+if [[ "$(sysctl -n kern.hv_vmm_present 2>/dev/null)" == 1 ]]; then
+  _ul=""
+  for _c in "${0:A:h}/../guest/unity.lock" /tmp/payload/guest/unity.lock /tmp/payload/images/macos26/guest/unity.lock; do
+    if [[ -f "$_c" ]]; then _ul="$_c"; break; fi
+  done
+  if [[ -n "$_ul" ]] && source "$_ul"; then
+    _ue="/Applications/Unity/Hub/Editor/$UNITY_VERSION/Unity.app"
+    if [[ -x "$_ue/Contents/MacOS/Unity" ]]; then ok "Unity editor at $_ue"; else bad "Unity editor missing at $_ue"; fi
+    _uv=$(/usr/libexec/PlistBuddy -c 'Print :CFBundleVersion' "$_ue/Contents/Info.plist" 2>/dev/null)
+    if [[ "$_uv" == "$UNITY_VERSION"* ]]; then ok "Unity editor version $_uv"; else bad "Unity editor version '$_uv' != $UNITY_VERSION"; fi
+    if [[ -d "/Applications/Unity/Hub/Editor/$UNITY_VERSION/PlaybackEngines/WebGLSupport" ]]; then ok "Unity WebGL build support"; else bad "Unity WebGL build support missing"; fi
+    if [[ -L /Applications/Unity.app && "$(readlink /Applications/Unity.app)" == "$_ue" ]]; then ok "/Applications/Unity.app links to the editor"; else bad "/Applications/Unity.app link missing or wrong"; fi
+    if codesign --verify --strict "$_ue" >/dev/null 2>&1; then ok "Unity editor signature"; else bad "Unity editor signature fails codesign --verify"; fi
+    if xattr -r /Applications/Unity 2>/dev/null | grep com.apple.quarantine >/dev/null; then bad "quarantine under /Applications/Unity"; else ok "no quarantine under /Applications/Unity"; fi
+  else
+    bad "unity.lock not staged"
+  fi
+  if [[ -e "/Applications/Unity Hub.app" ]]; then bad "Unity Hub installed (its updater cannot be disabled)"; else ok "no Unity Hub (self-updating)"; fi
+  if pgrep -f 'Unity.Licensing.Client|/Unity.app/Contents/MacOS/Unity' >/dev/null 2>&1; then bad "a Unity process is running in the image"; else ok "no Unity process running"; fi
+fi
+
 # --- Xcode (reports SKIP when phase 20 has not run yet) ---
 if [[ -d /Applications/Xcode.app ]]; then
   if xcodebuild -version 2>/dev/null | grep -q "${XCODE_VERSION:-26.6}"; then

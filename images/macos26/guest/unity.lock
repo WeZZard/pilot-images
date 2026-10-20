@@ -1,4 +1,5 @@
-# Unity Editor pinned for the macos26-games line. Read by 80-unity.zsh beside it.
+# Unity Editor pinned for the macos26 line. Read by 80-unity.zsh beside it and by
+# checks/acceptance.zsh.
 # Source of every value: Unity's public release API, read 2026-10-20
 #   https://services.api.unity.com/unity/editor/release/v1/releases?version=6000.3.26f1&platform=MAC_OS&architecture=ARM64
 # 6000.3 is the newest LTS stream (6000.3.26f1 released 2026-10-08). The

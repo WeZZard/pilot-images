@@ -39,7 +39,7 @@ sysadminctl -screenLock off -password "$GUEST_PASS" 2>/dev/null \
 AUTOLOGIN=$(defaults read /Library/Preferences/com.apple.loginwindow autoLoginUser 2>/dev/null || echo none)
 glog "auto-login user: $AUTOLOGIN (expected: $USER)"
 
-glog "enforcing manual-only macOS updates (re-asserted in phase 70, which runs last)"
+glog "enforcing manual-only macOS updates (re-asserted in phase 70, the last phase that touches them)"
 su_manual_only
 
 glog "suppressing first-login onboarding (Setup Assistant / MiniBuddy panes)"

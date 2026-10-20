@@ -2,12 +2,59 @@
 
 Owner decisions that shape the images in this repo. Newest first.
 
+## 2026-10-20 — one macOS 26 image (macos26-games merged into macos26)
+
+- **[User] Decision (WeZZard):** "Merge them": one macOS 26 image, not a base
+  plus a games line. The separate line wastes disk and is not wanted. This
+  supersedes the agent default of the same day (entry below) that put the
+  engines in a derived `macos26-games` line.
+- **[User] Decision (WeZZard):** delete `pilot-mac26g-unity`, the licensed
+  purpose clone, with the merge. The owner signs in to Unity again in a new
+  clone of the merged base.
+- **[User] Decision (WeZZard):** restart vm-service once after the promotion,
+  so its catalog drops `macos26-games`: only through
+  `vm-service-install --check` and then `install`, and only when the check
+  passes. Leases that exist are waited out, never released.
+- **[User] Decision (WeZZard):** keep no `-prev` copy of the old base, since
+  disk is the point; keep `pilot-macos26-seed`.
+- **[Agent] Default applied (2026-10-20):** Unity's phase 80, `unity.lock`,
+  its acceptance and no-secrets rows, its application plan and its inventory
+  entry move into `images/macos26/`. Phase 75 is dropped, because macos26's
+  phase 70 already installs the same Chrome policy restore daemon. Unity Hub
+  stays out and no license enters the image. Phase 80 keeps its number and
+  runs after phase 70; it touches no update switch, so phase 70 is now
+  described as the last phase that touches them.
+- **[Agent] Default applied (2026-10-20):** the Unity acceptance rows run only
+  when `kern.hv_vmm_present` is 1, because `metal/bootstrap.zsh` runs phases
+  00-60 and a physical Mac never gets the editor.
+- **[Agent] Default applied (2026-10-20):** the existing base was updated the
+  way the 2026-09-26 grant was, on a work clone of `pilot-macos26-base`, but
+  with `--from-phase 70` (phases 70 and 80) instead of a single phase: the
+  promoted base predated phase 70's restore daemon, and without it the first
+  boot empties `/Library/Managed Preferences` and acceptance fails "Chrome
+  updates never applied". Re-running phase 70 also re-pins the npx MCP
+  servers to the versions current that day. The work VM's memory was set to
+  the line's 8 GB.
+- **Applied (2026-10-21, agent):** phases 70 and 80 ran on the work clone;
+  acceptance 69 PASS / 0 FAIL and no-secrets 12 PASS in the build, the
+  extraction `macos26-3CHwnRfj` and the fresh-clone check
+  `accept-macos26-th6q_kkc` passed, and work was promoted to
+  `pilot-macos26-base`. `pilot-macos26-games-base` and `pilot-mac26g-unity`
+  were then deleted, with the line's host-local associations and receipts;
+  its extraction evidence stays. vm-service was reinstalled once after a
+  passing `--check` with no leases, and its catalog lists `macos26` with
+  Unity and no `macos26-games`.
+- **[Agent] Default applied (2026-10-20):** `PARENT_LINE`/`PARENT_BASE` in
+  `host/build-base.zsh` and `host/promote-base.zsh` stay, unused, for a
+  future derived line. Flagged for the owner, who may prefer them removed.
+
 ## 2026-10-20 — macos26-games line (Unity, Unreal)
 
 - **Decision (WeZZard):** download Unreal Engine and Unity and install them as
   applications in the macOS images, for game design and development golden
   cases.
-- **Default applied (2026-10-20, agent):** the engines go in a new DERIVED line,
+- **Default applied (2026-10-20, agent), superseded the same day by the
+  owner's "Merge them" (entry above):** the engines go in a new DERIVED line,
   `macos26-games`, whose work VM is a clone of the promoted
   `pilot-macos26-base` rather than a seed. Rationale: the engines add tens of
   GB, and most relay work never needs them, so the general base stays as it
