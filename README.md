@@ -155,7 +155,7 @@ VM_ENVIRONMENT_FILE=/absolute/profiles/image-dev.json \
 |---|---|---|---|
 | Unity Editor (Apple silicon) + WebGL build support | 6000.3.26f1 (LTS) | `/Applications/Unity/Hub/Editor/6000.3.26f1/`, linked as `/Applications/Unity.app` | installed; needs a license to open a project |
 | Unity Hub | — | — | not installed: its updater cannot be turned off |
-| Unreal Engine 5 | — | — | blocked: needs an Epic sign-in to download |
+| Unreal Engine 5 | — | — | not in images: installed on the evaluation host (see below) |
 
 Phase 80 (`images/macos26/guest/80-unity.zsh`) downloads the installers pinned
 in `guest/unity.lock` from Unity's public CDN, checks size, MD5 and the Unity
@@ -180,11 +180,23 @@ purpose clone:
   in the purpose clone, and returns the seat with `-returnlicense` before the
   clone is discarded.
 
-Unreal Engine: Epic distributes the macOS editor only through the Epic Games
-Launcher, which needs an Epic sign-in. Sign in on this Mac, install UE 5
-(Apple silicon) to `/Users/Shared/Epic Games/UE_5.x`, and tell the agent the
-path. A phase then streams that folder into the work VM the way phase 20
-streams a host Xcode, and no Epic credential ever enters the image.
+Unreal Engine is not part of any image (decision 2026-10-21): the Epic Games
+Launcher crashed inside a VM, and Tart's paravirtual GPU has no Metal 3. It
+lives on the evaluation host instead, and rows that need it run there.
+Host recipe: install the Epic Games Launcher, sign in, and install UE 5.x
+(Apple silicon) to `/Users/Shared/Epic Games/` with only the Mac platform,
+Templates and Feature Packs and Starter Content; leave MetaHuman Creator Core
+Data, editor debug symbols and the engine source unchecked. Install Xcode as
+for the images, and cua-driver for computer use.
+
+## Publishing
+
+Built images are never published; this repository is the recipe (decision
+2026-10-21). Rebuild an image on your own Mac with the Quickstart: the seed is
+a pinned public image, Unity comes from Unity's own CDN, and Xcode from your
+own Apple ID download, so no vendor software is redistributed. Sign in to
+Unity in your own purpose clone; the base stays credential-free, and
+`checks/no-secrets.zsh` enforces it.
 
 ## Networking
 

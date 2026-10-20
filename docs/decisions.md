@@ -2,6 +2,12 @@
 
 Owner decisions that shape the images in this repo. Newest first.
 
+## 2026-10-21 — the recipe is published, never an image; Unreal stays on the host
+
+- **[User] Decision (WeZZard):** built images are never published. This repository is the recipe: anyone rebuilds an image on their own Mac from the pinned public seed, Unity's own CDN (`guest/unity.lock`) and their own Xcode download, so nobody receives Unity, Xcode or any other vendor software from us. One macOS image per version stays the rule.
+- **[User] Decision (WeZZard):** every user signs in to Unity in their own purpose clone. The owner's Unity licence and sign-in stay in the owner's local `pilot-mac-unity`; no licence pack and no lease-time injection is built (the earlier proposal is dropped).
+- **[User] Decision (WeZZard):** Unreal Engine is installed on the evaluation host, not in an image: the Epic Games Launcher crashed inside a VM (an OpenGL Slate shader assertion), and Tart's paravirtual GPU has no Metal 3. Evaluations that need it run directly on that Mac. The host's setup is a recipe in the README too.
+
 ## 2026-10-20 — one macOS 26 image (macos26-games merged into macos26)
 
 - **[User] Decision (WeZZard):** "Merge them": one macOS 26 image, not a base
