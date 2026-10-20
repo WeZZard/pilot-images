@@ -136,14 +136,14 @@ print(json.dumps(dict(schemaVersion=1,image='fixture',os=observed['os'],architec
         bin_dir = self.root / 'bin'
         bin_dir.mkdir()
         (bin_dir / 'tart').write_text('#!/bin/zsh\nprint "local work $(<\"$HOME/state\")"\n')
-        (bin_dir / 'vmctl').write_text('''#!/usr/bin/env python3
+        (bin_dir / 'machctl').write_text('''#!/usr/bin/env python3
 import json,os,subprocess,sys
 from pathlib import Path
 root=Path(os.environ['HOME'])
 sys.path.insert(0,str(root/'host'))
 import inventory
 args=sys.argv[1:]
-with (root/'vmctl-events').open('a') as f: f.write(json.dumps(args)+'\\n')
+with (root/'machctl-events').open('a') as f: f.write(json.dumps(args)+'\\n')
 fail=os.environ.get('CLONE_FAIL','')
 if args[0]=='acquire':
  state=inventory.state_directory(root/'tart/vms')
@@ -320,7 +320,7 @@ elif args[0] not in ('exec','push'): raise RuntimeError(args)
                     fixture.run_script('extract-work-inventory.zsh')
                     fixture.certify(fail=failure, success=False)
                     self.assertFalse(fixture.fresh_receipt.exists())
-                    calls = [json.loads(line) for line in (fixture.root / 'vmctl-events').read_text().splitlines()]
+                    calls = [json.loads(line) for line in (fixture.root / 'machctl-events').read_text().splitlines()]
                     self.assertEqual(calls[-1], ['release', 'owned-clone'])
                     self.assertIn('--expected-source-fingerprint', calls[0])
                 finally:
@@ -388,7 +388,7 @@ elif args[0] not in ('exec','push'): raise RuntimeError(args)
             'python3', '-c', 'import os,subprocess,sys; e=dict(os.environ);e.pop("PILOT_MAINTENANCE_FD");sys.exit(subprocess.call(sys.argv[1:],env=e))',
             'python3', str(self.root / 'host/check-clone.py'), 'fixture', '--source', 'work'], env=self.env, capture_output=True)
         self.assertEqual(result.returncode, 75)
-        self.assertFalse((self.root / 'vmctl-events').exists())
+        self.assertFalse((self.root / 'machctl-events').exists())
 
     def test_promotion_refuses_missing_acceptance_before_rename(self):
         self.run_script('extract-work-inventory.zsh')

@@ -44,5 +44,5 @@ host/make-pack.zsh vm-agents
 $EDITOR ~/.config/vm-credentials/vm-agents/env.extra   # fill the four keys
 host/new-clone.zsh x-research
 host/inject-credentials.zsh pilot-mac-x-research ~/.config/vm-credentials/vm-agents
-# or through vm-service: vmctl acquire --purpose x-research --lane vm-agents
+# or through machine-service: machctl acquire --purpose x-research --lane vm-agents
 ```

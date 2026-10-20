@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Pilot-owned publication writer (stdlib only).
 
-Wire contract: ../mcp-vm-relay/docs/search-contract.md and vm-service's documented
+Wire contract: ../mcp-vm-relay/docs/search-contract.md and machine-service's documented
 publication schema. This is an independent producer, not an imported/vendored
 backend. Fixture compatibility tests should accompany any schema change.
 Commands never collect locally or boot VMs. Shell callers must establish stopped
@@ -21,7 +21,7 @@ LIMIT = 4 * 1024 * 1024
 
 
 def state_directory(root, environ=None):
-    """Shared with vm-service: canonical UTF-8 store path, full SHA-256 namespace."""
+    """Shared with machine-service: canonical UTF-8 store path, full SHA-256 namespace."""
     env = os.environ if environ is None else environ
     home = Path(env.get('HOME', str(Path.home()))).expanduser()
     state = env.get('PILOT_IMAGES_STATE_DIR') or str(Path(env.get('XDG_STATE_HOME') or home / '.local/state') / 'pilot-images')

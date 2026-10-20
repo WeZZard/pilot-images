@@ -136,7 +136,7 @@ class HostInventoryTests(unittest.TestCase):
 
     def test_backend_compatibility_when_sibling_available(self):
         # Test-only optional consumer import; production helper is standalone.
-        backend_path = REPO.parent / 'vm-service/bin/application_catalog.py'
+        backend_path = REPO.parent / 'machine-service/bin/application_catalog.py'
         if not backend_path.is_file():
             self.skipTest('optional sibling backend not checked out')
         spec = importlib.util.spec_from_file_location('catalog_compat', backend_path)
@@ -151,7 +151,7 @@ class HostInventoryTests(unittest.TestCase):
         self.assertEqual(catalog['images'][0]['applications'], self.data['applications'])
 
     def test_backend_state_paths_match_all_configuration_branches(self):
-        backend_path = REPO.parent / 'vm-service/bin/application_catalog.py'
+        backend_path = REPO.parent / 'machine-service/bin/application_catalog.py'
         if not backend_path.is_file():
             self.skipTest('optional sibling backend not checked out')
         spec = importlib.util.spec_from_file_location('catalog_path_compat', backend_path)

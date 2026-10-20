@@ -1,4 +1,4 @@
-"""Fixture-only application plans, evidence gates, and vmctl orchestration."""
+"""Fixture-only application plans, evidence gates, and machctl orchestration."""
 import copy
 import hashlib
 import importlib.util
@@ -320,7 +320,7 @@ class CloneFixtureTests(unittest.TestCase):
                         clone.check_clone('ubuntu2404', evidence, invoke)
                 self.assertIn('--env', calls[0])
                 self.assertIn('none', calls[0])
-                self.assertEqual(calls[-1], ['vmctl', 'release', 'pilot-fixture'])
+                self.assertEqual(calls[-1], ['machctl', 'release', 'pilot-fixture'])
                 commands = [c for c in calls if c[1] == 'exec']
                 self.assertTrue(all('-lic' not in c and 'nvm' not in c for c in commands))
                 self.assertTrue((evidence / 'applications.json').exists())

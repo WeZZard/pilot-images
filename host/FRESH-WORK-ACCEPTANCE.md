@@ -10,10 +10,10 @@
 ## Ownership and lifecycle
 
 - Work checks acquire the existing per-image, per-Tart-home maintenance lock before reading the work association. Promotion acquires the same lock independently and revalidates the receipt.
-- The checker verifies inherited lock ownership. The lock descriptor is retained through vmctl subprocesses, and another maintenance entrypoint must contend for the same lock.
-- Acquisition uses `vmctl acquire --source work --env none --expected-source-fingerprint FILE`. The fingerprint file contains the exact work association fingerprint. The backend selects the configured work VM; the caller cannot select an arbitrary source path.
+- The checker verifies inherited lock ownership. The lock descriptor is retained through machctl subprocesses, and another maintenance entrypoint must contend for the same lock.
+- Acquisition uses `machctl acquire --source work --env none --expected-source-fingerprint FILE`. The fingerprint file contains the exact work association fingerprint. The backend selects the configured work VM; the caller cannot select an arbitrary source path.
 - The returned lease must identify that work VM and fingerprint. The checker releases only the returned purpose clone, including when checks fail. A response naming the work VM itself is rejected without attempting to release the work VM.
-- Release must succeed before a receipt is published. A failed release retains the command evidence and blocks promotion; the operator must resolve the outstanding lease through vm-service.
+- Release must succeed before a receipt is published. A failed release retains the command evidence and blocks promotion; the operator must resolve the outstanding lease through machine-service.
 - Both before acquisition and after clone release, the work VM must be known stopped, and its fingerprint and portable inventory association must remain unchanged. Unknown state is not treated as stopped.
 
 ## Receipt and evidence
@@ -29,6 +29,6 @@
 
 ## Fixture verification
 
-- `python3 -m unittest discover -s tests -p 'test_inventory_shell.py' -v` exercises the real shell lifecycle and host validators against temporary image metadata, mocked Tart, and mocked vmctl commands.
+- `python3 -m unittest discover -s tests -p 'test_inventory_shell.py' -v` exercises the real shell lifecycle and host validators against temporary image metadata, mocked Tart, and mocked machctl commands.
 - The fixtures cover successful promotion, missing and false receipts, stale evidence, wrong lease source, inventory mismatch, changed plans, changed work metadata, running work state, cleanup failure, lock contention, and receipt invalidation.
 - These fixtures establish host orchestration and validation behavior. They do not establish live image readiness or installed application behavior.

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Read-only selected-environment bootstrap; the trusted vmctl owns resolution."""
+"""Read-only selected-environment bootstrap; the trusted machctl owns resolution."""
 import argparse
 import hashlib
 import json
@@ -14,15 +14,19 @@ REPO = Path(__file__).resolve().parents[1]
 EXPORTS = {
     'PILOT_REPO': 'imageRepository',
     'TART_HOME': 'tartHome',
-    'VM_SERVICE_STATE': 'serviceStateDir',
+    'MACHINE_SERVICE_STATE': 'serviceStateDir',
     'PILOT_IMAGES_STATE_DIR': 'imageStateDir',
     'VM_RELAY_STATE_DIR': 'relayStateDir',
     'VM_RELAY_URL': 'vmServiceUrl',
-    'VMCTL': 'vmctlPath',
+    'MACHCTL': 'machctlPath',
     'TART': 'tartPath',
 }
 IDENTITY_FIELDS = ('id', 'vmServiceUrl', 'imageRepository', 'tartHome',
                    'serviceStateDir', 'imageStateDir', 'relayStateDir')
+SCHEMA_VERSION = 2
+SCHEMA_REFUSAL = ('selected environment profile must be schemaVersion 2 with machctlPath; '
+                  'a schemaVersion 1 profile or one carrying vmctlPath is refused: '
+                  'rename vmctlPath to machctlPath and set schemaVersion 2')
 
 
 def decode(raw):
@@ -34,6 +38,21 @@ def decode(raw):
             result[key] = value
         return result
     return json.loads(raw, object_pairs_hook=pairs)
+
+
+def require_schema(profile):
+    """Refuse the vmctl-era profile shape with its fix; there is no fallback.
+
+    The renamed field raised the profile to schemaVersion 2 (machine-service
+    DC-41, DC-42): a version 1 profile, or any profile still carrying
+    vmctlPath, names machctlPath and version 2 rather than being read the old way.
+    """
+    if not isinstance(profile, dict):
+        raise ValueError('environment profile must be a JSON object')
+    version = profile.get('schemaVersion')
+    if (isinstance(version, bool) or not isinstance(version, (int, float))
+            or version != SCHEMA_VERSION or 'vmctlPath' in profile or 'machctlPath' not in profile):
+        raise ValueError(SCHEMA_REFUSAL)
 
 
 def executable(value):
@@ -60,19 +79,21 @@ def resolve(environ=None, repository=REPO):
     if len(content) > 65536:
         raise ValueError('environment profile exceeds 64 KiB')
     bootstrap = decode(content.decode('utf-8'))
-    vmctl = executable(bootstrap['vmctlPath'])
+    require_schema(bootstrap)
+    machctl = executable(bootstrap['machctlPath'])
     env['VM_ENVIRONMENT_FILE'] = str(selected)
     env['PYTHONDONTWRITEBYTECODE'] = '1'
-    result = subprocess.run([vmctl, 'environment', '--json'], env=env,
+    result = subprocess.run([machctl, 'environment', '--json'], env=env,
                             check=True, text=True, capture_output=True, timeout=30)
     if len(result.stdout.encode('utf-8')) > 1024 * 1024:
         raise ValueError('environment resolver output exceeds bound')
     document = decode(result.stdout)
     if not isinstance(document, dict) or set(document) != {'profile', 'identity', 'environment'}:
-        raise ValueError('invalid vmctl environment response')
+        raise ValueError('invalid machctl environment response')
     profile, identity, exported = (document[k] for k in ('profile', 'identity', 'environment'))
     if not all(isinstance(value, dict) for value in (profile, identity, exported)):
-        raise ValueError('invalid vmctl environment objects')
+        raise ValueError('invalid machctl environment objects')
+    require_schema(profile)
     if profile.get('imageRepository') != str(Path(repository).resolve()):
         raise ValueError('selected imageRepository differs from this checkout; invoke that checkout\'s script')
     expected_identity = {key: profile[key] for key in IDENTITY_FIELDS}
@@ -80,13 +101,13 @@ def resolve(environ=None, repository=REPO):
         profile, sort_keys=True, separators=(',', ':'), ensure_ascii=False).encode('utf-8')).hexdigest()
     if identity != expected_identity:
         raise ValueError('inconsistent selected environment identity')
-    if profile['vmctlPath'] != vmctl:
-        raise ValueError('resolver changed the trusted vmctl executable')
+    if profile['machctlPath'] != machctl:
+        raise ValueError('resolver changed the trusted machctl executable')
     executable(profile['tartPath'])
     url = urlsplit(profile['vmServiceUrl'])
     expected = {key: profile[field] for key, field in EXPORTS.items()}
-    expected.update(VM_ENVIRONMENT_FILE=str(selected), VM_ENVIRONMENT_FINGERPRINT=identity['fingerprint'], VM_SERVICE_HOST=url.hostname,
-                    VM_SERVICE_PORT=str(url.port))
+    expected.update(VM_ENVIRONMENT_FILE=str(selected), VM_ENVIRONMENT_FINGERPRINT=identity['fingerprint'],
+                    MACHINE_SERVICE_HOST=url.hostname, MACHINE_SERVICE_PORT=str(url.port))
     if exported != expected or any(not isinstance(v, str) or '\x00' in v for v in exported.values()):
         raise ValueError('inconsistent or non-whitelisted selected environment exports')
     return exported

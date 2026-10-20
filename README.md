@@ -65,17 +65,18 @@ See [profiles/pi/litellm.env.example.md](profiles/pi/litellm.env.example.md).
 
 ## Selected environments
 
-- Set `VM_ENVIRONMENT_FILE` to use the same JSON profile as vm-service and mcp-vm-relay.
+- Set `VM_ENVIRONMENT_FILE` to use the same JSON profile as machine-service and mcp-vm-relay.
 - The profile must contain every field shown below, and all filesystem paths must be absolute.
 - `imageRepository` must identify the checkout whose host script you invoke. A different checkout is rejected before image operations run.
-- `vmctlPath` is a trusted executable selected by the user. The bootstrap executes its read-only `environment --json` command to obtain the canonical profile, identity, and exported variables.
-- `host/environment.py` checks the response identity and exports only the agreed variables. It does not start a service, create state directories, or resolve configuration during library imports.
-- Selected scripts use the profile's Tart executable, Tart store, vmctl executable, service address, and state directories even when legacy environment variables or PATH entries conflict.
+- `machctlPath` is a trusted executable selected by the user. The bootstrap executes its read-only `environment --json` command to obtain the canonical profile, identity, and exported variables.
+- The profile is at `schemaVersion` 2. A profile at `schemaVersion` 1, or one that still carries `vmctlPath`, is refused before anything is executed, with an error that names `machctlPath` and `schemaVersion` 2. Nothing falls back to the old field or rewrites the profile: rename the field and raise the version by hand.
+- `host/environment.py` checks the response identity and exports only the agreed variables, among them `MACHCTL`, `MACHINE_SERVICE_STATE`, `MACHINE_SERVICE_HOST` and `MACHINE_SERVICE_PORT`; it exports no `VMCTL` and no `VM_SERVICE_*` variable. It does not start a service, create state directories, or resolve configuration during library imports.
+- Selected scripts use the profile's Tart executable, Tart store, machctl executable, service address, and state directories even when legacy environment variables or PATH entries conflict.
 - Resolution errors stop the command without falling back to legacy binaries or stores. Without a profile, existing behavior remains unchanged.
 
 ```json
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "id": "image-dev",
   "vmServiceUrl": "http://127.0.0.1:9876",
   "imageRepository": "/absolute/checkouts/pilot-images",
@@ -83,7 +84,7 @@ See [profiles/pi/litellm.env.example.md](profiles/pi/litellm.env.example.md).
   "serviceStateDir": "/absolute/environments/image-dev/service",
   "imageStateDir": "/absolute/environments/image-dev/images",
   "relayStateDir": "/absolute/environments/image-dev/relay",
-  "vmctlPath": "/absolute/checkouts/vm-service/bin/vmctl",
+  "machctlPath": "/absolute/libexec/machine-service/machctl",
   "tartPath": "/absolute/bin/tart"
 }
 ```
@@ -115,7 +116,7 @@ VM_ENVIRONMENT_FILE=/absolute/profiles/image-dev.json \
 - Build, extraction, and refresh run the selected [application baseline and extensions](applications/README.md). Promotion checks the stopped-work fingerprint, report, and selected plan digest before renaming work.
 - Both checked-in inventories have explicit or native-source baseline coverage. This is not a live readiness result: unsupported sources and failed metadata, launch, or extension checks still block promotion. Historical observations are never rebound automatically.
 - [Inventory publication](inventory/README.md) documents the wire format, locking, path contract, migration order, and rollback.
-- `python3 host/check-clone.py <image>` is an explicit live operator command for fresh-clone checks through vm-service. It has only fixture coverage in this change, and is not invoked by tests.
+- `python3 host/check-clone.py <image>` is an explicit live operator command for fresh-clone checks through machine-service. It has only fixture coverage in this change, and is not invoked by tests.
 
 ## Update policy
 

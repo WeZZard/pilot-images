@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""Opt-in application checks on a fresh credential-free vm-service clone.
+"""Opt-in application checks on a fresh credential-free machine-service clone.
 
 The default source is base. Work acceptance holds the image maintenance lock,
-uses only vm-service's configured work source, and publishes a receipt only
+uses only machine-service's configured work source, and publishes a receipt only
 after release, unchanged plans, and stopped-source revalidation.
 """
 import argparse
@@ -29,7 +29,7 @@ def acceptance_module():
 
 
 def check_clone(image, evidence, invoke=subprocess.run, *, source='base', work=None, stopped=None):
-    """The injected boundary is only for tests; production always uses vmctl."""
+    """The injected boundary is only for tests; production always uses machctl."""
     if source not in ('base', 'work'):
         raise ValueError('unsupported clone source')
     acceptance = acceptance_module()
@@ -58,7 +58,7 @@ def check_clone(image, evidence, invoke=subprocess.run, *, source='base', work=N
         options = {}
         if source == 'work' and os.environ.get('PILOT_MAINTENANCE_FD'):
             options['pass_fds'] = (int(os.environ['PILOT_MAINTENANCE_FD']),)
-        argv = [os.environ['VMCTL'] if os.environ.get('VM_ENVIRONMENT_FILE') else 'vmctl', *map(str, args)]
+        argv = [os.environ['MACHCTL'] if os.environ.get('VM_ENVIRONMENT_FILE') else 'machctl', *map(str, args)]
         if command_timeout is not None:
             if args[0] != 'exec':
                 raise ValueError('command timeout applies only to exec')
@@ -68,7 +68,7 @@ def check_clone(image, evidence, invoke=subprocess.run, *, source='base', work=N
         (evidence / f'{sequence:02d}.json').write_text(json.dumps(dict(argv=argv,
             returncode=result.returncode, stdout=result.stdout, stderr=result.stderr), indent=2) + '\n')
         if result.returncode and not allow_failure:
-            raise RuntimeError(f'vmctl {args[0]} failed; see {evidence}')
+            raise RuntimeError(f'machctl {args[0]} failed; see {evidence}')
         return result
 
     try:
@@ -81,12 +81,12 @@ def check_clone(image, evidence, invoke=subprocess.run, *, source='base', work=N
             '--env', 'none', '--ttl-hours', '4', *source_args).stdout)
         returned_vm = inventory.key(lease['vm'])
         if source == 'work' and returned_vm == work['vm']:
-            raise ValueError('vm-service returned work VM instead of an owned clone; refusing release')
+            raise ValueError('machine-service returned work VM instead of an owned clone; refusing release')
         vm = returned_vm
         (evidence / 'lease.json').write_text(json.dumps(lease, indent=2) + '\n')
         if source == 'work' and (lease.get('source') != 'work' or lease.get('source_vm') != work['vm']
                 or lease.get('source_fingerprint') != before['base'] or vm == work['vm']):
-            raise ValueError('vm-service returned an incorrect work source')
+            raise ValueError('machine-service returned an incorrect work source')
         remote = '/tmp/' + evidence.name
         call('exec', vm, '--', 'mkdir', '-p', remote)
         call('push', vm, REPO / 'applications', remote + '/applications')
