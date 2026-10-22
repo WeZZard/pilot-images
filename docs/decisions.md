@@ -2,6 +2,40 @@
 
 Owner decisions that shape the images in this repo. Newest first.
 
+## 2026-10-23 — macos27 disk, and updaters switched off instead of excluded
+
+- **[User] Decision:** `pilot-macos27-base` gets the 200 GB disk that
+  `images/macos27/line.conf` declares.
+- **[Agent] Finding (2026-10-23):** it already had one. macos27's seed uses
+  an ASIF disk, and `tart list` reports an ASIF disk's allocated size (90 GB),
+  not its virtual size (200 GB). `tart set --disk-size` on an ASIF disk grows
+  the system container on the host and moves the recovery container to the
+  end, so the container was 194 GB with 102 GB free, and the guest resize
+  fails with -69519 because there is nothing left to grow. On the raw macos15
+  and macos26 seeds `tart set` only lengthens the file and the guest must
+  grow the container.
+- **[Agent] Default applied (2026-10-23):** phase 00 finds the container of
+  `/` (its APFS physical store), grows it when the disk has unallocated space,
+  repairs the partition map and retries when refused, and fails when 1 GiB or
+  more stays unallocated; acceptance asserts the same measurement. Physical
+  Macs are left alone.
+- **[User] Decision:** MiniMax Code, ZCode, Zenflow and AiderDesk are
+  installed with their self-update turned off instead of being excluded,
+  preferring a documented setting, then a root-owned bundle, then a blocked
+  update host, whichever is least invasive and verifiably works.
+- **[Agent] Default applied (2026-10-23):** MiniMax Code and Zenflow have no
+  switch, so their feed hosts (`file.cdn.minimax.io`,
+  `download.zencoder.ai`) point at 0.0.0.0 in `/etc/hosts`. ZCode keeps its
+  own default, written explicitly (`autoDownloadAndInstallUpdates: false`).
+  AiderDesk gets its setting plus `AIDER_DESK_NO_UPDATES=true` and
+  `AIDER_DESK_AIDER_VERSION=0.86.2` for its Python backend, which reach a
+  Dock-launched app only through launchd, so a LaunchAgent sets them at
+  login.
+- **[Agent] Default applied (2026-10-23):** the root-owned bundle is not used
+  for any of the four. Squirrel.Mac asks for an administrator password when
+  it cannot write the bundle: a modal nothing headless can answer, while the
+  check and the download still happen.
+
 ## 2026-10-22 — the coding agents the `skills` CLI supports
 
 - **[Agent] Default applied (2026-10-22):** every macOS line gets phase 85,
@@ -17,7 +51,8 @@ Owner decisions that shape the images in this repo. Newest first.
   whose updater has no off switch is excluded, following the Unity Hub
   precedent (2026-10-20) and the no-self-update decision (2026-10-01):
   MiniMax Code, ZCode, Zenflow (and with it the Zencoder CLI it manages) and
-  AiderDesk. Including them is an owner call.
+  AiderDesk. Including them is an owner call. Superseded on 2026-10-23: they
+  are installed with their updaters switched off.
 - **[Agent] Default applied (2026-10-22):** OpenClaw needs Node 24.22.1 or
   later and the image runs Node 22, so it gets its own Node from nodejs.org,
   pinned by sha256, under `~/.local/share/pilot-agents/openclaw/`, rather
