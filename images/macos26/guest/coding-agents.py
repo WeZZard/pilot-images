@@ -242,12 +242,28 @@ def fetch(agent):
             raise SystemExit('%s: sha256 mismatch for %s: %s != %s' % (agent['id'], agent['url'], digest.hexdigest(), agent['sha256']))
 
 
-def link(name, target):
+def link(name, target, wrap=False):
+    """A symlink, or for a launcher that finds its files beside itself, an exec wrapper."""
     LOCAL_BIN.mkdir(parents=True, exist_ok=True)
     path = LOCAL_BIN / name
     if path.is_symlink() or path.exists():
         path.unlink()
-    path.symlink_to(target)
+    if wrap:
+        path.write_text(wrapper_text(target))
+        path.chmod(0o755)
+    else:
+        path.symlink_to(target)
+
+
+def wrapper_text(target):
+    return '#!/bin/sh\n# pilot-coding-agents exec wrapper\nexec "%s" "$@"\n' % target
+
+
+def linked(name, target, wrap=False):
+    path = LOCAL_BIN / name
+    if wrap:
+        return path.is_file() and not path.is_symlink() and path.read_text() == wrapper_text(target)
+    return path.resolve() == pathlib.Path(target).resolve()
 
 
 def install_archive(agent):
@@ -263,12 +279,18 @@ def install_archive(agent):
         run(['ditto', '-x', '-k', str(archive), str(root)])
     else:
         run(['tar', '-xf', str(archive), '-C', str(root)])
+    # Files the vendor's own launcher expects somewhere other than the archive puts them.
+    for relative, destination in agent.get('moves', {}).items():
+        target = root / destination
+        target.parent.mkdir(parents=True, exist_ok=True)
+        (root / relative).rename(target)
+        target.chmod(0o755)
     for name, relative in agent['links'].items():
         target = root / relative
         if not target.is_file():
             raise SystemExit('%s: %s is not in the archive' % (agent['id'], relative))
         target.chmod(target.stat().st_mode | 0o755)
-        link(name, target)
+        link(name, target, agent.get('wrap', False))
     # Earlier pinned versions are removed so only the lock's version remains.
     for old in (AGENTS_ROOT / agent['id']).iterdir():
         if old.name != agent['version']:
@@ -419,7 +441,7 @@ def installed_version(agent):
         return uv_version(agent['package'])
     if method == 'archive':
         root = AGENTS_ROOT / agent['id'] / agent['version']
-        ok = root.is_dir() and all((LOCAL_BIN / n).resolve() == (root / r).resolve() for n, r in agent['links'].items())
+        ok = root.is_dir() and all(linked(n, root / r, agent.get('wrap', False)) for n, r in agent['links'].items())
         return agent['version'] if ok else None
     if method == 'app':
         return plist_value(pathlib.Path('/Applications') / agent['app'], 'CFBundleShortVersionString')
