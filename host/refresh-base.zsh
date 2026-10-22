@@ -38,6 +38,14 @@ vscp "$IP" "$REPO_ROOT/images/$LINE/guest" /tmp/payload/
 vssh "$IP" "$GUEST_SHELL /tmp/payload/guest/70-no-self-update.zsh" \
   || die "phase 70 failed — inventory remains invalidated"
 
+# `npm update -g` above moves the npm-installed coding agents past their pins,
+# so phase 85 puts the pinned versions back (it reinstalls only what moved).
+if [[ -f "$REPO_ROOT/images/$LINE/guest/85-coding-agents.zsh" ]]; then
+  log "re-asserting phase 85 (pinned coding agents)"
+  vssh "$IP" "$GUEST_SHELL /tmp/payload/guest/85-coding-agents.zsh" \
+    || die "phase 85 failed — inventory remains invalidated"
+fi
+
 log "macOS point updates available (informational):"
 vssh "$IP" "softwareupdate -l 2>&1 || true"
 print -- "To apply point updates: ssh $GUEST_USER@$IP 'sudo softwareupdate -i -a'  then re-run this script."
