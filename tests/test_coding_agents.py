@@ -79,8 +79,13 @@ class LockSchemaTests(unittest.TestCase):
         for agent in LOCK['agents']:
             for action in agent['updates']:
                 with self.subTest(agent=agent['id'], action=action):
-                    kinds = set(action) & {'env', 'json', 'toml', 'command'}
+                    kinds = set(action) & {'env', 'json', 'toml', 'command', 'hosts'}
                     self.assertEqual(len(kinds), 1)
+                    if 'hosts' in action:
+                        # Only an app with no off switch, and only its own feed host.
+                        self.assertEqual(agent['method'], 'app')
+                        for host in action['hosts']:
+                            self.assertRegex(host, r'^[a-z0-9.-]+\.[a-z]+$')
                     if 'json' in action or 'toml' in action:
                         spec = action.get('json') or action['toml']
                         self.assertTrue(spec['path'].startswith('~/'))
@@ -206,6 +211,20 @@ class HelperTests(unittest.TestCase):
         self.assertIn('# pilot-runtime-path', once)
         for key, value in self.helper.agent_env(LOCK).items():
             self.assertIn('export %s=%s %s' % (key, value, self.helper.ENV_MARK), once)
+
+    def test_hosts_block_is_rewritten_and_lifted(self):
+        hosts = self.helper.agent_hosts(LOCK)
+        self.assertIn('file.cdn.minimax.io', hosts)
+        self.assertIn('download.zencoder.ai', hosts)
+        base = '127.0.0.1\tlocalhost\n::1 localhost\n'
+        once = self.helper.hosts_text(base, hosts)
+        self.assertEqual(self.helper.hosts_text(once, hosts), once)
+        self.assertTrue(once.startswith(base))
+        for host in hosts:
+            for line in self.helper.hosts_lines(host):
+                self.assertIn(line + '\n', once)
+        # install lifts the block so the vendor downloads can reach the same hosts.
+        self.assertEqual(self.helper.hosts_text(once, []), base)
 
     def test_moved_archive_binary_is_reached_through_an_exec_wrapper(self):
         import tarfile

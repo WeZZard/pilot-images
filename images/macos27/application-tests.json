@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "image": "macos27",
   "scope": "provisioned",
-  "plans": ["node", "npm", "corepack", "pnpm", "nvm", "pi", "claude-code", "codex", "cua-driver", "playwright", "google-chrome", "gh", "jq", "ffmpeg", "pyenv", "pyenv-python", "uv", "wget", "rustup", "rustc", "cargo", "xcode", "ghostty", "blackhole", "amp", "autohand-code", "auggie", "ibm-bob", "cline", "dexto", "kimi-code", "jazz", "kilo", "kode", "mcpjam-inspector", "codebuddy-code", "command-code", "continue-cli", "gemini-cli", "copilot-cli", "opencode", "qwen-code", "qodercli", "qoderclicn", "reasonix", "terramind", "neovate", "pochi", "openhands", "deepagents-code", "mistral-vibe", "astrbot", "antigravity-cli", "cursor-agent", "warp-cli", "devin-cli", "droid", "forgecode", "goose", "fx", "inference-sh", "junie", "kimchi", "cortex-code", "codearts-agent", "ona", "acli", "tinycloud", "crush", "grok-build", "hermes-agent", "openclaw", "cursor", "windsurf", "zed", "trae", "trae-cn", "antigravity", "kiro-cli", "code-studio", "positron"],
+  "plans": ["node", "npm", "corepack", "pnpm", "nvm", "pi", "claude-code", "codex", "cua-driver", "playwright", "google-chrome", "gh", "jq", "ffmpeg", "pyenv", "pyenv-python", "uv", "wget", "rustup", "rustc", "cargo", "xcode", "ghostty", "blackhole", "amp", "autohand-code", "auggie", "ibm-bob", "cline", "dexto", "kimi-code", "jazz", "kilo", "kode", "mcpjam-inspector", "codebuddy-code", "command-code", "continue-cli", "gemini-cli", "copilot-cli", "opencode", "qwen-code", "qodercli", "qoderclicn", "reasonix", "terramind", "neovate", "pochi", "openhands", "deepagents-code", "mistral-vibe", "astrbot", "antigravity-cli", "cursor-agent", "warp-cli", "devin-cli", "droid", "forgecode", "goose", "fx", "inference-sh", "junie", "kimchi", "cortex-code", "codearts-agent", "ona", "acli", "tinycloud", "crush", "grok-build", "hermes-agent", "openclaw", "cursor", "windsurf", "zed", "trae", "trae-cn", "antigravity", "kiro-cli", "code-studio", "positron", "minimax-code", "zcode", "zenflow", "aider-desk"],
   "dependencies": {},
   "provisioning": {
     "node": {"path": "images/macos27/guest/30-node.zsh", "reason": "Installs the selected Node.js runtime."},
@@ -85,6 +85,10 @@
     "antigravity": {"path": "images/macos27/guest/85-coding-agents.zsh", "reason": "Installs Antigravity 2.25.0, pinned in coding-agents.lock.json."},
     "kiro-cli": {"path": "images/macos27/guest/85-coding-agents.zsh", "reason": "Installs Kiro CLI 2.33.1, pinned in coding-agents.lock.json."},
     "code-studio": {"path": "images/macos27/guest/85-coding-agents.zsh", "reason": "Installs Syncfusion Code Studio 2.0.5, pinned in coding-agents.lock.json."},
-    "positron": {"path": "images/macos27/guest/85-coding-agents.zsh", "reason": "Installs Positron (Posit Assistant) 2026.10.1-2, pinned in coding-agents.lock.json."}
+    "positron": {"path": "images/macos27/guest/85-coding-agents.zsh", "reason": "Installs Positron (Posit Assistant) 2026.10.1-2, pinned in coding-agents.lock.json."},
+    "minimax-code": {"path": "images/macos27/guest/85-coding-agents.zsh", "reason": "Installs MiniMax Code 3.1.4, pinned in coding-agents.lock.json."},
+    "zcode": {"path": "images/macos27/guest/85-coding-agents.zsh", "reason": "Installs ZCode 3.16.2, pinned in coding-agents.lock.json."},
+    "zenflow": {"path": "images/macos27/guest/85-coding-agents.zsh", "reason": "Installs Zenflow 2.5.3, pinned in coding-agents.lock.json."},
+    "aider-desk": {"path": "images/macos27/guest/85-coding-agents.zsh", "reason": "Installs AiderDesk 0.88.0, pinned in coding-agents.lock.json."}
   }
 }

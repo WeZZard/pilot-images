@@ -1,0 +1,4 @@
+{
+ "schemaVersion": 1, "id": "aider-desk", "inventoryIds": ["bundle:com.hotovo.aider-desk"],
+ "platforms": {"macos": {"architectures": ["arm64"], "executable": "/usr/bin/defaults", "version": ["read", "/Applications/aider-desk.app/Contents/Info", "CFBundleShortVersionString"], "launch": {"mode": "command", "args": ["read", "/Applications/aider-desk.app/Contents/Info", "CFBundleShortVersionString"]}, "timeoutSeconds": 60, "extensions": [], "optional": false}}
+}

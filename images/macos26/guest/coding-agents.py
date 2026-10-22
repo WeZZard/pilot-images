@@ -16,6 +16,7 @@ import hashlib
 import json
 import os
 import pathlib
+import plistlib
 import re
 import shutil
 import signal
@@ -29,6 +30,9 @@ AGENTS_ROOT = HOME / '.local/share/pilot-agents'
 DOWNLOADS = pathlib.Path('/var/tmp/pilot-agents-download')
 ZSHENV = HOME / '.zshenv'
 ENV_MARK = '# pilot-coding-agents'
+HOSTS = pathlib.Path('/etc/hosts')
+LAUNCH_ENV_LABEL = 'dev.pilot-images.coding-agents-env'
+LAUNCH_ENV_PLIST = HOME / 'Library/LaunchAgents' / (LAUNCH_ENV_LABEL + '.plist')
 
 
 def log(message):
@@ -56,6 +60,16 @@ def agent_env(lock):
     for agent in lock['agents']:
         for action in agent.get('updates', []):
             result.update(action.get('env', {}))
+    return result
+
+
+def gui_env(lock):
+    """The env-var switches a desktop app reads, which ~/.zshenv cannot reach."""
+    result = {}
+    for agent in lock['agents']:
+        for action in agent.get('updates', []):
+            if action.get('gui'):
+                result.update(action['env'])
     return result
 
 
@@ -181,8 +195,85 @@ def write_env(lock):
     ZSHENV.write_text('\n'.join(lines) + '\n')
 
 
+def launch_env_plist(values):
+    """A LaunchAgent that puts the GUI switches into the login session's launchd."""
+    pairs = []
+    for key, value in sorted(values.items()):
+        pairs += [key, value]
+    return plistlib.dumps({'Label': LAUNCH_ENV_LABEL, 'RunAtLoad': True,
+                           'ProgramArguments': ['/bin/launchctl', 'setenv'] + pairs})
+
+
+def write_launch_env(lock):
+    """An app started from the Dock or `open` inherits launchd's environment, not
+    the shell's, so its env-var switch is set there too: at every login by the
+    LaunchAgent, and in the running session now. `launchctl setenv` over SSH
+    reaches only the SSH session's own domain (measured 2026-10-23: an app
+    opened afterwards did not see it), so the agent is bootstrapped into the
+    login session's gui domain, exactly as a login loads it."""
+    values = gui_env(lock)
+    if not values:
+        return
+    LAUNCH_ENV_PLIST.parent.mkdir(parents=True, exist_ok=True)
+    LAUNCH_ENV_PLIST.write_bytes(launch_env_plist(values))
+    domain = 'gui/%d' % os.getuid()
+    run(['launchctl', 'bootout', domain, str(LAUNCH_ENV_PLIST)], check=False)
+    run(['launchctl', 'bootstrap', domain, str(LAUNCH_ENV_PLIST)])
+
+
+def session_env():
+    """The environment launchd hands to apps in the login session."""
+    result = run(['launchctl', 'print', 'gui/%d' % os.getuid()], check=False)
+    found, inside = {}, False
+    for line in result.stdout.splitlines():
+        text = line.strip()
+        if text == 'environment = {':
+            inside = True
+        elif inside and text == '}':
+            break
+        elif inside and ' => ' in text:
+            key, _, value = text.partition(' => ')
+            found[key] = value
+    return found
+
+
+def agent_hosts(lock):
+    """Every update host an agent's switch blocks, for apps with no off switch."""
+    return sorted({h for a in lock['agents'] for action in a.get('updates', []) for h in action.get('hosts', [])})
+
+
+def hosts_lines(host):
+    return ['0.0.0.0 %s %s' % (host, ENV_MARK), ':: %s %s' % (host, ENV_MARK)]
+
+
+def hosts_text(current, hosts):
+    """/etc/hosts with one marked block of blocked update hosts, rewritten, never appended."""
+    lines = [l for l in current.splitlines() if not l.endswith(ENV_MARK)]
+    for host in hosts:
+        lines += hosts_lines(host)
+    return '\n'.join(lines) + '\n'
+
+
+def write_hosts(hosts):
+    """An app whose updater has no off switch reaches its feed through 0.0.0.0.
+
+    The vendors serve their downloads from the same hosts, so `install` lifts
+    the block first and writes it back after the last install. Written as root
+    through `tee` so /etc/hosts keeps its owner and mode; the resolver cache is
+    flushed so a running app cannot keep a cached address.
+    """
+    wanted = hosts_text(HOSTS.read_text(), hosts)
+    if wanted == HOSTS.read_text():
+        return
+    subprocess.run(['sudo', 'tee', str(HOSTS)], input=wanted, text=True, check=True, stdout=subprocess.DEVNULL)
+    run(['sudo', 'dscacheutil', '-flushcache'], check=False)
+    run(['sudo', 'killall', '-HUP', 'mDNSResponder'], check=False)
+
+
 def apply_updates(agent, env):
     for action in agent.get('updates', []):
+        if 'hosts' in action:
+            continue  # the whole lock's block is written once by write_hosts
         if 'json' in action:
             path = expand(action['json']['path'])
             data = read_json(path)
@@ -204,6 +295,18 @@ def check_updates(agent, zshenv):
         if 'env' in action:
             for key, value in action['env'].items():
                 yield ('export %s=%s %s' % (key, value, ENV_MARK)) in zshenv, '%s=%s in ~/.zshenv' % (key, value)
+                if action.get('gui'):
+                    try:
+                        args = plistlib.loads(LAUNCH_ENV_PLIST.read_bytes()).get('ProgramArguments', [])
+                    except (OSError, plistlib.InvalidFileException):
+                        args = []
+                    pairs = dict(zip(args[2::2], args[3::2])) if args[:2] == ['/bin/launchctl', 'setenv'] else {}
+                    yield pairs.get(key) == value, '%s=%s in LaunchAgent %s' % (key, value, LAUNCH_ENV_LABEL)
+                    yield session_env().get(key) == value, '%s=%s in the login session (launchctl print gui/%d)' % (key, value, os.getuid())
+        elif 'hosts' in action:
+            hosts = HOSTS.read_text().splitlines() if HOSTS.exists() else []
+            for host in action['hosts']:
+                yield all(l in hosts for l in hosts_lines(host)), '%s resolves to 0.0.0.0 in /etc/hosts' % host
         elif 'json' in action:
             spec = action['json']
             try:
@@ -515,6 +618,7 @@ def main():
         return 0
     if args.command == 'install':
         write_env(json.loads(pathlib.Path(args.lock).read_text()))
+        write_hosts([])
         for agent in lock['agents']:
             # A rerun (a resumed build, or host/refresh-base.zsh after its
             # `npm update -g`) reinstalls only what is not at the pinned version.
@@ -525,6 +629,8 @@ def main():
             log('installing %s %s (%s)' % (agent['id'], agent['version'], agent['method']))
             install(agent, env)
         shutil.rmtree(DOWNLOADS, ignore_errors=True)
+        write_hosts(agent_hosts(json.loads(pathlib.Path(args.lock).read_text())))
+        write_launch_env(json.loads(pathlib.Path(args.lock).read_text()))
         return 0
     return 1 if verify(lock, env) else 0
 
