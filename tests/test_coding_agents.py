@@ -207,6 +207,30 @@ class HelperTests(unittest.TestCase):
         for key, value in self.helper.agent_env(LOCK).items():
             self.assertIn('export %s=%s %s' % (key, value, self.helper.ENV_MARK), once)
 
+    def test_moved_archive_binary_is_reached_through_an_exec_wrapper(self):
+        import tarfile
+        payload = self.root / 'payload'
+        payload.mkdir()
+        (payload / 'agentkernel').write_text('#!/bin/sh\necho kernel\n')
+        (payload / 'codearts').write_text('#!/bin/sh\nexec "$(dirname "$0")/bin/codearts" "$@"\n')
+        archive = self.root / 'agent.tar.gz'
+        with tarfile.open(archive, 'w:gz') as tar:
+            for name in ('agentkernel', 'codearts'):
+                tar.add(payload / name, arcname=name)
+        agent = next(a for a in LOCK['agents'] if a.get('wrap'))
+        with mock.patch.object(self.helper, 'LOCAL_BIN', self.root / 'bin'), \
+                mock.patch.object(self.helper, 'AGENTS_ROOT', self.root / 'agents'), \
+                mock.patch.object(self.helper, 'fetch', return_value=archive):
+            self.helper.install_archive(agent)
+            self.assertEqual(self.helper.installed_version(agent), agent['version'])
+            root = self.root / 'agents' / agent['id'] / agent['version']
+            self.assertTrue((root / 'bin/codearts').is_file())
+            command = self.root / 'bin/codearts'
+            self.assertFalse(command.is_symlink())
+            self.assertIn(str(root / 'codearts'), command.read_text())
+            result = self.helper.run([str(command)])
+            self.assertEqual(result.stdout.strip(), 'kernel')
+
     def test_install_skips_an_agent_already_at_its_pin(self):
         agent = next(a for a in LOCK['agents'] if a['method'] == 'npm')
         lock = {**LOCK, 'agents': [agent]}

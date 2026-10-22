@@ -1174,7 +1174,11 @@
       "OPENCODE_DISABLE_AUTOUPDATE": "1"
      }
     }
-   ]
+   ],
+   "moves": {
+    "agentkernel": "bin/codearts"
+   },
+   "wrap": true
   },
   {
    "id": "ona",
@@ -1450,7 +1454,8 @@
       }
      }
     }
-   ]
+   ],
+   "expect": "0b186d6e13a1a48a46430c51fe414dd0747d46f6"
   },
   {
    "id": "zed",
@@ -1516,7 +1521,8 @@
       }
      }
     }
-   ]
+   ],
+   "expect": "1d77c78ec48282dc114875a57a2269199d898538"
   },
   {
    "id": "trae-cn",
@@ -1549,7 +1555,8 @@
       }
      }
     }
-   ]
+   ],
+   "expect": "428b3440427a64b51632df94fd7d6611443d246b"
   },
   {
    "id": "antigravity",
