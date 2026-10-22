@@ -1,0 +1,4 @@
+{
+ "schemaVersion": 1, "id": "crush", "inventoryIds": [],
+ "platforms": {"macos": {"architectures": ["arm64"], "executable": "~/.local/bin/crush", "version": ["--version"], "launch": {"mode": "command", "args": ["--version"]}, "timeoutSeconds": 60, "extensions": [], "optional": false}}
+}

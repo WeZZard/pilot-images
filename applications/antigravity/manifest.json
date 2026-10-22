@@ -1,0 +1,4 @@
+{
+ "schemaVersion": 1, "id": "antigravity", "inventoryIds": ["bundle:com.google.antigravity"],
+ "platforms": {"macos": {"architectures": ["arm64"], "executable": "/usr/bin/defaults", "version": ["read", "/Applications/Antigravity.app/Contents/Info", "CFBundleShortVersionString"], "launch": {"mode": "command", "args": ["read", "/Applications/Antigravity.app/Contents/Info", "CFBundleShortVersionString"]}, "timeoutSeconds": 60, "extensions": [], "optional": false}}
+}

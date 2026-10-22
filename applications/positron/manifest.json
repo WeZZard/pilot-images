@@ -1,0 +1,4 @@
+{
+ "schemaVersion": 1, "id": "positron", "inventoryIds": ["bundle:co.posit.positron"],
+ "platforms": {"macos": {"architectures": ["arm64"], "executable": "/usr/bin/defaults", "version": ["read", "/Applications/Positron.app/Contents/Info", "CFBundleShortVersionString"], "launch": {"mode": "command", "args": ["read", "/Applications/Positron.app/Contents/Info", "CFBundleShortVersionString"]}, "timeoutSeconds": 60, "extensions": [], "optional": false}}
+}

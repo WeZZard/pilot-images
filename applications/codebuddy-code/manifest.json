@@ -1,0 +1,4 @@
+{
+ "schemaVersion": 1, "id": "codebuddy-code", "inventoryIds": ["npm:@tencent-ai/codebuddy-code"],
+ "platforms": {"macos": {"architectures": ["arm64"], "executable": "codebuddy", "version": ["--version"], "launch": {"mode": "command", "args": ["--version"]}, "timeoutSeconds": 60, "extensions": [], "optional": false}}
+}

@@ -1,0 +1,4 @@
+{
+ "schemaVersion": 1, "id": "opencode", "inventoryIds": ["npm:@opencode/cli"],
+ "platforms": {"macos": {"architectures": ["arm64"], "executable": "opencode", "version": ["--version"], "launch": {"mode": "command", "args": ["--version"]}, "timeoutSeconds": 60, "extensions": [], "optional": false}}
+}

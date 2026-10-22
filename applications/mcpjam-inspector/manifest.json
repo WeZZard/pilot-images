@@ -1,0 +1,4 @@
+{
+ "schemaVersion": 1, "id": "mcpjam-inspector", "inventoryIds": ["npm:@mcpjam/inspector"],
+ "platforms": {"macos": {"architectures": ["arm64"], "executable": "npm", "version": ["ls", "-g", "--depth=0", "@mcpjam/inspector"], "launch": {"mode": "command", "args": ["ls", "-g", "--depth=0", "@mcpjam/inspector"]}, "timeoutSeconds": 60, "extensions": [], "optional": false}}
+}

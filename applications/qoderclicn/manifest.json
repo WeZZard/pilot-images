@@ -1,0 +1,4 @@
+{
+ "schemaVersion": 1, "id": "qoderclicn", "inventoryIds": ["npm:@qodercn-ai/qoderclicn"],
+ "platforms": {"macos": {"architectures": ["arm64"], "executable": "qoderclicn", "version": ["--version"], "launch": {"mode": "command", "args": ["--version"]}, "timeoutSeconds": 60, "extensions": [], "optional": false}}
+}
