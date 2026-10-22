@@ -2,6 +2,40 @@
 
 Owner decisions that shape the images in this repo. Newest first.
 
+## 2026-10-22 — the coding agents the `skills` CLI supports
+
+- **[Agent] Default applied (2026-10-22):** every macOS line gets phase 85,
+  which installs the agents in vercel-labs/skills `src/agents.ts` at
+  `a80e4c9` (78 agents; Claude Code, Codex and Pi were already in the
+  image), pinned in `guest/coding-agents.lock.json`. VM images only, like
+  phase 80; acceptance checks its rows only when `kern.hv_vmm_present` is 1.
+- **[Agent] Default applied (2026-10-22):** Homebrew is not used for any
+  agent. A formula's version comes from whatever API metadata the image has
+  cached, so `brew install` cannot be pinned to the lock's version; every
+  agent is an exact npm or PyPI version or a vendor download with its sha256.
+- **[Agent] Default applied (2026-10-22), flagged for the owner:** an app
+  whose updater has no off switch is excluded, following the Unity Hub
+  precedent (2026-10-20) and the no-self-update decision (2026-10-01):
+  MiniMax Code, ZCode, Zenflow (and with it the Zencoder CLI it manages) and
+  AiderDesk. Including them is an owner call.
+- **[Agent] Default applied (2026-10-22):** OpenClaw needs Node 24.22.1 or
+  later and the image runs Node 22, so it gets its own Node from nodejs.org,
+  pinned by sha256, under `~/.local/share/pilot-agents/openclaw/`, rather
+  than a second nvm or Homebrew runtime.
+- **[Agent] Default applied (2026-10-22):** Hermes Agent installs through its
+  vendor script, itself pinned by sha256 and told the release commit to
+  check out (tag v0.22.4), because its package refuses wheel builds and
+  Homebrew cannot be pinned.
+- **[Agent] Default applied (2026-10-22):** `host/refresh-base.zsh` runs phase
+  85 again after phase 70, because the maintenance boot's `npm update -g`
+  moves the npm agents past their pins. Phase 85 reinstalls only an agent
+  that is not at its pinned version.
+- **[Agent] Default applied (2026-10-22), flagged for the owner:** Rovo Dev
+  is installed as `acli`, which downloads the Rovo Dev agent itself on first
+  use, outside the lock; the image never runs `acli rovodev`. The CodeArts
+  Agent CLI is pinned by sha256 to a tarball served under a `/latest/` URL,
+  so a new upload fails the build until the pin is bumped.
+
 ## 2026-10-21 — the recipe is published, never an image; Unreal stays on the host
 
 - **[User] Decision (WeZZard):** built images are never published. This repository is the recipe: anyone rebuilds an image on their own Mac from the pinned public seed, Unity's own CDN (`guest/unity.lock`) and their own Xcode download, so nobody receives Unity, Xcode or any other vendor software from us. One macOS image per version stays the rule.

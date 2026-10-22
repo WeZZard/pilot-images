@@ -140,7 +140,8 @@ VM_ENVIRONMENT_FILE=/absolute/profiles/image-dev.json \
   creates it as the auto-login default and removes the seed's `admin` before
   provisioning (see `guest/_setup-account.zsh`). Host-local NAT only; auto-login
   + lock-screen-off per the always-on-unlocked doctrine. Carries the Unity
-  editor (phase 80; see "Unity in macos26" below).
+  editor (phase 80; see "Unity in macos26" below) and, like every macOS
+  line, the coding agents (phase 85; see "Coding agents" below).
 - `images/macos15/` — macOS 15. Seed: cirruslabs macos-sequoia-base; Xcode
   16.4 (`Xcode_16.4.xip`). Same account, phases and checks as macos26; clones
   are `pilot-mac15-<purpose>`.
@@ -189,6 +190,134 @@ Host recipe: install the Epic Games Launcher, sign in, and install UE 5.x
 Templates and Feature Packs and Starter Content; leave MetaHuman Creator Core
 Data, editor debug symbols and the engine source unchecked. Install Xcode as
 for the images, and cua-driver for computer use.
+
+## Coding agents
+
+Every macOS line carries the coding agents that the `skills` CLI supports
+(the agent list in [vercel-labs/skills `src/agents.ts`](https://github.com/vercel-labs/skills/blob/a80e4c9d12d607631249d4d7d059f835d4b2f13a/src/agents.ts)
+at `a80e4c9`, read 2026-10-22: 78 agents). Claude Code, Codex and Pi were
+already in the image (phases 50 and 55). Phase 85
+(`guest/85-coding-agents.zsh`) installs the rest from
+`guest/coding-agents.lock.json`: 54 agents as 57 lock entries, because
+Cursor, for one, ships both a CLI and an app. Nothing signs in, and every
+agent's own updater is turned off the way its vendor documents (an
+environment variable in `~/.zshenv`, a settings file, or the agent's own
+config command).
+
+- Every entry is pinned: an exact npm or PyPI version, or a vendor download
+  with its sha256. Homebrew is not used, because a formula's version comes
+  from the image's cached API metadata and cannot be pinned.
+- Desktop apps are copied into `/Applications` unquarantined after
+  `codesign --verify --deep --strict`, and their bundle id and version are
+  checked against the lock.
+- Phase 85 runs in VM images only, like Unity's phase 80; acceptance checks
+  its rows only when `kern.hv_vmm_present` is 1. `checks/acceptance.zsh`
+  runs `coding-agents.py verify`: the pinned version is the one installed,
+  its command is on PATH, it prints its version with stdin closed (a sign-in
+  prompt is a timeout), and its updater switch is in place.
+  `checks/no-secrets.zsh` refuses an auth, credential, token or OAuth file
+  in any agent's folder, and a Cursor CLI account.
+- A maintenance boot's `npm update -g` would move the npm agents past their
+  pins, so `host/refresh-base.zsh` runs phase 85 again after phase 70. It
+  reinstalls only what moved.
+- To move a pin, edit the lock (version, URL and sha256 together) and
+  rebuild with `host/build-base.zsh <line> --from-phase 85`.
+
+| Agent | `skills` id | Method | Package, app or command | Version |
+|---|---|---|---|---|
+| Amp | `amp` | npm | `@ampcode/cli` | 0.0.1792641650-gd4ebfb |
+| Autohand Code CLI | `autohand-code` | npm | `autohand-cli` | 0.9.8 |
+| Augment (Auggie CLI) | `augment` | npm | `@augmentcode/auggie` | 0.36.0 |
+| IBM Bob (Bob Shell) | `bob` | npm | `@ibm/bob` | 2.0.8 |
+| Cline CLI | `cline` | npm | `cline` | 3.0.73 |
+| Dexto | `dexto` | npm | `dexto` | 1.14.2 |
+| Kimi Code CLI | `kimi-code-cli` | npm | `@moonshot-ai/kimi-code` | 2.3.0 |
+| Jazz | `jazz` | npm | `jazz-ai` | 0.16.20 |
+| Kilo Code CLI | `kilo` | npm | `@kilocode/cli` | 7.8.15 |
+| Kode | `kode` | npm | `@shareai-lab/kode` | 2.2.1 |
+| MCPJam Inspector | `mcpjam` | npm | `@mcpjam/inspector` | 3.16.2 |
+| CodeBuddy Code | `codebuddy` | npm | `@tencent-ai/codebuddy-code` | 2.172.1 |
+| Command Code | `command-code` | npm | `command-code` | 1.87.1 |
+| Continue CLI | `continue` | npm | `@continuedev/cli` | 1.5.47 |
+| Gemini CLI | `gemini-cli` | npm | `@google/gemini-cli` | 0.65.0 |
+| GitHub Copilot CLI | `github-copilot` | npm | `@github/copilot` | 1.0.102 |
+| OpenCode | `opencode` | npm | `@opencode/cli` | 2.1.2 |
+| Qwen Code | `qwen-code` | npm | `@qwen-code/qwen-code` | 0.26.0 |
+| Qoder CLI | `qoder` | npm | `@qoder-ai/qodercli` | 1.1.76 |
+| Qoder CN CLI | `qoder-cn` | npm | `@qodercn-ai/qoderclicn` | 1.1.76 |
+| Reasonix | `reasonix` | npm | `reasonix` | 2.48.0 |
+| Terramind | `terramind` | npm | `terramind` | 0.2.156 |
+| Neovate Code | `neovate` | npm | `@neovate/code` | 0.28.5 |
+| Pochi | `pochi` | npm | `@getpochi/cli` | 0.6.21 |
+| OpenHands CLI | `openhands` | uv tool | `openhands` | 1.16.0 |
+| Deep Agents Code | `deepagents` | uv tool | `deepagents-code` | 0.1.88 |
+| Mistral Vibe | `mistral-vibe` | uv tool | `mistral-vibe` | 3.0.1 |
+| AstrBot | `astrbot` | uv tool | `astrbot` | 4.29.1 |
+| Antigravity CLI | `antigravity-cli` | vendor download | `agy` | 1.4.4 |
+| Cursor CLI | `cursor` | vendor download | `agent, cursor-agent` | 2026.10.19-6bbf2c4 |
+| Warp Agent CLI | `warp` | vendor download | `warp` | 0.2026.10.14.08.27.stable_03 |
+| Devin for Terminal | `devin` | vendor download | `devin` | 3000.11.92 |
+| Droid (Factory) | `droid` | vendor download | `droid` | 0.247.0 |
+| ForgeCode | `forgecode` | vendor download | `forge` | 2.14.0 |
+| Goose CLI | `goose` | vendor download | `goose` | 1.55.0 |
+| fx | `fx` | vendor download | `fx` | 0.0.14 |
+| inference.sh (belt) | `inference-sh` | vendor download | `belt, infsh` | 1.26.8 |
+| Junie CLI | `junie` | vendor download | `junie` | 3813.7 |
+| Kimchi | `kimchi` | vendor download | `kimchi` | 1.17.2 |
+| Cortex Code | `cortex` | vendor download | `cortex` | 1.2.18+192728.aa2238062732 |
+| CodeArts Agent CLI | `codearts-agent` | vendor download | `codearts` | 26.10.10 |
+| Ona CLI | `ona` | vendor download | `ona` | 20261020.11353.0 |
+| Atlassian CLI (Rovo Dev) | `rovodev` | vendor download | `acli` | 1.3.39-stable |
+| Tinycloud | `tinycloud` | vendor download | `tinycloud` | 0.3.25 |
+| Crush | `crush` | vendor download | `crush` | 0.98.1 |
+| Grok Build | `grok` | vendor download | `grok` | 1.0.67 |
+| Hermes Agent | `hermes-agent` | vendor installer | `hermes` | 0.22.4 |
+| OpenClaw | `openclaw` | npm, own Node | `openclaw` | 2026.10.5 |
+| Cursor | `cursor` | app (vendor download) | `Cursor.app` | 3.26.16 |
+| Windsurf (Devin Desktop) | `windsurf` | app (vendor download) | `Devin.app` | 3.10.67 |
+| Zed | `zed` | app (vendor download) | `Zed.app` | 1.25.2 |
+| Trae | `trae` | app (vendor download) | `Trae.app` | 2.3.61406 |
+| Trae CN | `trae-cn` | app (vendor download) | `Trae CN.app` | 2.3.62837 |
+| Antigravity | `antigravity` | app (vendor download) | `Antigravity.app` | 2.25.0 |
+| Kiro CLI | `kiro-cli` | app (vendor download) | `Kiro CLI.app` | 2.33.1 |
+| Syncfusion Code Studio | `codestudio` | app (vendor download) | `Syncfusion Code Studio.app` | 2.0.5 |
+| Positron (Posit Assistant) | `posit-assistant` | app (vendor download) | `Positron.app` | 2026.10.1-2 |
+
+The agents below are not installed. An app whose updater cannot be turned
+off is left out, as Unity Hub is.
+
+| `skills` id | Why not installed |
+|---|---|
+| `adal` | It updates itself at every start, with no opt-out. |
+| `aider-desk` | Its updater checks at every start; the switch lives in an app store written at first launch, so the image cannot turn it off. |
+| `codemaker` | No public macOS build (NetEase's internal platform). |
+| `eve` | A project framework, detected through a project's package.json. |
+| `firebender` | A JetBrains/Android Studio plugin only. |
+| `iflow-cli` | The service shut down on 2026-04-17. |
+| `lingma` | Renamed Qoder CN on 2026-05-20; the remaining IDE build is an unversioned download. |
+| `loaf` | Not distributed: no release, no package. |
+| `minimax-code` | Its electron-updater has no off switch. |
+| `moxby` | Now a browser extension; the desktop bridge needs a paid plan. |
+| `mux` | Renamed xum, which uses ~/.xum, and its updater has no off switch. |
+| `promptscript` | Detected only through a project's .promptscript or promptscript.yaml. |
+| `replit` | Detected only through a project's .replit file, and the desktop client needs a Replit account. |
+| `roo` | The extension shut down on 2026-05-15 and there is no CLI. |
+| `sarvam-code` | The install guide is behind a Sarvam sign-in. |
+| `tabnine-cli` | The installer always fetches the latest build, the updater has no documented off switch, and the CLI is in maintenance mode. |
+| `zcode` | Its electron-updater has no off switch. |
+| `zencoder` | Its CLI is installed and updated by Zenflow, which is not installed. |
+| `zenflow` | Its electron-updater has no off switch. |
+
+Open points for the owner:
+
+- MiniMax Code, ZCode, Zenflow and AiderDesk are left out only because their
+  updaters have no off switch. Including them means accepting a clone that
+  can update itself.
+- Rovo Dev (`acli rovodev`) downloads its agent on first use, outside the
+  lock. The image pins `acli` itself and never runs `rovodev`.
+- The CodeArts Agent CLI tarball is served under a `/latest/` URL. The lock
+  pins its sha256, so a new upload fails the build loudly rather than
+  installing something else; the pin then needs a deliberate bump.
 
 ## Publishing
 

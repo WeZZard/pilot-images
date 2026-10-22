@@ -71,7 +71,11 @@ Ghostty, Chrome; Oh My Zsh; Claude Code + pi + Codex CLI (all credential-free)
 with playwright/chrome-devtools/cua-driver MCP registered; cua-driver; headless
 TCC grants for cua-driver (phase 60) and for SSH-run `osascript` (phase 65);
 the Unity editor with WebGL build support, without Unity Hub and without a
-license (phase 80, VM images only; see `README.md`, "Unity in macos26").
+license (phase 80, VM images only; see `README.md`, "Unity in macos26");
+the coding agents the `skills` CLI supports, pinned in
+`guest/coding-agents.lock.json`, credential-free and with their updaters off
+(phase 85, VM images only, on every macOS line; see `README.md`, "Coding
+agents").
 There is one macOS 26 image: the separate `macos26-games` line was merged
 into this one on 2026-10-20 (owner decision, `docs/decisions.md`).
 Playwright and Chrome DevTools MCP are pinned to bundled Chrome-for-Testing
