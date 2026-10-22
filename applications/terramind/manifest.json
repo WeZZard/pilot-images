@@ -1,0 +1,4 @@
+{
+ "schemaVersion": 1, "id": "terramind", "inventoryIds": ["npm:terramind"],
+ "platforms": {"macos": {"architectures": ["arm64"], "executable": "terramind", "version": ["--version"], "launch": {"mode": "command", "args": ["--version"]}, "timeoutSeconds": 60, "extensions": [], "optional": false}}
+}

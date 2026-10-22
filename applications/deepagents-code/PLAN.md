@@ -1,0 +1,6 @@
+# Deep Agents Code baseline
+
+- Phase 85 of the macOS lines provisions Deep Agents Code, version 0.1.88, from the uv tool `deepagents-code==0.1.88` (Python 3.13). The pin is `guest/coding-agents.lock.json`.
+- The required baseline runs `dcode --version` twice with a 60-second limit. It prints the installed version without signing in.
+- It does not sign in, start a session, or send a model request. An account or API key is a credential and is never in the image.
+- Its updater is turned off by phase 85 and asserted by `checks/acceptance.zsh`; this plan does not repeat that check.

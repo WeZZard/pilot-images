@@ -1,0 +1,4 @@
+{
+ "schemaVersion": 1, "id": "kiro-cli", "inventoryIds": ["bundle:com.amazon.codewhisperer"],
+ "platforms": {"macos": {"architectures": ["arm64"], "executable": "/Applications/Kiro CLI.app/Contents/MacOS/kiro-cli", "version": ["--version"], "launch": {"mode": "command", "args": ["--version"]}, "timeoutSeconds": 60, "extensions": [], "optional": false}}
+}

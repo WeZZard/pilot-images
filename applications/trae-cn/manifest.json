@@ -1,0 +1,4 @@
+{
+ "schemaVersion": 1, "id": "trae-cn", "inventoryIds": ["bundle:cn.trae.app"],
+ "platforms": {"macos": {"architectures": ["arm64"], "executable": "/Applications/Trae CN.app/Contents/Resources/app/bin/trae-cn", "version": ["--version"], "launch": {"mode": "command", "args": ["--version"]}, "timeoutSeconds": 60, "extensions": [], "optional": false}}
+}

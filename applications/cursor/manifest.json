@@ -1,0 +1,4 @@
+{
+ "schemaVersion": 1, "id": "cursor", "inventoryIds": ["bundle:com.todesktop.230313mzl4w4u92"],
+ "platforms": {"macos": {"architectures": ["arm64"], "executable": "/Applications/Cursor.app/Contents/Resources/app/bin/cursor", "version": ["--version"], "launch": {"mode": "command", "args": ["--version"]}, "timeoutSeconds": 60, "extensions": [], "optional": false}}
+}

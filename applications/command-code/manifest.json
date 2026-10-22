@@ -1,0 +1,4 @@
+{
+ "schemaVersion": 1, "id": "command-code", "inventoryIds": ["npm:command-code"],
+ "platforms": {"macos": {"architectures": ["arm64"], "executable": "command-code", "version": ["--version"], "launch": {"mode": "command", "args": ["--version"]}, "timeoutSeconds": 60, "extensions": [], "optional": false}}
+}
