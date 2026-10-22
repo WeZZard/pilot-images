@@ -2,11 +2,12 @@
 # Phase 00 — system baseline: disk, SSH key, shell, always-on unlocked session (doctrine).
 source "${0:A:h}/lib.zsh"
 
-glog "APFS: expanding container to fill the virtual disk"
-if sudo diskutil apfs resizeContainer disk0s2 0 2>/dev/null; then
-  glog "APFS container resized"
+# A VM's container must fill the virtual disk the line declares (DISK_GB); a
+# physical Mac's partitioning belongs to its owner and is left alone.
+if [[ "$(sysctl -n kern.hv_vmm_present 2>/dev/null)" == 1 ]]; then
+  apfs_grow_root || { glog "FATAL: the system APFS container does not fill the disk"; exit 1; }
 else
-  glog "APFS resize skipped (already full-size or non-default layout — verify with diskutil list)"
+  glog "APFS: physical Mac, partitioning left as it is"
 fi
 
 if [[ -f /tmp/payload/host_key.pub ]]; then

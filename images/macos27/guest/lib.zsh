@@ -4,6 +4,59 @@ export PATH="/opt/homebrew/bin:$HOME/.local/bin:/usr/local/bin:$PATH"
 
 glog() { print -- "[guest $(date +%H:%M:%S)] $*" }
 
+# Bytes of the whole disk <disk> that no partition covers: the disk's size
+# minus the sum of its partitions. A container that fills its disk leaves only
+# the GPT headers and alignment, a few KiB.
+disk_unallocated_bytes() {  # disk_unallocated_bytes <whole-disk>
+  local d="$1" plist total sum=0 i=0 sz
+  plist=$(diskutil list -plist "$d") || return 1
+  total=$(diskutil info -plist "$d" | plutil -extract TotalSize raw -o - -) || return 1
+  while sz=$(print -r -- "$plist" | plutil -extract "AllDisksAndPartitions.0.Partitions.$i.Size" raw -o - - 2>/dev/null); do
+    sum=$(( sum + sz )); i=$(( i + 1 ))
+  done
+  (( i > 0 )) || return 1
+  print -- $(( total - sum ))
+}
+
+# Grow the APFS container that holds / to fill its virtual disk, and prove it.
+# The container is found from / itself (its APFS physical store), never assumed
+# to be disk0s2. Two layouts are measured (2026-10-23):
+#  - raw seeds (macos15, macos26) ship without a recovery container, and
+#    `tart set --disk-size` only lengthens the file, so the guest must grow the
+#    container; `diskutil repairDisk` first moves the GPT's backup header to the
+#    new end when diskutil does not see the space yet (Tart FAQ).
+#  - ASIF seeds (macos27) carry a recovery container after the system one, and
+#    `tart set --disk-size` grows the system container and moves recovery to the
+#    end on the host. The guest then finds nothing to grow, and resizeContainer
+#    fails with -69519 although the container is already full size.
+# So success is judged by measurement, not by resizeContainer's exit status:
+# what is left unallocated afterwards. Space a partition after the container
+# fences off (a recovery container on a raw disk) fails here loudly instead of
+# leaving a small disk behind a "skipped" line.
+apfs_grow_root() {
+  local store whole free limit=$(( 1024 * 1024 * 1024 ))
+  store=$(diskutil info -plist / | plutil -extract APFSPhysicalStores.0.APFSPhysicalStore raw -o - -) \
+    || { glog "cannot resolve the APFS physical store of /"; return 1; }
+  whole=$(diskutil info -plist "$store" | plutil -extract ParentWholeDisk raw -o - -) \
+    || { glog "cannot resolve the whole disk of $store"; return 1; }
+  free=$(disk_unallocated_bytes "$whole") || { glog "cannot measure $whole"; return 1; }
+  if (( free >= limit )); then
+    glog "APFS: growing container on $store ($(( free / limit )) GiB of $whole unallocated)"
+    if ! sudo diskutil apfs resizeContainer "$store" 0; then
+      glog "APFS: resize refused; repairing $whole's partition map and retrying"
+      yes | sudo diskutil repairDisk "$whole" || true
+      sudo diskutil apfs resizeContainer "$store" 0 || true
+    fi
+    free=$(disk_unallocated_bytes "$whole") || { glog "cannot measure $whole"; return 1; }
+  fi
+  if (( free >= limit )); then
+    glog "APFS: container on $store does not fill $whole: $(( free / limit )) GiB still unallocated"
+    diskutil list "$whole"
+    return 1
+  fi
+  glog "APFS: container on $store fills $whole ($(diskutil info -plist "$store" | plutil -extract Size raw -o - -) bytes)"
+}
+
 # The per-user TCC store. macOS 27 moved it out of ~/Library into a
 # containermanagerd ProtectedSystem container that the user owns (one per
 # user, created by tccd at the account's first login), so it is found by
