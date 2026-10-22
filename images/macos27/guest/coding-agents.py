@@ -460,7 +460,7 @@ def version_probe(agent, env):
     """The version invocation, stdin closed: a sign-in prompt is a timeout."""
     if agent.get('check') is None:
         return None
-    code, output = bounded(agent['check'], env, agent.get('checkTimeout', 60))
+    code, output = bounded(agent['check'], {**env, **agent.get('probeEnv', {})}, agent.get('checkTimeout', 60))
     expect = agent.get('expect', agent['version'].split('+')[0] if agent['method'] != 'app' else agent['bundleVersion'])
     return code == 0 and expect in output, code, output
 

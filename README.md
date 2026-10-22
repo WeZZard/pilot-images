@@ -315,6 +315,12 @@ Open points for the owner:
   can update itself.
 - Rovo Dev (`acli rovodev`) downloads its agent on first use, outside the
   lock. The image pins `acli` itself and never runs `rovodev`.
+- Over SSH, the Cursor CLI refuses every command, `--version` included, while
+  the login keychain is locked, and an SSH session sees it locked. The image
+  leaves the CLI's default (keychain) credential store alone, and its probes
+  run with `AGENT_CLI_CREDENTIAL_STORE=memory`. A clone that signs in over
+  SSH has two choices: unlock the keychain, or set that variable to `file`
+  or `memory`.
 - The CodeArts Agent CLI tarball is served under a `/latest/` URL. The lock
   pins its sha256, so a new upload fails the build loudly rather than
   installing something else; the pin then needs a deliberate bump.

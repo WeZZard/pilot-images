@@ -25,14 +25,24 @@ _agent_dirs=(~/.gemini ~/.qwen ~/.qoder ~/.qoder-cn ~/.cursor ~/.factory ~/.conf
   ~/.snowflake ~/.codeartsdoer ~/.ona ~/.rovodev ~/.config/acli ~/.tinycloud ~/.config/crush ~/.grok ~/.openclaw ~/.kiro
   ~/.warp ~/.warp_cli ~/.config/goose ~/.codeium ~/.trae ~/.trae-cn ~/.antigravity ~/.posit ~/.sfcodestudio
   "$HOME/Library/Application Support/kiro-cli" "$HOME/Library/Application Support/Antigravity")
+# Installed code is not scanned: node_modules and Hermes's source checkout
+# (~/.hermes/hermes-agent) carry modules named auth.py or token-*.yaml. An empty
+# file holds nothing (Qoder's .credential-transaction is a lock), and acli's
+# global_auth_config.yaml is a profile list, checked for emptiness below.
 _agent_secrets=$(for _d in "${_agent_dirs[@]}"; do
-  [[ -d "$_d" ]] && find "$_d" -maxdepth 4 -type f \( -iname '*auth*' -o -iname '*credential*' -o -iname '*token*' \
-    -o -iname 'oauth*' -o -iname '*.pem' -o -iname '*.key' \) ! -path '*/node_modules/*' 2>/dev/null
+  [[ -d "$_d" ]] && find "$_d" -maxdepth 4 \( -name node_modules -o -path "$HOME/.hermes/hermes-agent" \) -prune \
+    -o -type f -size +0 \( -iname '*auth*' -o -iname '*credential*' -o -iname '*token*' \
+    -o -iname 'oauth*' -o -iname '*.pem' -o -iname '*.key' \) ! -path "$HOME/.config/acli/global_auth_config.yaml" -print 2>/dev/null
 done)
 if [[ -n "$_agent_secrets" ]]; then
   print -- "FAIL  coding-agent credential files present:"; print -r -- "$_agent_secrets" | sed 's/^/        /'; FAIL=1
 else
   print -- "PASS  no coding-agent credential files"
+fi
+if [[ -f ~/.config/acli/global_auth_config.yaml ]] && ! grep -qx 'profiles: \[\]' ~/.config/acli/global_auth_config.yaml; then
+  print -- "FAIL  acli holds an Atlassian profile"; FAIL=1
+else
+  print -- "PASS  no acli profile"
 fi
 if [[ -f ~/.cursor/cli-config.json ]] && grep -q '"authInfo"' ~/.cursor/cli-config.json; then
   print -- "FAIL  Cursor CLI config holds an account"; FAIL=1
