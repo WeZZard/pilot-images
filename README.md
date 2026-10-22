@@ -198,11 +198,12 @@ Every macOS line carries the coding agents that the `skills` CLI supports
 at `a80e4c9`, read 2026-10-22: 78 agents). Claude Code, Codex and Pi were
 already in the image (phases 50 and 55). Phase 85
 (`guest/85-coding-agents.zsh`) installs the rest from
-`guest/coding-agents.lock.json`: 54 agents as 57 lock entries, because
-Cursor, for one, ships both a CLI and an app. Nothing signs in, and every
-agent's own updater is turned off the way its vendor documents (an
-environment variable in `~/.zshenv`, a settings file, or the agent's own
-config command).
+`guest/coding-agents.lock.json`: 61 of the 78 ids in 61 lock entries
+(Cursor's CLI and app share one id, and Zenflow carries the Zencoder CLI).
+Nothing signs in, and every agent's own updater is turned off: the way its
+vendor documents where it can be (an environment variable in `~/.zshenv`, a
+settings file, or the agent's own config command), otherwise as described
+under "Updaters without an off switch" below.
 
 - Every entry is pinned: an exact npm or PyPI version, or a vendor download
   with its sha256. Homebrew is not used, because a formula's version comes
@@ -282,21 +283,57 @@ config command).
 | Kiro CLI | `kiro-cli` | app (vendor download) | `Kiro CLI.app` | 2.33.1 |
 | Syncfusion Code Studio | `codestudio` | app (vendor download) | `Syncfusion Code Studio.app` | 2.0.5 |
 | Positron (Posit Assistant) | `posit-assistant` | app (vendor download) | `Positron.app` | 2026.10.1-2 |
+| MiniMax Code | `minimax-code` | app (vendor download) | `MiniMax Code.app` | 3.1.4 |
+| ZCode | `zcode` | app (vendor download) | `ZCode.app` | 3.16.2 |
+| Zenflow | `zenflow`, `zencoder` | app (vendor download) | `Zenflow.app`, `zencoder` | 2.5.3 |
+| AiderDesk | `aider-desk` | app (vendor download) | `aider-desk.app` | 0.88.0 |
 
-The agents below are not installed. An app whose updater cannot be turned
-off is left out, as Unity Hub is.
+### Updaters without an off switch
+
+Four apps update through electron-updater and either have no switch for it
+or keep part of it out of reach of a settings file. They are installed
+anyway (owner decision, 2026-10-23), each with its updater stopped by the
+least invasive method that was measured to work in a macos27 clone:
+
+| App | Updater | How the image stops it | Verified by |
+|---|---|---|---|
+| MiniMax Code 3.1.4 | electron-updater on a generic feed, plus a hot-update manifest; no switch | `file.cdn.minimax.io` points at 0.0.0.0 in `/etc/hosts` | the app starts, and its log shows both checks failing with `ERR_CONNECTION_REFUSED` |
+| ZCode 3.16.2 | electron-updater behind a manifest API; it downloads only when `autoDownloadAndInstallUpdates` is true | that key is written `false` in `~/.zcode/v2/setting.json` | the app starts, keeps the key, and downloads nothing |
+| Zenflow 2.5.3, with the Zencoder CLI 0.54.0 inside it | electron-updater on a generic feed, downloading every 30 minutes; no switch | `download.zencoder.ai` points at 0.0.0.0 in `/etc/hosts` | the app starts and logs `ERR_CONNECTION_REFUSED`, with no dialog |
+| AiderDesk 0.88.0 | electron-updater on GitHub releases, plus an upgrade of its Python backend (aider-chat) at every start | `settings.aiderDeskAutoUpdate` false in its `config.json`; `AIDER_DESK_NO_UPDATES=true` and `AIDER_DESK_AIDER_VERSION=0.86.2` in the login session | the app starts, logs "Skipping update checks", and keeps the setting |
+
+- A root-owned, read-only app bundle was considered and rejected. When
+  Squirrel.Mac cannot write the bundle, it asks for an administrator
+  password before it installs. That is a modal nothing headless can answer,
+  and the check and the download still happen.
+- A blocked host is blocked for everything the app fetches from it; for
+  MiniMax Code that includes a few interface images. ZCode's and AiderDesk's
+  feeds share their hosts with their APIs and with GitHub, so neither is
+  blocked.
+- Phase 85 lifts the block while it installs, because the vendors serve
+  their downloads from the same hosts, and writes it back afterwards.
+- An app opened from the Dock or with `open` inherits launchd's environment,
+  not `~/.zshenv`. The AiderDesk variables are therefore also set by the
+  LaunchAgent `dev.pilot-images.coding-agents-env` at every login, and
+  verify reads them back from the login session (`launchctl print gui/<uid>`).
+  macOS shows a one-time "App Background Activity" notice for it.
+- AiderDesk installs its Python backend at its first launch in a clone,
+  pinned to aider-chat 0.86.2, and never upgrades it.
+- ZCode can still refuse to start below a minimum version that its server
+  sends (`forceUpdate.minimalVersion`). No minimum is set today; if one
+  appears, the pin needs a bump.
+
+The agents below are not installed.
 
 | `skills` id | Why not installed |
 |---|---|
 | `adal` | It updates itself at every start, with no opt-out. |
-| `aider-desk` | Its updater checks at every start; the switch lives in an app store written at first launch, so the image cannot turn it off. |
 | `codemaker` | No public macOS build (NetEase's internal platform). |
 | `eve` | A project framework, detected through a project's package.json. |
 | `firebender` | A JetBrains/Android Studio plugin only. |
 | `iflow-cli` | The service shut down on 2026-04-17. |
 | `lingma` | Renamed Qoder CN on 2026-05-20; the remaining IDE build is an unversioned download. |
 | `loaf` | Not distributed: no release, no package. |
-| `minimax-code` | Its electron-updater has no off switch. |
 | `moxby` | Now a browser extension; the desktop bridge needs a paid plan. |
 | `mux` | Renamed xum, which uses ~/.xum, and its updater has no off switch. |
 | `promptscript` | Detected only through a project's .promptscript or promptscript.yaml. |
@@ -304,15 +341,9 @@ off is left out, as Unity Hub is.
 | `roo` | The extension shut down on 2026-05-15 and there is no CLI. |
 | `sarvam-code` | The install guide is behind a Sarvam sign-in. |
 | `tabnine-cli` | The installer always fetches the latest build, the updater has no documented off switch, and the CLI is in maintenance mode. |
-| `zcode` | Its electron-updater has no off switch. |
-| `zencoder` | Its CLI is installed and updated by Zenflow, which is not installed. |
-| `zenflow` | Its electron-updater has no off switch. |
 
 Open points for the owner:
 
-- MiniMax Code, ZCode, Zenflow and AiderDesk are left out only because their
-  updaters have no off switch. Including them means accepting a clone that
-  can update itself.
 - Rovo Dev (`acli rovodev`) downloads its agent on first use, outside the
   lock. The image pins `acli` itself and never runs `rovodev`.
 - Over SSH, the Cursor CLI refuses every command, `--version` included, while

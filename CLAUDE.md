@@ -244,6 +244,13 @@ all measured on 2026-09-12:
   preferences, `com.google.Keystone`, `UpdateDefault` 3), and the `@latest` npx
   MCP registrations of Claude Code and Codex, which it pins to a version.
   Acceptance asserts each of these when `kern.hv_vmm_present` is 1.
+  Phase 85 does the same for the coding agents. Where an app has no off
+  switch, its feed host is pointed at 0.0.0.0 in `/etc/hosts` (MiniMax Code,
+  Zenflow); a switch read from the environment by a desktop app goes into
+  the login session through the LaunchAgent
+  `dev.pilot-images.coding-agents-env` (AiderDesk). Never make an app bundle
+  root-owned to stop its updater: Squirrel.Mac answers with an admin-password
+  modal. See `README.md`, "Updaters without an off switch".
 - The refresh scripts (brew, rustup, npm globals, pi + pi extensions, Claude
   Code, cua-driver) live in `~/.refresh.d/` and run only in a maintenance boot
   (`refresh-base.zsh`), which then re-runs phase 70.
