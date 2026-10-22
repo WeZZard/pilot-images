@@ -1,0 +1,4 @@
+{
+ "schemaVersion": 1, "id": "minimax-code", "inventoryIds": ["bundle:com.minimax.agent"],
+ "platforms": {"macos": {"architectures": ["arm64"], "executable": "/usr/bin/defaults", "version": ["read", "/Applications/MiniMax Code.app/Contents/Info", "CFBundleShortVersionString"], "launch": {"mode": "command", "args": ["read", "/Applications/MiniMax Code.app/Contents/Info", "CFBundleShortVersionString"]}, "timeoutSeconds": 60, "extensions": [], "optional": false}}
+}

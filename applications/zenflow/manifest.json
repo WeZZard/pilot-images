@@ -1,0 +1,4 @@
+{
+ "schemaVersion": 1, "id": "zenflow", "inventoryIds": ["bundle:com.zenflow.desktop"],
+ "platforms": {"macos": {"architectures": ["arm64"], "executable": "/Applications/Zenflow.app/Contents/Resources/bin/zencoder", "version": ["--version"], "launch": {"mode": "command", "args": ["--version"]}, "timeoutSeconds": 60, "extensions": [], "optional": false}}
+}

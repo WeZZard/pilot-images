@@ -92,7 +92,6 @@
   "codex": "guest/55-codex.zsh"
  },
  "notInstalled": {
-  "aider-desk": "Its updater checks at every start; the switch lives in an app store written at first launch, so the image cannot turn it off.",
   "replit": "Detected only through a project's .replit file, and the desktop client needs a Replit account.",
   "loaf": "Not distributed: no release, no package.",
   "sarvam-code": "The install guide is behind a Sarvam sign-in.",
@@ -101,14 +100,10 @@
   "firebender": "A JetBrains/Android Studio plugin only.",
   "iflow-cli": "The service shut down on 2026-04-17.",
   "lingma": "Renamed Qoder CN on 2026-05-20; the remaining IDE build is an unversioned download.",
-  "minimax-code": "Its electron-updater has no off switch.",
   "moxby": "Now a browser extension; the desktop bridge needs a paid plan.",
   "mux": "Renamed xum, which uses ~/.xum, and its updater has no off switch.",
   "roo": "The extension shut down on 2026-05-15 and there is no CLI.",
   "tabnine-cli": "The installer always fetches the latest build, the updater has no documented off switch, and the CLI is in maintenance mode.",
-  "zcode": "Its electron-updater has no off switch.",
-  "zencoder": "Its CLI is installed and updated by Zenflow, which is not installed.",
-  "zenflow": "Its electron-updater has no off switch.",
   "promptscript": "Detected only through a project's .promptscript or promptscript.yaml.",
   "adal": "It updates itself at every start, with no opt-out."
  },
@@ -1686,6 +1681,137 @@
        "update.mode": "none"
       }
      }
+    }
+   ]
+  },
+  {
+   "id": "minimax-code",
+   "name": "MiniMax Code",
+   "skills": [
+    "minimax-code"
+   ],
+   "method": "app",
+   "format": "dmg",
+   "version": "3.1.4",
+   "url": "https://file.cdn.minimax.io/public/minimax-agent-prod/release/MiniMax%20Code-3.1.4-arm64.dmg",
+   "sha256": "b8b78c6f3e19af51c25dd64a756e1e0394abf3bea77bd356aafe67e2128caf79",
+   "app": "MiniMax Code.app",
+   "bundleId": "com.minimax.agent",
+   "bundleVersion": "3.1.4",
+   "links": {},
+   "source": "https://agent.minimax.io/",
+   "check": null,
+   "updates": [
+    {
+     "hosts": [
+      "file.cdn.minimax.io"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "zcode",
+   "name": "ZCode",
+   "skills": [
+    "zcode"
+   ],
+   "method": "app",
+   "format": "dmg",
+   "version": "3.16.2",
+   "url": "https://cdn-zcode.z.ai/zcode/electron/releases/3.16.2/macos-arm64/ZCode-3.16.2-mac-arm64.dmg",
+   "sha256": "69d836ed653d4a57de3315e26e0683dfeb3e8b8e0a610a1c5b6063ac81643714",
+   "app": "ZCode.app",
+   "bundleId": "dev.zcode.app",
+   "bundleVersion": "3.16.2",
+   "links": {},
+   "source": "https://zcode.z.ai/",
+   "check": [
+    "/Applications/ZCode.app/Contents/MacOS/ZCode",
+    "/Applications/ZCode.app/Contents/Resources/glm/zcode.cjs",
+    "--version"
+   ],
+   "updates": [
+    {
+     "json": {
+      "path": "~/.zcode/v2/setting.json",
+      "set": {
+       "autoDownloadAndInstallUpdates": false
+      }
+     }
+    }
+   ],
+   "probeEnv": {
+    "ELECTRON_RUN_AS_NODE": "1"
+   },
+   "expect": "0.17.0"
+  },
+  {
+   "id": "zenflow",
+   "name": "Zenflow",
+   "skills": [
+    "zenflow",
+    "zencoder"
+   ],
+   "method": "app",
+   "format": "dmg",
+   "version": "2.5.3",
+   "url": "https://download.zencoder.ai/zenflowapp/stable/2.5.3/app/darwin-arm64/Zenflow-2.5.3-arm64-mac.dmg",
+   "sha256": "ba7b9ec871b1416d5936954afe4ba5cb45aa32071ca28d80646f739fb4f1dd19",
+   "app": "Zenflow.app",
+   "bundleId": "com.zenflow.desktop",
+   "bundleVersion": "2.5.3",
+   "links": {
+    "zencoder": "Contents/Resources/bin/zencoder"
+   },
+   "source": "https://zencoder.ai/zenflow",
+   "check": [
+    "zencoder",
+    "--version"
+   ],
+   "updates": [
+    {
+     "hosts": [
+      "download.zencoder.ai"
+     ]
+    }
+   ],
+   "expect": "0.54.0"
+  },
+  {
+   "id": "aider-desk",
+   "name": "AiderDesk",
+   "skills": [
+    "aider-desk"
+   ],
+   "method": "app",
+   "format": "dmg",
+   "version": "0.88.0",
+   "url": "https://github.com/hotovo/aider-desk/releases/download/v0.88.0/aider-desk-0.88.0-macos-arm64.dmg",
+   "sha256": "b7c0562ef638e0a5b61e9008bad087d71ae570080662bc2148dbaef7261e84bd",
+   "app": "aider-desk.app",
+   "bundleId": "com.hotovo.aider-desk",
+   "bundleVersion": "0.88.0",
+   "links": {},
+   "source": "https://github.com/hotovo/aider-desk",
+   "check": null,
+   "updates": [
+    {
+     "json": {
+      "path": "~/Library/Application Support/aider-desk/config.json",
+      "set": {
+       "settingsVersion": 22,
+       "settings": {
+        "aiderDeskAutoUpdate": false
+       }
+      }
+     }
+    },
+    {
+     "env": {
+      "AIDER_DESK_NO_UPDATES": "true",
+      "AIDER_DESK_AIDER_VERSION": "0.86.2"
+     },
+     "gui": true
     }
    ]
   }

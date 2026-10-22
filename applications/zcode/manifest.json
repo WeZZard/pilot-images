@@ -1,0 +1,4 @@
+{
+ "schemaVersion": 1, "id": "zcode", "inventoryIds": ["bundle:dev.zcode.app"],
+ "platforms": {"macos": {"architectures": ["arm64"], "executable": "/usr/bin/defaults", "version": ["read", "/Applications/ZCode.app/Contents/Info", "CFBundleShortVersionString"], "launch": {"mode": "command", "args": ["read", "/Applications/ZCode.app/Contents/Info", "CFBundleShortVersionString"]}, "timeoutSeconds": 60, "extensions": [], "optional": false}}
+}
