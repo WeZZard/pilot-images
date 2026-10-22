@@ -1,0 +1,1683 @@
+{
+ "schemaVersion": 1,
+ "agentList": {
+  "source": "https://github.com/vercel-labs/skills",
+  "commit": "a80e4c9d12d607631249d4d7d059f835d4b2f13a",
+  "file": "src/agents.ts",
+  "readOn": "2026-10-22",
+  "ids": [
+   "aider-desk",
+   "amp",
+   "antigravity",
+   "antigravity-cli",
+   "astrbot",
+   "autohand-code",
+   "augment",
+   "bob",
+   "claude-code",
+   "openclaw",
+   "cline",
+   "codearts-agent",
+   "codebuddy",
+   "codemaker",
+   "codestudio",
+   "codex",
+   "command-code",
+   "continue",
+   "cortex",
+   "crush",
+   "cursor",
+   "deepagents",
+   "devin",
+   "dexto",
+   "droid",
+   "eve",
+   "firebender",
+   "forgecode",
+   "fx",
+   "gemini-cli",
+   "github-copilot",
+   "goose",
+   "grok",
+   "hermes-agent",
+   "inference-sh",
+   "jazz",
+   "junie",
+   "iflow-cli",
+   "kilo",
+   "kimchi",
+   "kimi-code-cli",
+   "kiro-cli",
+   "kode",
+   "lingma",
+   "loaf",
+   "mcpjam",
+   "minimax-code",
+   "mistral-vibe",
+   "moxby",
+   "mux",
+   "opencode",
+   "openhands",
+   "ona",
+   "pi",
+   "posit-assistant",
+   "qoder",
+   "qoder-cn",
+   "qwen-code",
+   "replit",
+   "reasonix",
+   "rovodev",
+   "roo",
+   "sarvam-code",
+   "tabnine-cli",
+   "terramind",
+   "tinycloud",
+   "trae",
+   "trae-cn",
+   "warp",
+   "windsurf",
+   "zed",
+   "zcode",
+   "zencoder",
+   "zenflow",
+   "neovate",
+   "pochi",
+   "promptscript",
+   "adal"
+  ]
+ },
+ "installedEarlier": {
+  "claude-code": "guest/50-agents.zsh",
+  "pi": "guest/50-agents.zsh",
+  "codex": "guest/55-codex.zsh"
+ },
+ "notInstalled": {
+  "aider-desk": "Its updater checks at every start; the switch lives in an app store written at first launch, so the image cannot turn it off.",
+  "replit": "Detected only through a project's .replit file, and the desktop client needs a Replit account.",
+  "loaf": "Not distributed: no release, no package.",
+  "sarvam-code": "The install guide is behind a Sarvam sign-in.",
+  "codemaker": "No public macOS build (NetEase's internal platform).",
+  "eve": "A project framework, detected through a project's package.json.",
+  "firebender": "A JetBrains/Android Studio plugin only.",
+  "iflow-cli": "The service shut down on 2026-04-17.",
+  "lingma": "Renamed Qoder CN on 2026-05-20; the remaining IDE build is an unversioned download.",
+  "minimax-code": "Its electron-updater has no off switch.",
+  "moxby": "Now a browser extension; the desktop bridge needs a paid plan.",
+  "mux": "Renamed xum, which uses ~/.xum, and its updater has no off switch.",
+  "roo": "The extension shut down on 2026-05-15 and there is no CLI.",
+  "tabnine-cli": "The installer always fetches the latest build, the updater has no documented off switch, and the CLI is in maintenance mode.",
+  "zcode": "Its electron-updater has no off switch.",
+  "zencoder": "Its CLI is installed and updated by Zenflow, which is not installed.",
+  "zenflow": "Its electron-updater has no off switch.",
+  "promptscript": "Detected only through a project's .promptscript or promptscript.yaml.",
+  "adal": "It updates itself at every start, with no opt-out."
+ },
+ "agents": [
+  {
+   "id": "amp",
+   "name": "Amp",
+   "skills": [
+    "amp"
+   ],
+   "method": "npm",
+   "package": "@ampcode/cli",
+   "version": "0.0.1792641650-gd4ebfb",
+   "bin": "amp",
+   "source": "https://ampcode.com/docs/cli",
+   "check": [
+    "amp",
+    "--version"
+   ],
+   "updates": [
+    {
+     "env": {
+      "AMP_SKIP_UPDATE_CHECK": "1"
+     }
+    },
+    {
+     "json": {
+      "path": "~/.config/amp/settings.json",
+      "set": {
+       "amp.updates.mode": "disabled"
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "autohand-code",
+   "name": "Autohand Code CLI",
+   "skills": [
+    "autohand-code"
+   ],
+   "method": "npm",
+   "package": "autohand-cli",
+   "version": "0.9.8",
+   "bin": "autohand",
+   "source": "https://autohand.ai/cli/",
+   "check": [
+    "autohand",
+    "--version"
+   ],
+   "updates": [
+    {
+     "env": {
+      "AUTOHAND_SKIP_UPDATE_CHECK": "1"
+     }
+    },
+    {
+     "json": {
+      "path": "~/.autohand/config.json",
+      "set": {
+       "ui": {
+        "checkForUpdates": false
+       }
+      }
+     }
+    }
+   ],
+   "installEnv": {
+    "AUTOHAND_SKIP_AHTRACES_INSTALL": "1"
+   },
+   "dropBins": [
+    "agent"
+   ]
+  },
+  {
+   "id": "auggie",
+   "name": "Augment (Auggie CLI)",
+   "skills": [
+    "augment"
+   ],
+   "method": "npm",
+   "package": "@augmentcode/auggie",
+   "version": "0.36.0",
+   "bin": "auggie",
+   "source": "https://docs.augmentcode.com/cli/setup-auggie/install-auggie-cli",
+   "check": [
+    "auggie",
+    "--version"
+   ],
+   "updates": [
+    {
+     "env": {
+      "AUGMENT_DISABLE_AUTO_UPDATE": "1"
+     }
+    }
+   ]
+  },
+  {
+   "id": "ibm-bob",
+   "name": "IBM Bob (Bob Shell)",
+   "skills": [
+    "bob"
+   ],
+   "method": "npm",
+   "package": "@ibm/bob",
+   "version": "2.0.8",
+   "bin": "bob",
+   "source": "https://bob.ibm.com/docs/shell/getting-started/install-and-setup",
+   "check": [
+    "bob",
+    "--version"
+   ],
+   "updates": [
+    {
+     "json": {
+      "path": "~/.bob/settings.json",
+      "set": {
+       "bobShell": {
+        "autoUpdate": false
+       }
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "cline",
+   "name": "Cline CLI",
+   "skills": [
+    "cline"
+   ],
+   "method": "npm",
+   "package": "cline",
+   "version": "3.0.73",
+   "bin": "cline",
+   "source": "https://docs.cline.bot/cli/cli-reference",
+   "check": [
+    "cline",
+    "--version"
+   ],
+   "updates": [
+    {
+     "env": {
+      "CLINE_NO_AUTO_UPDATE": "1"
+     }
+    }
+   ]
+  },
+  {
+   "id": "dexto",
+   "name": "Dexto",
+   "skills": [
+    "dexto"
+   ],
+   "method": "npm",
+   "package": "dexto",
+   "version": "1.14.2",
+   "bin": "dexto",
+   "source": "https://cli.dexto.ai/docs/getting-started/installation",
+   "check": [
+    "dexto",
+    "--version"
+   ],
+   "updates": [
+    {
+     "env": {
+      "DEXTO_NO_UPDATE_CHECK": "true"
+     }
+    }
+   ]
+  },
+  {
+   "id": "kimi-code",
+   "name": "Kimi Code CLI",
+   "skills": [
+    "kimi-code-cli"
+   ],
+   "method": "npm",
+   "package": "@moonshot-ai/kimi-code",
+   "version": "2.3.0",
+   "bin": "kimi",
+   "source": "https://moonshotai.github.io/kimi-code/en/",
+   "check": [
+    "kimi",
+    "--version"
+   ],
+   "updates": [
+    {
+     "env": {
+      "KIMI_CODE_NO_AUTO_UPDATE": "1"
+     }
+    }
+   ]
+  },
+  {
+   "id": "jazz",
+   "name": "Jazz",
+   "skills": [
+    "jazz"
+   ],
+   "method": "npm",
+   "package": "jazz-ai",
+   "version": "0.16.20",
+   "bin": "jazz",
+   "source": "https://github.com/lvndry/jazz",
+   "check": [
+    "jazz",
+    "--version"
+   ],
+   "updates": [
+    {
+     "env": {
+      "JAZZ_DISABLE_UPDATE_CHECK": "1"
+     }
+    }
+   ]
+  },
+  {
+   "id": "kilo",
+   "name": "Kilo Code CLI",
+   "skills": [
+    "kilo"
+   ],
+   "method": "npm",
+   "package": "@kilocode/cli",
+   "version": "7.8.15",
+   "bin": "kilo",
+   "source": "https://kilo.ai/docs/cli",
+   "check": [
+    "kilo",
+    "--version"
+   ],
+   "updates": [
+    {
+     "env": {
+      "KILO_DISABLE_AUTOUPDATE": "1"
+     }
+    },
+    {
+     "json": {
+      "path": "~/.config/kilo/kilo.json",
+      "set": {
+       "autoupdate": false
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "kode",
+   "name": "Kode",
+   "skills": [
+    "kode"
+   ],
+   "method": "npm",
+   "package": "@shareai-lab/kode",
+   "version": "2.2.1",
+   "bin": "kode",
+   "source": "https://github.com/shareAI-lab/kode",
+   "check": [
+    "kode",
+    "--version"
+   ],
+   "updates": []
+  },
+  {
+   "id": "mcpjam-inspector",
+   "name": "MCPJam Inspector",
+   "skills": [
+    "mcpjam"
+   ],
+   "method": "npm",
+   "package": "@mcpjam/inspector",
+   "version": "3.16.2",
+   "bin": "inspector",
+   "source": "https://docs.mcpjam.com/installation",
+   "check": [
+    "npm",
+    "ls",
+    "-g",
+    "--depth=0",
+    "@mcpjam/inspector"
+   ],
+   "updates": [],
+   "expect": "@mcpjam/inspector@3.16.2"
+  },
+  {
+   "id": "codebuddy-code",
+   "name": "CodeBuddy Code",
+   "skills": [
+    "codebuddy"
+   ],
+   "method": "npm",
+   "package": "@tencent-ai/codebuddy-code",
+   "version": "2.172.1",
+   "bin": "codebuddy",
+   "source": "https://www.workbuddy.ai/docs/cli/installation",
+   "check": [
+    "codebuddy",
+    "--version"
+   ],
+   "updates": [
+    {
+     "json": {
+      "path": "~/.codebuddy/settings.json",
+      "set": {
+       "autoUpdates": false
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "command-code",
+   "name": "Command Code",
+   "skills": [
+    "command-code"
+   ],
+   "method": "npm",
+   "package": "command-code",
+   "version": "1.87.1",
+   "bin": "command-code",
+   "source": "https://commandcode.ai/docs/settings",
+   "check": [
+    "command-code",
+    "--version"
+   ],
+   "updates": [
+    {
+     "env": {
+      "COMMANDCODE_SKIP_UPDATES": "1"
+     }
+    }
+   ]
+  },
+  {
+   "id": "continue-cli",
+   "name": "Continue CLI",
+   "skills": [
+    "continue"
+   ],
+   "method": "npm",
+   "package": "@continuedev/cli",
+   "version": "1.5.47",
+   "bin": "cn",
+   "source": "https://docs.continue.dev/guides/cli",
+   "check": [
+    "cn",
+    "--version"
+   ],
+   "updates": [
+    {
+     "json": {
+      "path": "~/.continue/index/globalContext.json",
+      "set": {
+       "autoUpdateCli": false
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "gemini-cli",
+   "name": "Gemini CLI",
+   "skills": [
+    "gemini-cli"
+   ],
+   "method": "npm",
+   "package": "@google/gemini-cli",
+   "version": "0.65.0",
+   "bin": "gemini",
+   "source": "https://geminicli.com/docs/get-started/installation",
+   "check": [
+    "gemini",
+    "--version"
+   ],
+   "updates": [
+    {
+     "json": {
+      "path": "~/.gemini/settings.json",
+      "set": {
+       "general": {
+        "enableAutoUpdate": false,
+        "enableAutoUpdateNotification": false
+       }
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "copilot-cli",
+   "name": "GitHub Copilot CLI",
+   "skills": [
+    "github-copilot"
+   ],
+   "method": "npm",
+   "package": "@github/copilot",
+   "version": "1.0.102",
+   "bin": "copilot",
+   "source": "https://docs.github.com/en/copilot/how-tos/set-up/install-copilot-cli",
+   "check": [
+    "copilot",
+    "--version"
+   ],
+   "updates": [
+    {
+     "env": {
+      "COPILOT_AUTO_UPDATE": "false"
+     }
+    }
+   ]
+  },
+  {
+   "id": "opencode",
+   "name": "OpenCode",
+   "skills": [
+    "opencode"
+   ],
+   "method": "npm",
+   "package": "@opencode/cli",
+   "version": "2.1.2",
+   "bin": "opencode",
+   "source": "https://opencode.ai/docs/",
+   "check": [
+    "opencode",
+    "--version"
+   ],
+   "updates": [
+    {
+     "env": {
+      "OPENCODE_DISABLE_AUTOUPDATE": "1"
+     }
+    }
+   ]
+  },
+  {
+   "id": "qwen-code",
+   "name": "Qwen Code",
+   "skills": [
+    "qwen-code"
+   ],
+   "method": "npm",
+   "package": "@qwen-code/qwen-code",
+   "version": "0.26.0",
+   "bin": "qwen",
+   "source": "https://qwenlm.github.io/qwen-code-docs/en/users/configuration/settings/",
+   "check": [
+    "qwen",
+    "--version"
+   ],
+   "updates": [
+    {
+     "json": {
+      "path": "~/.qwen/settings.json",
+      "set": {
+       "general": {
+        "enableAutoUpdate": false
+       }
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "qodercli",
+   "name": "Qoder CLI",
+   "skills": [
+    "qoder"
+   ],
+   "method": "npm",
+   "package": "@qoder-ai/qodercli",
+   "version": "1.1.76",
+   "bin": "qodercli",
+   "source": "https://docs.qoder.com/cli/installation",
+   "check": [
+    "qodercli",
+    "--version"
+   ],
+   "updates": [
+    {
+     "json": {
+      "path": "~/.qoder/settings.json",
+      "set": {
+       "general": {
+        "enableAutoUpdate": false
+       }
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "qoderclicn",
+   "name": "Qoder CN CLI",
+   "skills": [
+    "qoder-cn"
+   ],
+   "method": "npm",
+   "package": "@qodercn-ai/qoderclicn",
+   "version": "1.1.76",
+   "bin": "qoderclicn",
+   "source": "https://help.aliyun.com/zh/lingma/qoder-cli-cn/",
+   "check": [
+    "qoderclicn",
+    "--version"
+   ],
+   "updates": [
+    {
+     "json": {
+      "path": "~/.qoder-cn/settings.json",
+      "set": {
+       "general": {
+        "enableAutoUpdate": false
+       }
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "reasonix",
+   "name": "Reasonix",
+   "skills": [
+    "reasonix"
+   ],
+   "method": "npm",
+   "package": "reasonix",
+   "version": "2.48.0",
+   "bin": "reasonix",
+   "source": "https://github.com/esengine/DeepSeek-Reasonix",
+   "check": [
+    "reasonix",
+    "--version"
+   ],
+   "updates": []
+  },
+  {
+   "id": "terramind",
+   "name": "Terramind",
+   "skills": [
+    "terramind"
+   ],
+   "method": "npm",
+   "package": "terramind",
+   "version": "0.2.156",
+   "bin": "terramind",
+   "source": "https://terramind.com",
+   "check": [
+    "terramind",
+    "--version"
+   ],
+   "updates": [],
+   "expect": "terramind v0.2.154"
+  },
+  {
+   "id": "neovate",
+   "name": "Neovate Code",
+   "skills": [
+    "neovate"
+   ],
+   "method": "npm",
+   "package": "@neovate/code",
+   "version": "0.28.5",
+   "bin": "neovate",
+   "source": "https://github.com/neovateai/neovate-code",
+   "check": [
+    "neovate",
+    "--version"
+   ],
+   "updates": [
+    {
+     "env": {
+      "NEOVATE_SELF_UPDATE": "none"
+     }
+    }
+   ]
+  },
+  {
+   "id": "pochi",
+   "name": "Pochi",
+   "skills": [
+    "pochi"
+   ],
+   "method": "npm",
+   "package": "@getpochi/cli",
+   "version": "0.6.21",
+   "bin": "pochi",
+   "source": "https://docs.getpochi.com/cli/",
+   "check": [
+    "pochi",
+    "--version"
+   ],
+   "updates": []
+  },
+  {
+   "id": "openhands",
+   "name": "OpenHands CLI",
+   "skills": [
+    "openhands"
+   ],
+   "method": "uv",
+   "package": "openhands",
+   "version": "1.16.0",
+   "spec": "openhands==1.16.0",
+   "python": "3.12",
+   "bin": "openhands",
+   "source": "https://docs.openhands.dev/openhands/usage/cli/installation",
+   "check": [
+    "openhands",
+    "--version"
+   ],
+   "updates": []
+  },
+  {
+   "id": "deepagents-code",
+   "name": "Deep Agents Code",
+   "skills": [
+    "deepagents"
+   ],
+   "method": "uv",
+   "package": "deepagents-code",
+   "version": "0.1.88",
+   "spec": "deepagents-code==0.1.88",
+   "python": "3.13",
+   "bin": "dcode",
+   "source": "https://github.com/langchain-ai/deepagents",
+   "check": [
+    "dcode",
+    "--version"
+   ],
+   "updates": [
+    {
+     "env": {
+      "DEEPAGENTS_CODE_AUTO_UPDATE": "0"
+     }
+    }
+   ]
+  },
+  {
+   "id": "mistral-vibe",
+   "name": "Mistral Vibe",
+   "skills": [
+    "mistral-vibe"
+   ],
+   "method": "uv",
+   "package": "mistral-vibe",
+   "version": "3.0.1",
+   "spec": "mistral-vibe==3.0.1",
+   "python": "3.12",
+   "bin": "vibe",
+   "source": "https://github.com/mistralai/mistral-vibe",
+   "check": [
+    "vibe",
+    "--version"
+   ],
+   "updates": [
+    {
+     "toml": {
+      "path": "~/.vibe/config.toml",
+      "table": null,
+      "set": {
+       "enable_update_checks": false
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "astrbot",
+   "name": "AstrBot",
+   "skills": [
+    "astrbot"
+   ],
+   "method": "uv",
+   "package": "astrbot",
+   "version": "4.29.1",
+   "spec": "astrbot==4.29.1",
+   "python": "3.12",
+   "bin": "astrbot",
+   "source": "https://github.com/AstrBotDevs/AstrBot",
+   "check": [
+    "astrbot",
+    "--version"
+   ],
+   "updates": []
+  },
+  {
+   "id": "antigravity-cli",
+   "name": "Antigravity CLI",
+   "skills": [
+    "antigravity-cli"
+   ],
+   "method": "archive",
+   "format": "tar",
+   "version": "1.4.4",
+   "url": "https://storage.googleapis.com/antigravity-public/antigravity-cli/1.4.4-4783783166214144/darwin-arm/cli_mac_arm64.tar.gz",
+   "sha256": "85482aa8969300183f71c9653d9f581248fba7f506342a8eb087f3d2503203bd",
+   "links": {
+    "agy": "antigravity"
+   },
+   "bin": "agy",
+   "source": "https://antigravity.google/docs/cli",
+   "check": [
+    "agy",
+    "--version"
+   ],
+   "updates": [
+    {
+     "env": {
+      "AGY_CLI_DISABLE_AUTO_UPDATE": "true"
+     }
+    }
+   ]
+  },
+  {
+   "id": "cursor-agent",
+   "name": "Cursor CLI",
+   "skills": [
+    "cursor"
+   ],
+   "method": "archive",
+   "format": "tar",
+   "version": "2026.10.19-6bbf2c4",
+   "url": "https://downloads.cursor.com/lab/2026.10.19-6bbf2c4/darwin/arm64/agent-cli-package.tar.gz",
+   "sha256": "095dccb923488d280aae697ba68c13a92bbd9ce1dc6105401e147e25869f2b13",
+   "links": {
+    "cursor-agent": "dist-package/cursor-agent",
+    "agent": "dist-package/cursor-agent"
+   },
+   "bin": "cursor-agent",
+   "source": "https://cursor.com/docs/cli/installation",
+   "check": [
+    "cursor-agent",
+    "--version"
+   ],
+   "updates": [
+    {
+     "json": {
+      "path": "~/.cursor/cli-config.json",
+      "set": {
+       "channel": "static"
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "warp-cli",
+   "name": "Warp Agent CLI",
+   "skills": [
+    "warp"
+   ],
+   "method": "archive",
+   "format": "tar",
+   "version": "0.2026.10.14.08.27.stable_03",
+   "url": "https://releases.warp.dev/stable/v0.2026.10.14.08.27.stable_03/tui/macos/aarch64/warp-tui-stable-macos-aarch64.tar.gz",
+   "sha256": "ea7c5b6206f541a201d3f818d2383ee619d941667a87799cc69803e0cbc47d91",
+   "links": {
+    "warp": "warp-tui-stable"
+   },
+   "bin": "warp",
+   "source": "https://docs.warp.dev/agents/cli/quickstart",
+   "check": [
+    "warp",
+    "--version"
+   ],
+   "updates": [
+    {
+     "env": {
+      "WARP_TUI_DISABLE_AUTOUPDATE": "1"
+     }
+    }
+   ]
+  },
+  {
+   "id": "devin-cli",
+   "name": "Devin for Terminal",
+   "skills": [
+    "devin"
+   ],
+   "method": "archive",
+   "format": "tar",
+   "version": "3000.11.92",
+   "url": "https://static.devin.ai/cli/3000.11.92/devin-3000.11.92-aarch64-apple-darwin.tar.gz",
+   "sha256": "6047392212ce073ede2724d84246cc04dd47811a1d1e2084eee7252703940ac1",
+   "links": {
+    "devin": "bin/devin"
+   },
+   "bin": "devin",
+   "source": "https://docs.devin.ai/cli",
+   "check": [
+    "devin",
+    "--version"
+   ],
+   "updates": [
+    {
+     "json": {
+      "path": "~/.config/devin/config.json",
+      "set": {
+       "auto_update": false
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "droid",
+   "name": "Droid (Factory)",
+   "skills": [
+    "droid"
+   ],
+   "method": "archive",
+   "format": "binary",
+   "version": "0.247.0",
+   "url": "https://downloads.factory.ai/factory-cli/releases/0.247.0/darwin/arm64/droid",
+   "sha256": "852ae6cd6ee6651bb916c030a5eb02b651e1e814db9dab1a0cfa77e63a8aa462",
+   "links": {
+    "droid": "droid"
+   },
+   "bin": "droid",
+   "source": "https://docs.factory.ai/cli/getting-started/quickstart",
+   "check": [
+    "droid",
+    "--version"
+   ],
+   "updates": [
+    {
+     "json": {
+      "path": "~/.factory/settings.json",
+      "set": {
+       "disableAutoUpdate": true
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "forgecode",
+   "name": "ForgeCode",
+   "skills": [
+    "forgecode"
+   ],
+   "method": "archive",
+   "format": "binary",
+   "version": "2.14.0",
+   "url": "https://github.com/tailcallhq/forgecode/releases/download/v2.14.0/forge-aarch64-apple-darwin",
+   "sha256": "cf1137552122c3477a9763e3a76d29464ea3863645bcaf1876925356a2266f47",
+   "links": {
+    "forge": "forge-aarch64-apple-darwin"
+   },
+   "bin": "forge",
+   "source": "https://github.com/tailcallhq/forgecode",
+   "check": [
+    "forge",
+    "--version"
+   ],
+   "updates": [
+    {
+     "toml": {
+      "path": "~/.forge/.forge.toml",
+      "table": "updates",
+      "set": {
+       "auto_update": false,
+       "frequency": "never"
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "goose",
+   "name": "Goose CLI",
+   "skills": [
+    "goose"
+   ],
+   "method": "archive",
+   "format": "tar",
+   "version": "1.55.0",
+   "url": "https://github.com/aaif-goose/goose/releases/download/v1.55.0/goose-aarch64-apple-darwin.tar.gz",
+   "sha256": "153425d6dc3a49afce85e70009eff87f6020e3ed029bb56fae1b523f7f2d8107",
+   "links": {
+    "goose": "goose"
+   },
+   "bin": "goose",
+   "source": "https://goose-docs.ai/docs/getting-started/installation",
+   "check": [
+    "goose",
+    "--version"
+   ],
+   "updates": []
+  },
+  {
+   "id": "fx",
+   "name": "fx",
+   "skills": [
+    "fx"
+   ],
+   "method": "archive",
+   "format": "tar",
+   "version": "0.0.14",
+   "url": "https://releases.fx.sh/v0.0.14/fx-macos-aarch64.tar.gz",
+   "sha256": "619c6dccf4e8cd6290ec4a052d29c8724b2a4b150d893435b3de9086c21fb7b1",
+   "links": {
+    "fx": "fx"
+   },
+   "bin": "fx",
+   "source": "https://fx.sh",
+   "check": [
+    "fx",
+    "--version"
+   ],
+   "updates": [
+    {
+     "json": {
+      "path": "~/.fx/settings.json",
+      "set": {
+       "auto_upgrade": false
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "inference-sh",
+   "name": "inference.sh (belt)",
+   "skills": [
+    "inference-sh"
+   ],
+   "method": "archive",
+   "format": "tar",
+   "version": "1.26.8",
+   "url": "https://dist.inference.sh/cli/v1.26.8/inferencesh-cli-v1.26.8-darwin-arm64.tar.gz",
+   "sha256": "43d8585be3f8d2bb6d1f5822f2f66ee6d15f793a0406a9d0ccf3bb12cdda8a9d",
+   "links": {
+    "belt": "inferencesh-cli-v1.26.8-darwin-arm64",
+    "infsh": "inferencesh-cli-v1.26.8-darwin-arm64"
+   },
+   "bin": "belt",
+   "source": "https://inference.sh/docs/extend/cli-setup",
+   "check": [
+    "belt",
+    "version"
+   ],
+   "updates": [
+    {
+     "env": {
+      "INFSH_NO_AUTOUPDATE": "1"
+     }
+    }
+   ]
+  },
+  {
+   "id": "junie",
+   "name": "Junie CLI",
+   "skills": [
+    "junie"
+   ],
+   "method": "archive",
+   "format": "zip",
+   "version": "3813.7",
+   "url": "https://github.com/JetBrains/junie/releases/download/3813.7/junie-release-3813.7-macos-aarch64.zip",
+   "sha256": "36f11ca9946add48a2a41cce9edaf2ca975c1443b5f11251beafb4e8718872ca",
+   "links": {
+    "junie": "Applications/junie.app/Contents/MacOS/junie"
+   },
+   "bin": "junie",
+   "source": "https://junie.jetbrains.com/docs/junie-cli.html",
+   "check": [
+    "junie",
+    "--version"
+   ],
+   "updates": [
+    {
+     "env": {
+      "JUNIE_SKIP_UPDATE_CHECK": "1"
+     }
+    }
+   ]
+  },
+  {
+   "id": "kimchi",
+   "name": "Kimchi",
+   "skills": [
+    "kimchi"
+   ],
+   "method": "archive",
+   "format": "tar",
+   "version": "1.17.2",
+   "url": "https://github.com/getkimchi/kimchi/releases/download/v1.17.2/kimchi_darwin_arm64.tar.gz",
+   "sha256": "7995f7ab1f00c8541d89a4e87c0bc4d25cbc91bcaca1b0b9a7dec715bbd27ad3",
+   "links": {
+    "kimchi": "bin/kimchi"
+   },
+   "bin": "kimchi",
+   "source": "https://docs.kimchi.dev/docs/kimchi-cli.md",
+   "check": [
+    "kimchi",
+    "--version"
+   ],
+   "updates": [
+    {
+     "env": {
+      "KIMCHI_NO_UPDATE_CHECK": "1"
+     }
+    }
+   ]
+  },
+  {
+   "id": "cortex-code",
+   "name": "Cortex Code",
+   "skills": [
+    "cortex"
+   ],
+   "method": "archive",
+   "format": "tar",
+   "version": "1.2.18+192728.aa2238062732",
+   "url": "https://sfc-repo.snowflakecomputing.com/cortex-code-cli/a4643c4278/1.2.18%2B192728.aa2238062732/coco-1.2.18%2B192728.aa2238062732-darwin-arm64.tar.gz",
+   "sha256": "0dc9e79466020ab550bc3639c2814fa3d2a5090b3f14dfddd834c3520202364d",
+   "links": {
+    "cortex": "coco-1.2.18+192728.aa2238062732-darwin-arm64/cortex"
+   },
+   "bin": "cortex",
+   "source": "https://docs.snowflake.com/en/user-guide/cortex-code/cortex-code-cli",
+   "check": [
+    "cortex",
+    "--version"
+   ],
+   "updates": [
+    {
+     "json": {
+      "path": "~/.snowflake/cortex/settings.json",
+      "set": {
+       "autoUpdate": false
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "codearts-agent",
+   "name": "CodeArts Agent CLI",
+   "skills": [
+    "codearts-agent"
+   ],
+   "method": "archive",
+   "format": "tar",
+   "version": "26.10.10",
+   "url": "https://apsoutheast1-cloudide-marketplace.obs.ap-southeast-1.myhuaweicloud.com/codearts/cli_tui/latest/codearts-install-26.10.10-darwin-arm64.tar.gz",
+   "sha256": "c3127296c938d5c42ffefbf1ff867000866c255730b30bdaf9860043080a5a13",
+   "links": {
+    "codearts": "codearts"
+   },
+   "bin": "codearts",
+   "source": "https://support.huaweicloud.com/intl/en-us/usermanual-cli/codeartsagent_cli_0005.html",
+   "check": [
+    "codearts",
+    "--version"
+   ],
+   "updates": [
+    {
+     "env": {
+      "OPENCODE_DISABLE_AUTOUPDATE": "1"
+     }
+    }
+   ]
+  },
+  {
+   "id": "ona",
+   "name": "Ona CLI",
+   "skills": [
+    "ona"
+   ],
+   "method": "archive",
+   "format": "binary",
+   "version": "20261020.11353.0",
+   "url": "https://releases.gitpod.io/cli/releases/20261020.11353.0/gitpod-darwin-arm64",
+   "sha256": "fb087a9014d136cac8b70254161430939e03ef491486251c9c3469f6bde54637",
+   "links": {
+    "ona": "gitpod-darwin-arm64"
+   },
+   "bin": "ona",
+   "source": "https://ona.com/docs/ona/integrations/cli",
+   "check": [
+    "ona",
+    "version"
+   ],
+   "updates": [
+    {
+     "command": [
+      "ona",
+      "config",
+      "set",
+      "--autoupdate=false"
+     ],
+     "verify": [
+      {
+       "path": "~/.ona/configuration.yaml",
+       "contains": "autoupdate: false"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "acli",
+   "name": "Atlassian CLI (Rovo Dev)",
+   "skills": [
+    "rovodev"
+   ],
+   "method": "archive",
+   "format": "tar",
+   "version": "1.3.39-stable",
+   "url": "https://acli.atlassian.com/darwin/1.3.39-stable/acli_1.3.39-stable_darwin_arm64.tar.gz",
+   "sha256": "29126bdb8072b126709f2d3ccaac581cd7f91b62afaa9046ae9c1d43b2e5b939",
+   "links": {
+    "acli": "acli_1.3.39-stable_darwin_arm64/acli"
+   },
+   "bin": "acli",
+   "source": "https://developer.atlassian.com/cloud/acli/guides/install-macos/",
+   "check": [
+    "acli",
+    "--version"
+   ],
+   "updates": []
+  },
+  {
+   "id": "tinycloud",
+   "name": "Tinycloud",
+   "skills": [
+    "tinycloud"
+   ],
+   "method": "archive",
+   "format": "tar",
+   "version": "0.3.25",
+   "url": "https://media.cloudglue.dev/tinycloud-dist/tinycloud-darwin-arm64-v0.3.25.tar.gz",
+   "sha256": "cf8a3dfb8ac79de2f2a8c24b269a629e71d02c4f9e2f7a3f91204892a82fd577",
+   "links": {
+    "tinycloud": "tinycloud"
+   },
+   "bin": "tinycloud",
+   "source": "https://tinycloud.sh",
+   "check": [
+    "tinycloud",
+    "--version"
+   ],
+   "updates": []
+  },
+  {
+   "id": "crush",
+   "name": "Crush",
+   "skills": [
+    "crush"
+   ],
+   "method": "archive",
+   "format": "tar",
+   "version": "0.98.1",
+   "url": "https://github.com/charmbracelet/crush/releases/download/v0.98.1/crush_0.98.1_Darwin_arm64.tar.gz",
+   "sha256": "178710f9e43abd3f1df29756309950f42ed229737e4f2fb9bc5f36aeff07a3c3",
+   "links": {
+    "crush": "crush_0.98.1_Darwin_arm64/crush"
+   },
+   "bin": "crush",
+   "source": "https://github.com/charmbracelet/crush",
+   "check": [
+    "crush",
+    "--version"
+   ],
+   "updates": []
+  },
+  {
+   "id": "grok-build",
+   "name": "Grok Build",
+   "skills": [
+    "grok"
+   ],
+   "method": "archive",
+   "format": "binary",
+   "version": "1.0.67",
+   "url": "https://x.ai/cli/grok-1.0.67-macos-aarch64",
+   "sha256": "036a47ce2987adae04de827f7803bf0cc460bf169b640db168f18ec7acb734db",
+   "links": {
+    "grok": "grok-1.0.67-macos-aarch64"
+   },
+   "bin": "grok",
+   "source": "https://github.com/xai-org/grok-build",
+   "check": [
+    "grok",
+    "--version"
+   ],
+   "updates": [
+    {
+     "env": {
+      "GROK_DISABLE_AUTOUPDATER": "1"
+     }
+    },
+    {
+     "toml": {
+      "path": "~/.grok/config.toml",
+      "table": "cli",
+      "set": {
+       "auto_update": false
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "hermes-agent",
+   "name": "Hermes Agent",
+   "skills": [
+    "hermes-agent"
+   ],
+   "method": "script",
+   "version": "0.22.4",
+   "url": "https://hermes-agent.nousresearch.com/install.sh",
+   "sha256": "cff8ffb7d63da7287f5368017dc5299f33d9c147381252cae5c926c80e9fded7",
+   "args": [
+    "--commit",
+    "4d04303818b61bf3aa09278af48356315515965b",
+    "--skip-setup",
+    "--skip-browser",
+    "--skip-computer-use"
+   ],
+   "bin": "hermes",
+   "source": "https://hermes-agent.nousresearch.com/docs/getting-started/installation",
+   "check": [
+    "hermes",
+    "--version"
+   ],
+   "updates": [
+    {
+     "command": [
+      "hermes",
+      "config",
+      "set",
+      "updates.check",
+      "false"
+     ],
+     "verify": [
+      {
+       "path": "~/.hermes/config.yaml",
+       "contains": "check: false"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "openclaw",
+   "name": "OpenClaw",
+   "skills": [
+    "openclaw"
+   ],
+   "method": "npm-node",
+   "package": "openclaw",
+   "version": "2026.10.5",
+   "entry": "openclaw.mjs",
+   "bin": "openclaw",
+   "node": {
+    "version": "24.22.1",
+    "url": "https://nodejs.org/dist/v24.22.1/node-v24.22.1-darwin-arm64.tar.gz",
+    "sha256": "89c682593d76cd44233fa53b1563264e7de9cbb189cad169135c5b4fadfbc0a7"
+   },
+   "source": "https://docs.openclaw.ai/install",
+   "check": [
+    "openclaw",
+    "--version"
+   ],
+   "updates": [
+    {
+     "env": {
+      "OPENCLAW_NO_AUTO_UPDATE": "1"
+     }
+    }
+   ]
+  },
+  {
+   "id": "cursor",
+   "name": "Cursor",
+   "skills": [
+    "cursor"
+   ],
+   "method": "app",
+   "format": "zip",
+   "version": "3.26.16",
+   "url": "https://downloads.cursor.com/production/8fcb8ace5c73fa31f2e2707fd6783160e4ed3e49/darwin/arm64/Cursor-darwin-arm64.zip",
+   "sha256": "c25c9bf61b29c76c2daecc3e626884c746cf8476bbc0be450b52cdfd8c27a192",
+   "app": "Cursor.app",
+   "bundleId": "com.todesktop.230313mzl4w4u92",
+   "bundleVersion": "3.26.16",
+   "links": {
+    "cursor": "Contents/Resources/app/bin/cursor"
+   },
+   "source": "https://cursor.com/download",
+   "check": [
+    "cursor",
+    "--version"
+   ],
+   "updates": [
+    {
+     "json": {
+      "path": "~/Library/Application Support/Cursor/User/settings.json",
+      "set": {
+       "update.mode": "none"
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "windsurf",
+   "name": "Windsurf (Devin Desktop)",
+   "skills": [
+    "windsurf"
+   ],
+   "method": "app",
+   "format": "dmg",
+   "version": "3.10.67",
+   "url": "https://windsurf-stable.codeiumdata.com/darwin-arm64-dmg/stable/0b186d6e13a1a48a46430c51fe414dd0747d46f6/Devin-darwin-arm64-3.10.67.dmg",
+   "sha256": "d475af85b9399c02bc7d80699eb2f6ca4bc625874b1cb0ca2007295e14c24b1b",
+   "app": "Devin.app",
+   "bundleId": "com.exafunction.windsurf",
+   "bundleVersion": "3.10.67",
+   "links": {
+    "devin-desktop": "Contents/Resources/app/bin/devin-desktop"
+   },
+   "source": "https://docs.devin.ai/desktop/devin-desktop-faq",
+   "check": [
+    "devin-desktop",
+    "--version"
+   ],
+   "updates": [
+    {
+     "json": {
+      "path": "~/Library/Application Support/Devin/User/settings.json",
+      "set": {
+       "update.mode": "none"
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "zed",
+   "name": "Zed",
+   "skills": [
+    "zed"
+   ],
+   "method": "app",
+   "format": "dmg",
+   "version": "1.25.2",
+   "url": "https://github.com/zed-industries/zed/releases/download/v1.25.2/Zed-aarch64.dmg",
+   "sha256": "c427b19bb0d55f5bd99391b21e7bda0dcf892abd80dbc020ef645c9d86457940",
+   "app": "Zed.app",
+   "bundleId": "dev.zed.Zed",
+   "bundleVersion": "1.25.2",
+   "links": {
+    "zed": "Contents/MacOS/cli"
+   },
+   "source": "https://zed.dev/docs/installation",
+   "check": [
+    "zed",
+    "--version"
+   ],
+   "updates": [
+    {
+     "json": {
+      "path": "~/.config/zed/settings.json",
+      "set": {
+       "auto_update": false
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "trae",
+   "name": "Trae",
+   "skills": [
+    "trae"
+   ],
+   "method": "app",
+   "format": "dmg",
+   "version": "2.3.61406",
+   "url": "https://lf-cdn.trae.ai/obj/trae-ai-us/pkg/app/releases/stable/2.3.61406/darwin/Trae-darwin-arm64.dmg",
+   "sha256": "b8064ce3461dd899dbfa6e3b46ebdaf5ae045c1eaad580eff3513947dbc336f8",
+   "app": "Trae.app",
+   "bundleId": "com.trae.app",
+   "bundleVersion": "3.5.81",
+   "links": {
+    "trae": "Contents/Resources/app/bin/trae"
+   },
+   "source": "https://docs.trae.ai/ide/download",
+   "check": [
+    "trae",
+    "--version"
+   ],
+   "updates": [
+    {
+     "json": {
+      "path": "~/Library/Application Support/Trae/User/settings.json",
+      "set": {
+       "update.mode": "none"
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "trae-cn",
+   "name": "Trae CN",
+   "skills": [
+    "trae-cn"
+   ],
+   "method": "app",
+   "format": "dmg",
+   "version": "2.3.62837",
+   "url": "https://lf-cdn.trae.com.cn/obj/trae-com-cn/pkg/app/releases/stable/2.3.62837/darwin/Trae_CN-darwin-arm64.dmg",
+   "sha256": "b8a033c4a4ebbd4802a14d517f802e12c506504edfe2fe957ecde700ae615b64",
+   "app": "Trae CN.app",
+   "bundleId": "cn.trae.app",
+   "bundleVersion": "3.3.83",
+   "links": {
+    "trae-cn": "Contents/Resources/app/bin/trae-cn"
+   },
+   "source": "https://www.trae.cn/download",
+   "check": [
+    "trae-cn",
+    "--version"
+   ],
+   "updates": [
+    {
+     "json": {
+      "path": "~/Library/Application Support/Trae CN/User/settings.json",
+      "set": {
+       "update.mode": "none"
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "antigravity",
+   "name": "Antigravity",
+   "skills": [
+    "antigravity"
+   ],
+   "method": "app",
+   "format": "dmg",
+   "version": "2.25.0",
+   "url": "https://storage.googleapis.com/antigravity-public/antigravity-hub/2.25.0-6535192714805248/darwin-arm/Antigravity.dmg",
+   "sha256": "a61814653f617b8dec7815427364ee29b5a4811f8d401df9bc60308171e96bd3",
+   "app": "Antigravity.app",
+   "bundleId": "com.google.antigravity",
+   "bundleVersion": "2.25.0",
+   "links": {},
+   "source": "https://antigravity.google/docs/getting-started",
+   "check": null,
+   "updates": [
+    {
+     "json": {
+      "path": "~/Library/Application Support/Antigravity/app_storage.json",
+      "set": {
+       "autoCheckForUpdates": "false"
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "kiro-cli",
+   "name": "Kiro CLI",
+   "skills": [
+    "kiro-cli"
+   ],
+   "method": "app",
+   "format": "dmg",
+   "version": "2.33.1",
+   "url": "https://desktop-release.q.us-east-1.amazonaws.com/2.33.1/Kiro%20CLI.dmg",
+   "sha256": "f544b4f9de51a457e1ed0849ffdf2be7b6b70af491330006b01cb71fa2111f44",
+   "app": "Kiro CLI.app",
+   "bundleId": "com.amazon.codewhisperer",
+   "bundleVersion": "2.33.1",
+   "links": {
+    "kiro-cli": "Contents/MacOS/kiro-cli"
+   },
+   "source": "https://kiro.dev/docs/cli/installation/",
+   "check": [
+    "kiro-cli",
+    "--version"
+   ],
+   "updates": [
+    {
+     "command": [
+      "kiro-cli",
+      "settings",
+      "app.disableAutoupdates",
+      "true"
+     ],
+     "verify": [
+      {
+       "path": "~/.kiro/settings/cli.json",
+       "contains": "\"app.disableAutoupdates\": true"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "code-studio",
+   "name": "Syncfusion Code Studio",
+   "skills": [
+    "codestudio"
+   ],
+   "method": "app",
+   "format": "dmg",
+   "version": "2.0.5",
+   "url": "https://downloads.sfcodestudio.com/v2.0.5/mac-silicon/syncfusioncodestudio.dmg",
+   "sha256": "033537f10ad2cd2c3f648e7ce6f5926520cf2be6f498c0e0c114e1a4d76b70b4",
+   "app": "Syncfusion Code Studio.app",
+   "bundleId": "com.syncfusion.code.studio",
+   "bundleVersion": "2.0.5",
+   "links": {
+    "sfcode": "Contents/Resources/app/bin/sfcode"
+   },
+   "source": "https://help.syncfusion.com/code-studio/getting-started/install-and-configuration",
+   "check": [
+    "sfcode",
+    "--version"
+   ],
+   "updates": [
+    {
+     "json": {
+      "path": "~/Library/Application Support/Syncfusion Code Studio/User/settings.json",
+      "set": {
+       "update.mode": "none"
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "positron",
+   "name": "Positron (Posit Assistant)",
+   "skills": [
+    "posit-assistant"
+   ],
+   "method": "app",
+   "format": "zip",
+   "version": "2026.10.1-2",
+   "url": "https://cdn.posit.co/positron/releases/mac/arm64/Positron-darwin-2026.10.1-2-arm64.zip",
+   "sha256": "23e2f9eed067b540650d78ec252e8b53aad10098665a0050b507f20144e70400",
+   "app": "Positron.app",
+   "bundleId": "co.posit.positron",
+   "bundleVersion": "1.134.0",
+   "links": {},
+   "source": "https://assistant.posit.co/docs/",
+   "check": null,
+   "updates": [
+    {
+     "json": {
+      "path": "~/Library/Application Support/Positron/User/settings.json",
+      "set": {
+       "update.mode": "none"
+      }
+     }
+    }
+   ]
+  }
+ ]
+}

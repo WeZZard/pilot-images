@@ -7,8 +7,9 @@
 # Software changes only in a controlled maintenance boot (host/refresh-base.zsh),
 # which runs the ~/.refresh.d scripts and then this phase again. Physical Macs
 # keep their nightly crontab: metal/bootstrap.zsh runs metal/updates.zsh in place
-# of this phase. This phase runs last, so it also decides the promoted image's
-# macOS update switches.
+# of this phase. This is the last phase that touches the macOS update switches
+# (phase 85, the coding agents, after it touches none), so it decides the
+# promoted image's state.
 source "${0:A:h}/lib.zsh"
 export NVM_DIR="$HOME/.nvm"
 source "$NVM_DIR/nvm.sh"
