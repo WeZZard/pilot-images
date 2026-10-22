@@ -209,6 +209,23 @@ else
   if crontab -l 2>/dev/null | grep -q "crontab.d"; then ok "update crontab installed (metal)"; else bad "update crontab missing (metal)"; fi
 fi
 
+# --- coding agents (phase 85; VM image only, metal runs phases 00-60) ---
+# The pin is guest/coding-agents.lock.json, read the same way as unity.lock. The
+# helper prints one PASS/FAIL line per assertion: the pinned version is the one
+# installed, its command is on PATH, it prints its version with stdin closed
+# (a sign-in prompt is a timeout), and its updater switch is in place.
+if [[ "$(sysctl -n kern.hv_vmm_present 2>/dev/null)" == 1 ]]; then
+  _cal=""
+  for _c in "${0:A:h}/../guest" /tmp/payload/guest /tmp/payload/images/macos15/guest; do
+    if [[ -f "$_c/coding-agents.lock.json" && -f "$_c/coding-agents.py" ]]; then _cal="$_c"; break; fi
+  done
+  if [[ -n "$_cal" ]]; then
+    /usr/bin/python3 -I "$_cal/coding-agents.py" verify --lock "$_cal/coding-agents.lock.json" || FAIL=1
+  else
+    bad "coding-agents.lock.json not staged"
+  fi
+fi
+
 # --- Xcode (reports SKIP when phase 20 has not run yet) ---
 if [[ -d /Applications/Xcode.app ]]; then
   if xcodebuild -version 2>/dev/null | grep -q "${XCODE_VERSION:-26.6}"; then
