@@ -66,8 +66,12 @@ def bounded(argv, env, timeout):
     merged['CI'] = merged.get('CI', '1')
     merged['NO_COLOR'] = '1'
     with tempfile.TemporaryFile() as out:
-        process = subprocess.Popen(argv, stdin=subprocess.DEVNULL, stdout=out, stderr=subprocess.STDOUT,
-                                   env=merged, start_new_session=True)
+        try:
+            process = subprocess.Popen(argv, stdin=subprocess.DEVNULL, stdout=out, stderr=subprocess.STDOUT,
+                                       env=merged, start_new_session=True)
+        except OSError as error:
+            # A missing command is one failed row, not the end of the report.
+            return None, str(error)
         try:
             code = process.wait(timeout=timeout)
         except subprocess.TimeoutExpired:

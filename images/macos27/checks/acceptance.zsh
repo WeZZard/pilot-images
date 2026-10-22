@@ -36,6 +36,25 @@ else
 fi
 rm -f /tmp/dispchk /tmp/dispchk.swift
 
+# --- disk: the system APFS container fills the virtual disk (phase 00) ---
+# Judged by what no partition covers, not by a resize's exit status: on an
+# ASIF disk Tart has already grown the container and the guest resize fails.
+if [[ "$(sysctl -n kern.hv_vmm_present 2>/dev/null)" == 1 ]]; then
+  _store=$(diskutil info -plist / | plutil -extract APFSPhysicalStores.0.APFSPhysicalStore raw -o - - 2>/dev/null)
+  _whole=$(diskutil info -plist "$_store" 2>/dev/null | plutil -extract ParentWholeDisk raw -o - - 2>/dev/null)
+  _plist=$(diskutil list -plist "$_whole" 2>/dev/null)
+  _total=$(diskutil info -plist "$_whole" 2>/dev/null | plutil -extract TotalSize raw -o - - 2>/dev/null)
+  _sum=0; _i=0
+  while _sz=$(print -r -- "$_plist" | plutil -extract "AllDisksAndPartitions.0.Partitions.$_i.Size" raw -o - - 2>/dev/null); do
+    _sum=$(( _sum + _sz )); _i=$(( _i + 1 ))
+  done
+  if [[ -n "$_store" && -n "$_total" ]] && (( _i > 0 && _total - _sum < 1073741824 )); then
+    ok "APFS container on $_store fills $_whole ($(( _total / 1000000000 )) GB disk)"
+  else
+    bad "APFS container on ${_store:-?} does not fill ${_whole:-?}: $(( (${_total:-0} - _sum) / 1073741824 )) GiB unallocated"
+  fi
+fi
+
 # --- first-launch dialogs (nothing headless can answer a modal) ---
 typeset -a QUARANTINED
 QUARANTINED=()
