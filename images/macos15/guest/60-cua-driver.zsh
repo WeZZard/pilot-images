@@ -50,6 +50,20 @@ else
   sudo killall tccd 2>/dev/null || true
   glog "TCC grants written for $BID (Accessibility + Screen Recording)"
 
+  # Since cua-driver 0.37.0 a capture refuses with direct_capture_consent_required
+  # until macOS has shown its once-per-app screen-capture alert. That record lives
+  # in replayd's approvals, not in TCC, so pre-record it as the vendor's own CI
+  # does (trycua/cua scripts/ci/macos/run-hosted-rust-e2e.sh at 8347d6c).
+  APPROVALS="$HOME/Library/Group Containers/group.com.apple.replayd/ScreenCaptureApprovals.plist"
+  mkdir -p "${APPROVALS:h}"
+  defaults write "$APPROVALS" "$BID" -dict \
+    kScreenCaptureApprovalLastAlerted -date "3024-01-01 00:00:00 +0000" \
+    kScreenCaptureApprovalLastUsed -date "3024-01-01 00:00:00 +0000"
+  killall -HUP replayd 2>/dev/null || true
+  defaults read "$APPROVALS" "$BID" | grep -q kScreenCaptureApprovalLastAlerted \
+    || { glog "screen-capture approval for $BID was not stored"; exit 1 }
+  glog "screen-capture approval recorded for $BID"
+
   # Bring the daemon up now as a proper launchd job so acceptance can verify it.
   sudo launchctl bootstrap "gui/$UIDN" ~/Library/LaunchAgents/com.trycua.driver.serve.plist 2>/dev/null \
     || sudo launchctl kickstart -k "gui/$UIDN/com.trycua.driver.serve"
