@@ -144,6 +144,21 @@ class CoverageTests(unittest.TestCase):
             self.assertIn('| `%s` |' % skill, section)
 
 
+class ResolutionDateTests(unittest.TestCase):
+    def test_lock_carries_a_utc_resolution_date(self):
+        self.assertRegex(LOCK['resolvedBefore'], r'^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$')
+
+    def test_npm_and_uv_resolve_at_the_lock_date(self):
+        helper = load_helper()
+        self.assertEqual(helper.resolution_env(LOCK),
+                         {'npm_config_before': LOCK['resolvedBefore'], 'UV_EXCLUDE_NEWER': LOCK['resolvedBefore']})
+
+    def test_resolution_date_stays_out_of_the_shell_profile(self):
+        helper = load_helper()
+        self.assertNotIn('npm_config_before', helper.agent_env(LOCK))
+        self.assertNotIn('UV_EXCLUDE_NEWER', helper.agent_env(LOCK))
+
+
 class LineParityTests(unittest.TestCase):
     def block(self, text, start, end):
         return text[text.index(start):text.index(end)]
