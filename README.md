@@ -133,6 +133,35 @@ VM_ENVIRONMENT_FILE=/absolute/profiles/image-dev.json \
 - Base refresh cadence: monthly maintenance boot (register as an
   agentic-continuation task once the base is promoted).
 
+### Updating the pinned software
+
+A maintenance boot refreshes only what floats. Everything pinned moves with
+two scripts, on a branch:
+
+```sh
+python3 host/update-software.py check            # what has a newer release; changes nothing
+host/update-images.zsh macos26 macos27           # apply, test, commit, rebuild each line
+host/promote-base.zsh macos27                    # after the manual doctrine checks
+```
+
+- `update-software.py` reads every pin: `line.conf` (Python, the newest patch
+  of its minor that the newest pyenv can build; nvm), `seed.lock`,
+  `guest/unity.lock`, and `guest/coding-agents.lock.json` (with its
+  `resolvedBefore`, the README table and each agent's `PLAN.md`). A new
+  Xcode or a new Node or Python major is reported, not applied.
+- An npm, PyPI or GitHub-release pin needs nothing more. Any other vendor
+  download names its feed in the lock entry's `release` object; the script's
+  docstring describes the format. A vendor with no feed carries
+  `"feed": "none"` and a reason, and is checked by hand.
+- `apply` fetches each new download once into `~/.cache/pilot-images/downloads`,
+  checks it against the feed's sha256 when there is one, and reads it without
+  running it: archives must hold every link target, and apps must keep their
+  bundle id; the app's version becomes `bundleVersion`.
+- A probe output it cannot derive (`expect`) is kept and listed; phase 85's
+  verify prints the real output, which goes into the lock.
+- `update-images.zsh` sets the previous seed copy and work VM aside under a
+  dated suffix instead of deleting them, and builds one line at a time.
+
 ## Images
 
 - `images/macos26/` — active. Seed: cirruslabs macos-tahoe-base (ships an
@@ -231,8 +260,10 @@ under "Updaters without an off switch" below.
 - A maintenance boot's `npm update -g` would move the npm agents past their
   pins, so `host/refresh-base.zsh` runs phase 85 again after phase 70. It
   reinstalls only what moved.
-- To move a pin, edit the lock (version, URL and sha256 together) and
-  rebuild with `host/build-base.zsh <line> --from-phase 85`.
+- To move the pins, run `host/update-software.py apply` (see "Updating the
+  pinned software"); to move one by hand, edit the lock (version, URL and
+  sha256 together). Then rebuild, or resume with
+  `host/build-base.zsh <line> --from-phase 85` when only agents moved.
 
 | Agent | `skills` id | Method | Package, app or command | Version |
 |---|---|---|---|---|

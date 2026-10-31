@@ -277,3 +277,21 @@ Owner decisions that shape the images in this repo. Newest first.
   single-phase run (`--phase 65`) on a work clone of the base rather than a
   multi-hour rebuild from the seed, with the normal evidence and promotion
   steps, and keep the previous base as `pilot-macos26-base-prev-20260926`.
+
+## 2026-11-01 — One script moves every pin; the macOS lines are rebuilt from it
+
+- **Decision (WeZZard):** update all the software in the macOS 26 and 27
+  images, keep doing so regularly, and keep the process as scripts in this
+  repo.
+- **How (agent):** `host/update-software.py` finds the newest release of every
+  pin (line.conf, seed.lock, unity.lock, the coding-agents lock) and, with
+  `apply`, rewrites it, hashing and reading each new download without running
+  it. Each vendor download names its release feed in the lock (`release`);
+  GitHub release downloads and npm and PyPI packages need none.
+  `host/update-images.zsh` chains apply, the tests, a commit and a fresh build
+  of each line; promotion stays manual. Python stays on 3.14 and Node on 22:
+  a new major is reported, not applied.
+- **Found while doing it (agent):** cua-driver 0.37.0 and later refuse capture
+  until macOS has shown its once-per-app screen-capture alert, which TCC rows
+  do not record. Phase 60 now pre-records that approval the way the vendor's
+  own CI does.

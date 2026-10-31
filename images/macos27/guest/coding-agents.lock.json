@@ -818,7 +818,15 @@
       "AGY_CLI_DISABLE_AUTO_UPDATE": "true"
      }
     }
-   ]
+   ],
+   "release": {
+    "feed": "json",
+    "url": "https://antigravity-cli-auto-updater-974169037036.us-central1.run.app/manifests/darwin_arm64.json",
+    "pick": {
+     "version": "version",
+     "url": "url"
+    }
+   }
   },
   {
    "id": "cursor-agent",
@@ -853,6 +861,13 @@
    ],
    "probeEnv": {
     "AGENT_CLI_CREDENTIAL_STORE": "memory"
+   },
+   "release": {
+    "feed": "text",
+    "url": "https://cursor.com/install",
+    "pick": {
+     "version": "downloads\\.cursor\\.com/lab/(?P<version>[^/]+)/"
+    }
    }
   },
   {
@@ -881,7 +896,14 @@
       "WARP_TUI_DISABLE_AUTOUPDATE": "1"
      }
     }
-   ]
+   ],
+   "release": {
+    "feed": "redirect",
+    "url": "https://app.warp.dev/download/agent-cli/artifact?os=macos&arch=aarch64",
+    "pick": {
+     "version": "/stable/v(?P<version>[^/]+)/"
+    }
+   }
   },
   {
    "id": "devin-cli",
@@ -912,7 +934,16 @@
       }
      }
     }
-   ]
+   ],
+   "release": {
+    "feed": "json",
+    "url": "https://static.devin.ai/cli/current/manifest.json",
+    "pick": {
+     "version": "version",
+     "url": "platforms.aarch64-apple-darwin.url",
+     "sha256": "platforms.aarch64-apple-darwin.sha256"
+    }
+   }
   },
   {
    "id": "droid",
@@ -943,7 +974,11 @@
       }
      }
     }
-   ]
+   ],
+   "release": {
+    "feed": "text",
+    "url": "https://downloads.factory.ai/factory-cli/LATEST"
+   }
   },
   {
    "id": "forgecode",
@@ -1029,7 +1064,11 @@
       }
      }
     }
-   ]
+   ],
+   "release": {
+    "feed": "text",
+    "url": "https://releases.fx.sh/latest.txt"
+   }
   },
   {
    "id": "inference-sh",
@@ -1058,7 +1097,16 @@
       "INFSH_NO_AUTOUPDATE": "1"
      }
     }
-   ]
+   ],
+   "release": {
+    "feed": "json",
+    "url": "https://dist.inference.sh/cli/manifest.json",
+    "pick": {
+     "version": "version",
+     "url": "builds.darwin-arm64.url",
+     "sha256": "builds.darwin-arm64.sha256"
+    }
+   }
   },
   {
    "id": "junie",
@@ -1145,7 +1193,11 @@
       }
      }
     }
-   ]
+   ],
+   "release": {
+    "feed": "text",
+    "url": "https://sfc-repo.snowflakecomputing.com/cortex-code-cli/a4643c4278/stable_version.txt"
+   }
   },
   {
    "id": "codearts-agent",
@@ -1177,7 +1229,11 @@
    "moves": {
     "agentkernel": "bin/codearts"
    },
-   "wrap": true
+   "wrap": true,
+   "release": {
+    "feed": "none",
+    "reason": "The download bucket cannot be listed and the docs page is behind a CAPTCHA."
+   }
   },
   {
    "id": "ona",
@@ -1214,7 +1270,16 @@
       }
      ]
     }
-   ]
+   ],
+   "release": {
+    "feed": "json",
+    "url": "https://releases.gitpod.io/cli/stable/manifest.json",
+    "pick": {
+     "version": "version",
+     "url": "downloads.darwin-arm64.url",
+     "sha256": "downloads.darwin-arm64.digest"
+    }
+   }
   },
   {
    "id": "acli",
@@ -1236,7 +1301,11 @@
     "acli",
     "--version"
    ],
-   "updates": []
+   "updates": [],
+   "release": {
+    "feed": "none",
+    "reason": "Atlassian publishes only an unversioned latest/ tarball, with no version file."
+   }
   },
   {
    "id": "tinycloud",
@@ -1258,7 +1327,16 @@
     "tinycloud",
     "--version"
    ],
-   "updates": []
+   "updates": [],
+   "release": {
+    "feed": "json",
+    "url": "https://media.cloudglue.dev/tinycloud-dist/manifest.json",
+    "pick": {
+     "version": "channels.stable",
+     "url": "versions.{version}.platforms.darwin-arm64.url",
+     "sha256": "versions.{version}.platforms.darwin-arm64.sha256"
+    }
+   }
   },
   {
    "id": "crush",
@@ -1317,7 +1395,11 @@
       }
      }
     }
-   ]
+   ],
+   "release": {
+    "feed": "text",
+    "url": "https://x.ai/cli/stable"
+   }
   },
   {
    "id": "hermes-agent",
@@ -1358,7 +1440,12 @@
       }
      ]
     }
-   ]
+   ],
+   "release": {
+    "feed": "github",
+    "repo": "NousResearch/hermes-agent",
+    "download": "https://raw.githubusercontent.com/NousResearch/hermes-agent/{commit}/scripts/install.sh"
+   }
   },
   {
    "id": "openclaw",
@@ -1420,7 +1507,16 @@
       }
      }
     }
-   ]
+   ],
+   "release": {
+    "feed": "json",
+    "url": "https://api2.cursor.sh/updates/api/download/stable/darwin-arm64/cursor",
+    "pick": {
+     "version": "version",
+     "commit": "commitSha"
+    },
+    "download": "https://downloads.cursor.com/production/{commit}/darwin/arm64/Cursor-darwin-arm64.zip"
+   }
   },
   {
    "id": "windsurf",
@@ -1454,7 +1550,18 @@
      }
     }
    ],
-   "expect": "0b186d6e13a1a48a46430c51fe414dd0747d46f6"
+   "expect": "0b186d6e13a1a48a46430c51fe414dd0747d46f6",
+   "release": {
+    "feed": "json",
+    "url": "https://windsurf-stable.codeium.com/api/update/darwin-arm64-dmg/stable/latest",
+    "pick": {
+     "version": "windsurfVersion",
+     "commit": "version",
+     "url": "url",
+     "sha256": "sha256hash"
+    },
+    "expect": "{commit}"
+   }
   },
   {
    "id": "zed",
@@ -1521,7 +1628,16 @@
      }
     }
    ],
-   "expect": "1d77c78ec48282dc114875a57a2269199d898538"
+   "expect": "1d77c78ec48282dc114875a57a2269199d898538",
+   "release": {
+    "feed": "json",
+    "url": "https://icube-normal.traeapi.us/icube/api/v1/native/version/trae/latest",
+    "pick": {
+     "url": "data.manifest.darwin.download[region=va].apple"
+    },
+    "download": "https://lf-cdn.trae.ai/obj/trae-ai-us/pkg/app/releases/stable/{version}/darwin/TRAE-darwin-arm64.dmg",
+    "expect": "{commit}"
+   }
   },
   {
    "id": "trae-cn",
@@ -1555,7 +1671,16 @@
      }
     }
    ],
-   "expect": "428b3440427a64b51632df94fd7d6611443d246b"
+   "expect": "428b3440427a64b51632df94fd7d6611443d246b",
+   "release": {
+    "feed": "json",
+    "url": "https://api.trae.cn/icube/api/v1/native/version/trae/cn/latest",
+    "pick": {
+     "url": "data.manifest.darwin.download[region=cn].apple"
+    },
+    "download": "https://lf-cdn.trae.com.cn/obj/trae-com-cn/pkg/app/releases/stable/{version}/darwin/TRAE_CN-darwin-arm64.dmg",
+    "expect": "{commit}"
+   }
   },
   {
    "id": "antigravity",
@@ -1583,7 +1708,16 @@
       }
      }
     }
-   ]
+   ],
+   "release": {
+    "feed": "json",
+    "url": "https://antigravity-hub-auto-updater-974169037036.us-central1.run.app/releases",
+    "pick": {
+     "version": "0.version",
+     "build": "0.execution_id"
+    },
+    "download": "https://storage.googleapis.com/antigravity-public/antigravity-hub/{version}-{build}/darwin-arm/Antigravity.dmg"
+   }
   },
   {
    "id": "kiro-cli",
@@ -1622,7 +1756,16 @@
       }
      ]
     }
-   ]
+   ],
+   "release": {
+    "feed": "json",
+    "url": "https://desktop-release.q.us-east-1.amazonaws.com/latest/manifest.json",
+    "pick": {
+     "version": "version",
+     "sha256": "packages[fileType=dmg].sha256"
+    },
+    "download": "https://desktop-release.q.us-east-1.amazonaws.com/{version}/Kiro%20CLI.dmg"
+   }
   },
   {
    "id": "code-studio",
@@ -1655,7 +1798,11 @@
       }
      }
     }
-   ]
+   ],
+   "release": {
+    "feed": "none",
+    "reason": "Syncfusion publishes release notes only, with no machine-readable version feed."
+   }
   },
   {
    "id": "positron",
@@ -1683,7 +1830,16 @@
       }
      }
     }
-   ]
+   ],
+   "release": {
+    "feed": "json",
+    "url": "https://cdn.posit.co/positron/releases/mac/arm64/releases.json",
+    "pick": {
+     "version": "version",
+     "url": "url",
+     "sha256": "sha256hash"
+    }
+   }
   },
   {
    "id": "minimax-code",
@@ -1708,7 +1864,15 @@
       "file.cdn.minimax.io"
      ]
     }
-   ]
+   ],
+   "release": {
+    "feed": "text",
+    "url": "https://file.cdn.minimax.io/public/minimax-agent-prod/release/latest-mac.yml",
+    "pick": {
+     "version": "^version: (?P<version>\\S+)"
+    },
+    "download": "https://file.cdn.minimax.io/public/minimax-agent-prod/release/MiniMax%20Code-{version}-arm64.dmg"
+   }
   },
   {
    "id": "zcode",
@@ -1744,7 +1908,14 @@
    "probeEnv": {
     "ELECTRON_RUN_AS_NODE": "1"
    },
-   "expect": "0.17.0"
+   "expect": "0.17.0",
+   "release": {
+    "feed": "text",
+    "url": "https://zcode.z.ai/",
+    "pick": {
+     "version": "releases/(?P<version>\\d+(?:\\.\\d+)+)/macos-arm64/ZCode-"
+    }
+   }
   },
   {
    "id": "zenflow",
@@ -1776,7 +1947,11 @@
      ]
     }
    ],
-   "expect": "0.54.0"
+   "expect": "0.54.0",
+   "release": {
+    "feed": "none",
+    "reason": "The site links only an unversioned latest/Zenflow.dmg, and no feed names the stable version."
+   }
   },
   {
    "id": "aider-desk",
