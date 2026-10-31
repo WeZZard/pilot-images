@@ -208,6 +208,10 @@ under "Updaters without an off switch" below.
 - Every entry is pinned: an exact npm or PyPI version, or a vendor download
   with its sha256. Homebrew is not used, because a formula's version comes
   from the image's cached API metadata and cannot be pinned.
+- A vendor download's URL names its version, build or commit, so its sha256
+  cannot go stale: Hermes's installer comes from the repository at the
+  release's commit, not from `hermes-agent.nousresearch.com/install.sh`, which
+  serves the newest script on the vendor's main branch.
 - Desktop apps are copied into `/Applications` unquarantined after
   `codesign --verify --deep --strict`, and their bundle id and version are
   checked against the lock.

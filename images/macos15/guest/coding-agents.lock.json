@@ -1326,8 +1326,8 @@
    ],
    "method": "script",
    "version": "0.22.4",
-   "url": "https://hermes-agent.nousresearch.com/install.sh",
-   "sha256": "cff8ffb7d63da7287f5368017dc5299f33d9c147381252cae5c926c80e9fded7",
+   "url": "https://raw.githubusercontent.com/NousResearch/hermes-agent/4d04303818b61bf3aa09278af48356315515965b/scripts/install.sh",
+   "sha256": "20f44240ebada354a468104a6a6724d037afcb8883d4d09ddeb4815622c52d8b",
    "args": [
     "--commit",
     "4d04303818b61bf3aa09278af48356315515965b",
