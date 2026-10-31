@@ -1,5 +1,6 @@
 {
  "schemaVersion": 1,
+ "resolvedBefore": "2026-10-22T12:00:00Z",
  "agentList": {
   "source": "https://github.com/vercel-labs/skills",
   "commit": "a80e4c9d12d607631249d4d7d059f835d4b2f13a",

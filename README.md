@@ -212,6 +212,12 @@ under "Updaters without an off switch" below.
   cannot go stale: Hermes's installer comes from the repository at the
   release's commit, not from `hermes-agent.nousresearch.com/install.sh`, which
   serves the newest script on the vendor's main branch.
+- An exact npm or PyPI pin fixes only the agent's own version; its
+  dependencies float within their ranges. The lock's `resolvedBefore` date
+  makes npm (`npm_config_before`) and uv (`UV_EXCLUDE_NEWER`) resolve every
+  dependency as of that date, so a later build installs the same trees. Move
+  the date on purpose, together with the pins it covers, and keep it after the
+  newest pinned version.
 - Desktop apps are copied into `/Applications` unquarantined after
   `codesign --verify --deep --strict`, and their bundle id and version are
   checked against the lock.

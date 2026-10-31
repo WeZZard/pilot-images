@@ -63,6 +63,16 @@ def agent_env(lock):
     return result
 
 
+def resolution_env(lock):
+    """npm and uv resolve every dependency as of the lock's date, not the build's.
+
+    An exact pin fixes only the agent's own version; its dependencies still float
+    within their ranges. Applied to installs only, never written to a shell profile.
+    """
+    when = lock['resolvedBefore']
+    return {'npm_config_before': when, 'UV_EXCLUDE_NEWER': when}
+
+
 def gui_env(lock):
     """The env-var switches a desktop app reads, which ~/.zshenv cannot reach."""
     result = {}
@@ -627,7 +637,7 @@ def main():
                 apply_updates(agent, env)
                 continue
             log('installing %s %s (%s)' % (agent['id'], agent['version'], agent['method']))
-            install(agent, env)
+            install(agent, {**env, **resolution_env(lock)})
         shutil.rmtree(DOWNLOADS, ignore_errors=True)
         write_hosts(agent_hosts(json.loads(pathlib.Path(args.lock).read_text())))
         write_launch_env(json.loads(pathlib.Path(args.lock).read_text()))
