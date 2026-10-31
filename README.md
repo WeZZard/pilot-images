@@ -267,67 +267,67 @@ under "Updaters without an off switch" below.
 
 | Agent | `skills` id | Method | Package, app or command | Version |
 |---|---|---|---|---|
-| Amp | `amp` | npm | `@ampcode/cli` | 0.0.1792641650-gd4ebfb |
-| Autohand Code CLI | `autohand-code` | npm | `autohand-cli` | 0.9.8 |
+| Amp | `amp` | npm | `@ampcode/cli` | 0.0.1793476832-ga2d2ae |
+| Autohand Code CLI | `autohand-code` | npm | `autohand-cli` | 0.9.9 |
 | Augment (Auggie CLI) | `augment` | npm | `@augmentcode/auggie` | 0.36.0 |
-| IBM Bob (Bob Shell) | `bob` | npm | `@ibm/bob` | 2.0.8 |
-| Cline CLI | `cline` | npm | `cline` | 3.0.73 |
-| Dexto | `dexto` | npm | `dexto` | 1.14.2 |
-| Kimi Code CLI | `kimi-code-cli` | npm | `@moonshot-ai/kimi-code` | 2.3.0 |
-| Jazz | `jazz` | npm | `jazz-ai` | 0.16.20 |
-| Kilo Code CLI | `kilo` | npm | `@kilocode/cli` | 7.8.15 |
+| IBM Bob (Bob Shell) | `bob` | npm | `@ibm/bob` | 2.0.9 |
+| Cline CLI | `cline` | npm | `cline` | 3.0.74 |
+| Dexto | `dexto` | npm | `dexto` | 1.14.4 |
+| Kimi Code CLI | `kimi-code-cli` | npm | `@moonshot-ai/kimi-code` | 2.4.1 |
+| Jazz | `jazz` | npm | `jazz-ai` | 0.16.28 |
+| Kilo Code CLI | `kilo` | npm | `@kilocode/cli` | 7.8.18 |
 | Kode | `kode` | npm | `@shareai-lab/kode` | 2.2.1 |
-| MCPJam Inspector | `mcpjam` | npm | `@mcpjam/inspector` | 3.16.2 |
-| CodeBuddy Code | `codebuddy` | npm | `@tencent-ai/codebuddy-code` | 2.172.1 |
-| Command Code | `command-code` | npm | `command-code` | 1.87.1 |
+| MCPJam Inspector | `mcpjam` | npm | `@mcpjam/inspector` | 3.18.0 |
+| CodeBuddy Code | `codebuddy` | npm | `@tencent-ai/codebuddy-code` | 2.179.1 |
+| Command Code | `command-code` | npm | `command-code` | 1.88.2 |
 | Continue CLI | `continue` | npm | `@continuedev/cli` | 1.5.47 |
-| Gemini CLI | `gemini-cli` | npm | `@google/gemini-cli` | 0.65.0 |
-| GitHub Copilot CLI | `github-copilot` | npm | `@github/copilot` | 1.0.102 |
-| OpenCode | `opencode` | npm | `@opencode/cli` | 2.1.2 |
-| Qwen Code | `qwen-code` | npm | `@qwen-code/qwen-code` | 0.26.0 |
-| Qoder CLI | `qoder` | npm | `@qoder-ai/qodercli` | 1.1.76 |
-| Qoder CN CLI | `qoder-cn` | npm | `@qodercn-ai/qoderclicn` | 1.1.76 |
-| Reasonix | `reasonix` | npm | `reasonix` | 2.48.0 |
-| Terramind | `terramind` | npm | `terramind` | 0.2.156 |
+| Gemini CLI | `gemini-cli` | npm | `@google/gemini-cli` | 0.66.0 |
+| GitHub Copilot CLI | `github-copilot` | npm | `@github/copilot` | 1.0.105 |
+| OpenCode | `opencode` | npm | `@opencode/cli` | 2.2.5 |
+| Qwen Code | `qwen-code` | npm | `@qwen-code/qwen-code` | 0.26.4 |
+| Qoder CLI | `qoder` | npm | `@qoder-ai/qodercli` | 1.1.81 |
+| Qoder CN CLI | `qoder-cn` | npm | `@qodercn-ai/qoderclicn` | 1.1.81 |
+| Reasonix | `reasonix` | npm | `reasonix` | 2.56.0 |
+| Terramind | `terramind` | npm | `terramind` | 0.2.187 |
 | Neovate Code | `neovate` | npm | `@neovate/code` | 0.28.5 |
 | Pochi | `pochi` | npm | `@getpochi/cli` | 0.6.21 |
 | OpenHands CLI | `openhands` | uv tool | `openhands` | 1.16.0 |
-| Deep Agents Code | `deepagents` | uv tool | `deepagents-code` | 0.1.88 |
-| Mistral Vibe | `mistral-vibe` | uv tool | `mistral-vibe` | 3.0.1 |
-| AstrBot | `astrbot` | uv tool | `astrbot` | 4.29.1 |
-| Antigravity CLI | `antigravity-cli` | vendor download | `agy` | 1.4.4 |
-| Cursor CLI | `cursor` | vendor download | `agent, cursor-agent` | 2026.10.19-6bbf2c4 |
-| Warp Agent CLI | `warp` | vendor download | `warp` | 0.2026.10.14.08.27.stable_03 |
-| Devin for Terminal | `devin` | vendor download | `devin` | 3000.11.92 |
-| Droid (Factory) | `droid` | vendor download | `droid` | 0.247.0 |
+| Deep Agents Code | `deepagents` | uv tool | `deepagents-code` | 0.2.2 |
+| Mistral Vibe | `mistral-vibe` | uv tool | `mistral-vibe` | 3.0.4 |
+| AstrBot | `astrbot` | uv tool | `astrbot` | 4.29.4 |
+| Antigravity CLI | `antigravity-cli` | vendor download | `agy` | 1.4.12 |
+| Cursor CLI | `cursor` | vendor download | `agent, cursor-agent` | 2026.10.22-27dcf5f |
+| Warp Agent CLI | `warp` | vendor download | `warp` | 0.2026.10.21.08.25.stable_02 |
+| Devin for Terminal | `devin` | vendor download | `devin` | 3000.11.234 |
+| Droid (Factory) | `droid` | vendor download | `droid` | 1.1.0 |
 | ForgeCode | `forgecode` | vendor download | `forge` | 2.14.0 |
-| Goose CLI | `goose` | vendor download | `goose` | 1.55.0 |
-| fx | `fx` | vendor download | `fx` | 0.0.14 |
-| inference.sh (belt) | `inference-sh` | vendor download | `belt, infsh` | 1.26.8 |
-| Junie CLI | `junie` | vendor download | `junie` | 3813.7 |
-| Kimchi | `kimchi` | vendor download | `kimchi` | 1.17.2 |
-| Cortex Code | `cortex` | vendor download | `cortex` | 1.2.18+192728.aa2238062732 |
+| Goose CLI | `goose` | vendor download | `goose` | 1.57.0 |
+| fx | `fx` | vendor download | `fx` | 0.0.16 |
+| inference.sh (belt) | `inference-sh` | vendor download | `belt, infsh` | 1.28.10 |
+| Junie CLI | `junie` | vendor download | `junie` | 3893.6 |
+| Kimchi | `kimchi` | vendor download | `kimchi` | 1.25.1 |
+| Cortex Code | `cortex` | vendor download | `cortex` | 1.2.33+210348.7a343afc2cbb |
 | CodeArts Agent CLI | `codearts-agent` | vendor download | `codearts` | 26.10.10 |
-| Ona CLI | `ona` | vendor download | `ona` | 20261020.11353.0 |
+| Ona CLI | `ona` | vendor download | `ona` | 20261022.11814.0 |
 | Atlassian CLI (Rovo Dev) | `rovodev` | vendor download | `acli` | 1.3.39-stable |
 | Tinycloud | `tinycloud` | vendor download | `tinycloud` | 0.3.25 |
-| Crush | `crush` | vendor download | `crush` | 0.98.1 |
-| Grok Build | `grok` | vendor download | `grok` | 1.0.67 |
-| Hermes Agent | `hermes-agent` | vendor installer | `hermes` | 0.22.4 |
-| OpenClaw | `openclaw` | npm, own Node | `openclaw` | 2026.10.5 |
-| Cursor | `cursor` | app (vendor download) | `Cursor.app` | 3.26.16 |
-| Windsurf (Devin Desktop) | `windsurf` | app (vendor download) | `Devin.app` | 3.10.67 |
-| Zed | `zed` | app (vendor download) | `Zed.app` | 1.25.2 |
-| Trae | `trae` | app (vendor download) | `Trae.app` | 2.3.61406 |
-| Trae CN | `trae-cn` | app (vendor download) | `Trae CN.app` | 2.3.62837 |
-| Antigravity | `antigravity` | app (vendor download) | `Antigravity.app` | 2.25.0 |
-| Kiro CLI | `kiro-cli` | app (vendor download) | `Kiro CLI.app` | 2.33.1 |
+| Crush | `crush` | vendor download | `crush` | 0.99.0 |
+| Grok Build | `grok` | vendor download | `grok` | 1.0.70 |
+| Hermes Agent | `hermes-agent` | vendor installer | `hermes` | 0.22.5 |
+| OpenClaw | `openclaw` | npm, own Node | `openclaw` | 2026.10.9 |
+| Cursor | `cursor` | app (vendor download) | `Cursor.app` | 3.27.22 |
+| Windsurf (Devin Desktop) | `windsurf` | app (vendor download) | `Devin.app` | 3.11.238 |
+| Zed | `zed` | app (vendor download) | `Zed.app` | 1.26.2 |
+| Trae | `trae` | app (vendor download) | `Trae.app` | 2.3.93439 |
+| Trae CN | `trae-cn` | app (vendor download) | `Trae CN.app` | 2.3.98528 |
+| Antigravity | `antigravity` | app (vendor download) | `Antigravity.app` | 2.28.2 |
+| Kiro CLI | `kiro-cli` | app (vendor download) | `Kiro CLI.app` | 2.37.0 |
 | Syncfusion Code Studio | `codestudio` | app (vendor download) | `Syncfusion Code Studio.app` | 2.0.5 |
-| Positron (Posit Assistant) | `posit-assistant` | app (vendor download) | `Positron.app` | 2026.10.1-2 |
-| MiniMax Code | `minimax-code` | app (vendor download) | `MiniMax Code.app` | 3.1.4 |
-| ZCode | `zcode` | app (vendor download) | `ZCode.app` | 3.16.2 |
+| Positron (Posit Assistant) | `posit-assistant` | app (vendor download) | `Positron.app` | 2026.10.2-3 |
+| MiniMax Code | `minimax-code` | app (vendor download) | `MiniMax Code.app` | 3.1.9 |
+| ZCode | `zcode` | app (vendor download) | `ZCode.app` | 3.16.3 |
 | Zenflow | `zenflow`, `zencoder` | app (vendor download) | `Zenflow.app`, `zencoder` | 2.5.3 |
-| AiderDesk | `aider-desk` | app (vendor download) | `aider-desk.app` | 0.88.0 |
+| AiderDesk | `aider-desk` | app (vendor download) | `aider-desk.app` | 0.89.0 |
 
 ### Updaters without an off switch
 

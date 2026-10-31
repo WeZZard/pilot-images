@@ -1,3 +1,3 @@
-# Seed provenance — pilot-macos27. Recorded 2026-10-17T17:06:15Z
+# Seed provenance — pilot-macos27. Recorded 2026-10-31T22:42:19Z
 SEED_OCI=ghcr.io/cirruslabs/macos-golden-gate-base:latest
-SEED_DIGEST=sha256:5302a9ea6cd68c059d00fa253fe75c8ebdf4e0dc8c45d4e136ecc6e7a4c02b70
+SEED_DIGEST=sha256:14f4fc32a778763ccae1a4d543ea0f177720c570dd7f859eda10b9e0020c7d05
