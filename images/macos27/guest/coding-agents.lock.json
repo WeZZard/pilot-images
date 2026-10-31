@@ -1,6 +1,6 @@
 {
  "schemaVersion": 1,
- "resolvedBefore": "2026-10-22T12:00:00Z",
+ "resolvedBefore": "2026-10-31T22:56:03Z",
  "agentList": {
   "source": "https://github.com/vercel-labs/skills",
   "commit": "a80e4c9d12d607631249d4d7d059f835d4b2f13a",
@@ -117,7 +117,7 @@
    ],
    "method": "npm",
    "package": "@ampcode/cli",
-   "version": "0.0.1792641650-gd4ebfb",
+   "version": "0.0.1793476832-ga2d2ae",
    "bin": "amp",
    "source": "https://ampcode.com/docs/cli",
    "check": [
@@ -148,7 +148,7 @@
    ],
    "method": "npm",
    "package": "autohand-cli",
-   "version": "0.9.8",
+   "version": "0.9.9",
    "bin": "autohand",
    "source": "https://autohand.ai/cli/",
    "check": [
@@ -210,7 +210,7 @@
    ],
    "method": "npm",
    "package": "@ibm/bob",
-   "version": "2.0.8",
+   "version": "2.0.9",
    "bin": "bob",
    "source": "https://bob.ibm.com/docs/shell/getting-started/install-and-setup",
    "check": [
@@ -238,7 +238,7 @@
    ],
    "method": "npm",
    "package": "cline",
-   "version": "3.0.73",
+   "version": "3.0.74",
    "bin": "cline",
    "source": "https://docs.cline.bot/cli/cli-reference",
    "check": [
@@ -261,7 +261,7 @@
    ],
    "method": "npm",
    "package": "dexto",
-   "version": "1.14.2",
+   "version": "1.14.4",
    "bin": "dexto",
    "source": "https://cli.dexto.ai/docs/getting-started/installation",
    "check": [
@@ -284,7 +284,7 @@
    ],
    "method": "npm",
    "package": "@moonshot-ai/kimi-code",
-   "version": "2.3.0",
+   "version": "2.4.1",
    "bin": "kimi",
    "source": "https://moonshotai.github.io/kimi-code/en/",
    "check": [
@@ -307,7 +307,7 @@
    ],
    "method": "npm",
    "package": "jazz-ai",
-   "version": "0.16.20",
+   "version": "0.16.28",
    "bin": "jazz",
    "source": "https://github.com/lvndry/jazz",
    "check": [
@@ -330,7 +330,7 @@
    ],
    "method": "npm",
    "package": "@kilocode/cli",
-   "version": "7.8.15",
+   "version": "7.8.18",
    "bin": "kilo",
    "source": "https://kilo.ai/docs/cli",
    "check": [
@@ -378,7 +378,7 @@
    ],
    "method": "npm",
    "package": "@mcpjam/inspector",
-   "version": "3.16.2",
+   "version": "3.18.0",
    "bin": "inspector",
    "source": "https://docs.mcpjam.com/installation",
    "check": [
@@ -389,7 +389,7 @@
     "@mcpjam/inspector"
    ],
    "updates": [],
-   "expect": "@mcpjam/inspector@3.16.2"
+   "expect": "@mcpjam/inspector@3.18.0"
   },
   {
    "id": "codebuddy-code",
@@ -399,7 +399,7 @@
    ],
    "method": "npm",
    "package": "@tencent-ai/codebuddy-code",
-   "version": "2.172.1",
+   "version": "2.179.1",
    "bin": "codebuddy",
    "source": "https://www.workbuddy.ai/docs/cli/installation",
    "check": [
@@ -425,7 +425,7 @@
    ],
    "method": "npm",
    "package": "command-code",
-   "version": "1.87.1",
+   "version": "1.88.2",
    "bin": "command-code",
    "source": "https://commandcode.ai/docs/settings",
    "check": [
@@ -474,7 +474,7 @@
    ],
    "method": "npm",
    "package": "@google/gemini-cli",
-   "version": "0.65.0",
+   "version": "0.66.0",
    "bin": "gemini",
    "source": "https://geminicli.com/docs/get-started/installation",
    "check": [
@@ -503,7 +503,7 @@
    ],
    "method": "npm",
    "package": "@github/copilot",
-   "version": "1.0.102",
+   "version": "1.0.105",
    "bin": "copilot",
    "source": "https://docs.github.com/en/copilot/how-tos/set-up/install-copilot-cli",
    "check": [
@@ -526,7 +526,7 @@
    ],
    "method": "npm",
    "package": "@opencode/cli",
-   "version": "2.1.2",
+   "version": "2.2.5",
    "bin": "opencode",
    "source": "https://opencode.ai/docs/",
    "check": [
@@ -549,7 +549,7 @@
    ],
    "method": "npm",
    "package": "@qwen-code/qwen-code",
-   "version": "0.26.0",
+   "version": "0.26.4",
    "bin": "qwen",
    "source": "https://qwenlm.github.io/qwen-code-docs/en/users/configuration/settings/",
    "check": [
@@ -577,7 +577,7 @@
    ],
    "method": "npm",
    "package": "@qoder-ai/qodercli",
-   "version": "1.1.76",
+   "version": "1.1.81",
    "bin": "qodercli",
    "source": "https://docs.qoder.com/cli/installation",
    "check": [
@@ -605,7 +605,7 @@
    ],
    "method": "npm",
    "package": "@qodercn-ai/qoderclicn",
-   "version": "1.1.76",
+   "version": "1.1.81",
    "bin": "qoderclicn",
    "source": "https://help.aliyun.com/zh/lingma/qoder-cli-cn/",
    "check": [
@@ -633,7 +633,7 @@
    ],
    "method": "npm",
    "package": "reasonix",
-   "version": "2.48.0",
+   "version": "2.56.0",
    "bin": "reasonix",
    "source": "https://github.com/esengine/DeepSeek-Reasonix",
    "check": [
@@ -650,7 +650,7 @@
    ],
    "method": "npm",
    "package": "terramind",
-   "version": "0.2.156",
+   "version": "0.2.187",
    "bin": "terramind",
    "source": "https://terramind.com",
    "check": [
@@ -727,8 +727,8 @@
    ],
    "method": "uv",
    "package": "deepagents-code",
-   "version": "0.1.88",
-   "spec": "deepagents-code==0.1.88",
+   "version": "0.2.2",
+   "spec": "deepagents-code==0.2.2",
    "python": "3.13",
    "bin": "dcode",
    "source": "https://github.com/langchain-ai/deepagents",
@@ -752,8 +752,8 @@
    ],
    "method": "uv",
    "package": "mistral-vibe",
-   "version": "3.0.1",
-   "spec": "mistral-vibe==3.0.1",
+   "version": "3.0.4",
+   "spec": "mistral-vibe==3.0.4",
    "python": "3.12",
    "bin": "vibe",
    "source": "https://github.com/mistralai/mistral-vibe",
@@ -781,8 +781,8 @@
    ],
    "method": "uv",
    "package": "astrbot",
-   "version": "4.29.1",
-   "spec": "astrbot==4.29.1",
+   "version": "4.29.4",
+   "spec": "astrbot==4.29.4",
    "python": "3.12",
    "bin": "astrbot",
    "source": "https://github.com/AstrBotDevs/AstrBot",
@@ -800,9 +800,9 @@
    ],
    "method": "archive",
    "format": "tar",
-   "version": "1.4.4",
-   "url": "https://storage.googleapis.com/antigravity-public/antigravity-cli/1.4.4-4783783166214144/darwin-arm/cli_mac_arm64.tar.gz",
-   "sha256": "85482aa8969300183f71c9653d9f581248fba7f506342a8eb087f3d2503203bd",
+   "version": "1.4.12",
+   "url": "https://storage.googleapis.com/antigravity-public/antigravity-cli/1.4.12-4768735748292608/darwin-arm/cli_mac_arm64.tar.gz",
+   "sha256": "4c989b5ccf0e39c99a1ce6df82410abb628d4d83e0d3183527702df744d9c589",
    "links": {
     "agy": "antigravity"
    },
@@ -836,9 +836,9 @@
    ],
    "method": "archive",
    "format": "tar",
-   "version": "2026.10.19-6bbf2c4",
-   "url": "https://downloads.cursor.com/lab/2026.10.19-6bbf2c4/darwin/arm64/agent-cli-package.tar.gz",
-   "sha256": "095dccb923488d280aae697ba68c13a92bbd9ce1dc6105401e147e25869f2b13",
+   "version": "2026.10.22-27dcf5f",
+   "url": "https://downloads.cursor.com/lab/2026.10.22-27dcf5f/darwin/arm64/agent-cli-package.tar.gz",
+   "sha256": "2f5b0a3dd5fb951cecffac813867d8a08d810e59837d59fd5f12d69b922398d7",
    "links": {
     "cursor-agent": "dist-package/cursor-agent",
     "agent": "dist-package/cursor-agent"
@@ -878,9 +878,9 @@
    ],
    "method": "archive",
    "format": "tar",
-   "version": "0.2026.10.14.08.27.stable_03",
-   "url": "https://releases.warp.dev/stable/v0.2026.10.14.08.27.stable_03/tui/macos/aarch64/warp-tui-stable-macos-aarch64.tar.gz",
-   "sha256": "ea7c5b6206f541a201d3f818d2383ee619d941667a87799cc69803e0cbc47d91",
+   "version": "0.2026.10.21.08.25.stable_02",
+   "url": "https://releases.warp.dev/stable/v0.2026.10.21.08.25.stable_02/tui/macos/aarch64/warp-tui-stable-macos-aarch64.tar.gz",
+   "sha256": "0202c429dbd84ac250452e9becc962521f16c5bea674ccf6ea27fa7b453d530a",
    "links": {
     "warp": "warp-tui-stable"
    },
@@ -913,9 +913,9 @@
    ],
    "method": "archive",
    "format": "tar",
-   "version": "3000.11.92",
-   "url": "https://static.devin.ai/cli/3000.11.92/devin-3000.11.92-aarch64-apple-darwin.tar.gz",
-   "sha256": "6047392212ce073ede2724d84246cc04dd47811a1d1e2084eee7252703940ac1",
+   "version": "3000.11.234",
+   "url": "https://static.devin.ai/cli/3000.11.234/devin-3000.11.234-aarch64-apple-darwin.tar.gz",
+   "sha256": "35f17a21e53a49435e42fb9627731726aa8ef7fa63e5c3d9d43d0cc5ca43edaf",
    "links": {
     "devin": "bin/devin"
    },
@@ -953,9 +953,9 @@
    ],
    "method": "archive",
    "format": "binary",
-   "version": "0.247.0",
-   "url": "https://downloads.factory.ai/factory-cli/releases/0.247.0/darwin/arm64/droid",
-   "sha256": "852ae6cd6ee6651bb916c030a5eb02b651e1e814db9dab1a0cfa77e63a8aa462",
+   "version": "1.1.0",
+   "url": "https://downloads.factory.ai/factory-cli/releases/1.1.0/darwin/arm64/droid",
+   "sha256": "28fc8c2b3389fa8ab724c5f0ee00f32fb5dabf8bd2e089719f274685a0f24429",
    "links": {
     "droid": "droid"
    },
@@ -1021,9 +1021,9 @@
    ],
    "method": "archive",
    "format": "tar",
-   "version": "1.55.0",
-   "url": "https://github.com/aaif-goose/goose/releases/download/v1.55.0/goose-aarch64-apple-darwin.tar.gz",
-   "sha256": "153425d6dc3a49afce85e70009eff87f6020e3ed029bb56fae1b523f7f2d8107",
+   "version": "1.57.0",
+   "url": "https://github.com/aaif-goose/goose/releases/download/v1.57.0/goose-aarch64-apple-darwin.tar.gz",
+   "sha256": "80d43c49b77302777e9d2fe32faf3c40c1028dafbea1e0a39b0378404a8a074b",
    "links": {
     "goose": "goose"
    },
@@ -1043,9 +1043,9 @@
    ],
    "method": "archive",
    "format": "tar",
-   "version": "0.0.14",
-   "url": "https://releases.fx.sh/v0.0.14/fx-macos-aarch64.tar.gz",
-   "sha256": "619c6dccf4e8cd6290ec4a052d29c8724b2a4b150d893435b3de9086c21fb7b1",
+   "version": "0.0.16",
+   "url": "https://releases.fx.sh/v0.0.16/fx-macos-aarch64.tar.gz",
+   "sha256": "2158a8d42e77457a774400d225d9802bb6c0e60a0bb0674a1116bc31252490d6",
    "links": {
     "fx": "fx"
    },
@@ -1078,12 +1078,12 @@
    ],
    "method": "archive",
    "format": "tar",
-   "version": "1.26.8",
-   "url": "https://dist.inference.sh/cli/v1.26.8/inferencesh-cli-v1.26.8-darwin-arm64.tar.gz",
-   "sha256": "43d8585be3f8d2bb6d1f5822f2f66ee6d15f793a0406a9d0ccf3bb12cdda8a9d",
+   "version": "1.28.10",
+   "url": "https://dist.inference.sh/cli/v1.28.10/inferencesh-cli-v1.28.10-darwin-arm64.tar.gz",
+   "sha256": "e8d94bbc0dc24873c772e01ad32abbaf39fc3582e74187ada3fbd54b2c0bf5fe",
    "links": {
-    "belt": "inferencesh-cli-v1.26.8-darwin-arm64",
-    "infsh": "inferencesh-cli-v1.26.8-darwin-arm64"
+    "belt": "inferencesh-cli-v1.28.10-darwin-arm64",
+    "infsh": "inferencesh-cli-v1.28.10-darwin-arm64"
    },
    "bin": "belt",
    "source": "https://inference.sh/docs/extend/cli-setup",
@@ -1116,9 +1116,9 @@
    ],
    "method": "archive",
    "format": "zip",
-   "version": "3813.7",
-   "url": "https://github.com/JetBrains/junie/releases/download/3813.7/junie-release-3813.7-macos-aarch64.zip",
-   "sha256": "36f11ca9946add48a2a41cce9edaf2ca975c1443b5f11251beafb4e8718872ca",
+   "version": "3893.6",
+   "url": "https://github.com/JetBrains/junie/releases/download/3893.6/junie-release-3893.6-macos-aarch64.zip",
+   "sha256": "917bd6a481f0e0c0dd18abfeb5a6da3e23d5c9c529beeddffbb61742a925ff49",
    "links": {
     "junie": "Applications/junie.app/Contents/MacOS/junie"
    },
@@ -1144,9 +1144,9 @@
    ],
    "method": "archive",
    "format": "tar",
-   "version": "1.17.2",
-   "url": "https://github.com/getkimchi/kimchi/releases/download/v1.17.2/kimchi_darwin_arm64.tar.gz",
-   "sha256": "7995f7ab1f00c8541d89a4e87c0bc4d25cbc91bcaca1b0b9a7dec715bbd27ad3",
+   "version": "1.25.1",
+   "url": "https://github.com/getkimchi/kimchi/releases/download/v1.25.1/kimchi_darwin_arm64.tar.gz",
+   "sha256": "f9b5f26b35198a4893c0c4847e6e6bfd24b12353decd4ae98025c0bea952c9bf",
    "links": {
     "kimchi": "bin/kimchi"
    },
@@ -1172,11 +1172,11 @@
    ],
    "method": "archive",
    "format": "tar",
-   "version": "1.2.18+192728.aa2238062732",
-   "url": "https://sfc-repo.snowflakecomputing.com/cortex-code-cli/a4643c4278/1.2.18%2B192728.aa2238062732/coco-1.2.18%2B192728.aa2238062732-darwin-arm64.tar.gz",
-   "sha256": "0dc9e79466020ab550bc3639c2814fa3d2a5090b3f14dfddd834c3520202364d",
+   "version": "1.2.33+210348.7a343afc2cbb",
+   "url": "https://sfc-repo.snowflakecomputing.com/cortex-code-cli/a4643c4278/1.2.33%2B210348.7a343afc2cbb/coco-1.2.33%2B210348.7a343afc2cbb-darwin-arm64.tar.gz",
+   "sha256": "0175341be9e0029b8103dcef9f2079ec5e47ecb16d6c6be553a2a20d89363b3e",
    "links": {
-    "cortex": "coco-1.2.18+192728.aa2238062732-darwin-arm64/cortex"
+    "cortex": "coco-1.2.33+210348.7a343afc2cbb-darwin-arm64/cortex"
    },
    "bin": "cortex",
    "source": "https://docs.snowflake.com/en/user-guide/cortex-code/cortex-code-cli",
@@ -1243,9 +1243,9 @@
    ],
    "method": "archive",
    "format": "binary",
-   "version": "20261020.11353.0",
-   "url": "https://releases.gitpod.io/cli/releases/20261020.11353.0/gitpod-darwin-arm64",
-   "sha256": "fb087a9014d136cac8b70254161430939e03ef491486251c9c3469f6bde54637",
+   "version": "20261022.11814.0",
+   "url": "https://releases.gitpod.io/cli/releases/20261022.11814.0/gitpod-darwin-arm64",
+   "sha256": "de0a4de22b5894bf9f7ea6dc1baaf686dd7cb07375ac1999cae015010e8d9e78",
    "links": {
     "ona": "gitpod-darwin-arm64"
    },
@@ -1346,11 +1346,11 @@
    ],
    "method": "archive",
    "format": "tar",
-   "version": "0.98.1",
-   "url": "https://github.com/charmbracelet/crush/releases/download/v0.98.1/crush_0.98.1_Darwin_arm64.tar.gz",
-   "sha256": "178710f9e43abd3f1df29756309950f42ed229737e4f2fb9bc5f36aeff07a3c3",
+   "version": "0.99.0",
+   "url": "https://github.com/charmbracelet/crush/releases/download/v0.99.0/crush_0.99.0_Darwin_arm64.tar.gz",
+   "sha256": "661c8754359b0c6ccb6076c01f99fe4134c3819888ddc60c372b9d7c336898d3",
    "links": {
-    "crush": "crush_0.98.1_Darwin_arm64/crush"
+    "crush": "crush_0.99.0_Darwin_arm64/crush"
    },
    "bin": "crush",
    "source": "https://github.com/charmbracelet/crush",
@@ -1368,11 +1368,11 @@
    ],
    "method": "archive",
    "format": "binary",
-   "version": "1.0.67",
-   "url": "https://x.ai/cli/grok-1.0.67-macos-aarch64",
-   "sha256": "036a47ce2987adae04de827f7803bf0cc460bf169b640db168f18ec7acb734db",
+   "version": "1.0.70",
+   "url": "https://x.ai/cli/grok-1.0.70-macos-aarch64",
+   "sha256": "5c8a688251bf61e35370b828b6a353b0a20fcc3f64000de8a91d426039f29cec",
    "links": {
-    "grok": "grok-1.0.67-macos-aarch64"
+    "grok": "grok-1.0.70-macos-aarch64"
    },
    "bin": "grok",
    "source": "https://github.com/xai-org/grok-build",
@@ -1408,12 +1408,12 @@
     "hermes-agent"
    ],
    "method": "script",
-   "version": "0.22.4",
-   "url": "https://raw.githubusercontent.com/NousResearch/hermes-agent/4d04303818b61bf3aa09278af48356315515965b/scripts/install.sh",
-   "sha256": "20f44240ebada354a468104a6a6724d037afcb8883d4d09ddeb4815622c52d8b",
+   "version": "0.22.5",
+   "url": "https://raw.githubusercontent.com/NousResearch/hermes-agent/bf0203a794a07aac3ff764972ab9087baa4e4f4e/scripts/install.sh",
+   "sha256": "99cb3691d55019c6973a7acb775a915648666cc24e483ca827a1cdbb3531a674",
    "args": [
     "--commit",
-    "4d04303818b61bf3aa09278af48356315515965b",
+    "bf0203a794a07aac3ff764972ab9087baa4e4f4e",
     "--skip-setup",
     "--skip-browser",
     "--skip-computer-use"
@@ -1455,13 +1455,13 @@
    ],
    "method": "npm-node",
    "package": "openclaw",
-   "version": "2026.10.5",
+   "version": "2026.10.9",
    "entry": "openclaw.mjs",
    "bin": "openclaw",
    "node": {
-    "version": "24.22.1",
-    "url": "https://nodejs.org/dist/v24.22.1/node-v24.22.1-darwin-arm64.tar.gz",
-    "sha256": "89c682593d76cd44233fa53b1563264e7de9cbb189cad169135c5b4fadfbc0a7"
+    "version": "24.22.2",
+    "url": "https://nodejs.org/dist/v24.22.2/node-v24.22.2-darwin-arm64.tar.gz",
+    "sha256": "aa9549349e47dffaa42dcf95d6e06ade8c4bdafc980979883b88767670df385a"
    },
    "source": "https://docs.openclaw.ai/install",
    "check": [
@@ -1484,12 +1484,12 @@
    ],
    "method": "app",
    "format": "zip",
-   "version": "3.26.16",
-   "url": "https://downloads.cursor.com/production/8fcb8ace5c73fa31f2e2707fd6783160e4ed3e49/darwin/arm64/Cursor-darwin-arm64.zip",
-   "sha256": "c25c9bf61b29c76c2daecc3e626884c746cf8476bbc0be450b52cdfd8c27a192",
+   "version": "3.27.22",
+   "url": "https://downloads.cursor.com/production/b1aa50cb6db84fd3e8c808259cb172ea73425c1f/darwin/arm64/Cursor-darwin-arm64.zip",
+   "sha256": "fed256d59c331944f75dedfbaffa43a7b50e9eda5f2c30156b6a8c2195dbb8c7",
    "app": "Cursor.app",
    "bundleId": "com.todesktop.230313mzl4w4u92",
-   "bundleVersion": "3.26.16",
+   "bundleVersion": "3.27.22",
    "links": {
     "cursor": "Contents/Resources/app/bin/cursor"
    },
@@ -1526,12 +1526,12 @@
    ],
    "method": "app",
    "format": "dmg",
-   "version": "3.10.67",
-   "url": "https://windsurf-stable.codeiumdata.com/darwin-arm64-dmg/stable/0b186d6e13a1a48a46430c51fe414dd0747d46f6/Devin-darwin-arm64-3.10.67.dmg",
-   "sha256": "d475af85b9399c02bc7d80699eb2f6ca4bc625874b1cb0ca2007295e14c24b1b",
+   "version": "3.11.238",
+   "url": "https://windsurf-stable.codeiumdata.com/darwin-arm64-dmg/stable/9e593c73d4ca24802eb3b302035f33cedad59802/Devin-darwin-arm64-3.11.238.dmg",
+   "sha256": "a09a4c8f4b2ce8e5cc641ba08e1ab542775c0c6ac3309d8b318fd264eecb2c56",
    "app": "Devin.app",
    "bundleId": "com.exafunction.windsurf",
-   "bundleVersion": "3.10.67",
+   "bundleVersion": "3.11.238",
    "links": {
     "devin-desktop": "Contents/Resources/app/bin/devin-desktop"
    },
@@ -1550,7 +1550,7 @@
      }
     }
    ],
-   "expect": "0b186d6e13a1a48a46430c51fe414dd0747d46f6",
+   "expect": "9e593c73d4ca24802eb3b302035f33cedad59802",
    "release": {
     "feed": "json",
     "url": "https://windsurf-stable.codeium.com/api/update/darwin-arm64-dmg/stable/latest",
@@ -1571,12 +1571,12 @@
    ],
    "method": "app",
    "format": "dmg",
-   "version": "1.25.2",
-   "url": "https://github.com/zed-industries/zed/releases/download/v1.25.2/Zed-aarch64.dmg",
-   "sha256": "c427b19bb0d55f5bd99391b21e7bda0dcf892abd80dbc020ef645c9d86457940",
+   "version": "1.26.2",
+   "url": "https://github.com/zed-industries/zed/releases/download/v1.26.2/Zed-aarch64.dmg",
+   "sha256": "4632b670da78371fef5a0e417918d7b42bfc333e291ae86ab6b758d635c6be81",
    "app": "Zed.app",
    "bundleId": "dev.zed.Zed",
-   "bundleVersion": "1.25.2",
+   "bundleVersion": "1.26.2",
    "links": {
     "zed": "Contents/MacOS/cli"
    },
@@ -1604,12 +1604,12 @@
    ],
    "method": "app",
    "format": "dmg",
-   "version": "2.3.61406",
-   "url": "https://lf-cdn.trae.ai/obj/trae-ai-us/pkg/app/releases/stable/2.3.61406/darwin/Trae-darwin-arm64.dmg",
-   "sha256": "b8064ce3461dd899dbfa6e3b46ebdaf5ae045c1eaad580eff3513947dbc336f8",
+   "version": "2.3.93439",
+   "url": "https://lf-cdn.trae.ai/obj/trae-ai-us/pkg/app/releases/stable/2.3.93439/darwin/TRAE-darwin-arm64.dmg",
+   "sha256": "0bf501b0ce59332f694c98ca0e0061c270672e5767241da7a6c529db3b5a8163",
    "app": "Trae.app",
    "bundleId": "com.trae.app",
-   "bundleVersion": "3.5.81",
+   "bundleVersion": "3.6.4",
    "links": {
     "trae": "Contents/Resources/app/bin/trae"
    },
@@ -1628,7 +1628,7 @@
      }
     }
    ],
-   "expect": "1d77c78ec48282dc114875a57a2269199d898538",
+   "expect": "77f41624cc0c27d6d65bafb87a3150742bcc77cc",
    "release": {
     "feed": "json",
     "url": "https://icube-normal.traeapi.us/icube/api/v1/native/version/trae/latest",
@@ -1647,12 +1647,12 @@
    ],
    "method": "app",
    "format": "dmg",
-   "version": "2.3.62837",
-   "url": "https://lf-cdn.trae.com.cn/obj/trae-com-cn/pkg/app/releases/stable/2.3.62837/darwin/Trae_CN-darwin-arm64.dmg",
-   "sha256": "b8a033c4a4ebbd4802a14d517f802e12c506504edfe2fe957ecde700ae615b64",
+   "version": "2.3.98528",
+   "url": "https://lf-cdn.trae.com.cn/obj/trae-com-cn/pkg/app/releases/stable/2.3.98528/darwin/TRAE_CN-darwin-arm64.dmg",
+   "sha256": "7b9659e5af64d3f041ddb0d14485c4db13ec69964837a55fcca45af3e2c8b10a",
    "app": "Trae CN.app",
    "bundleId": "cn.trae.app",
-   "bundleVersion": "3.3.83",
+   "bundleVersion": "3.4.11",
    "links": {
     "trae-cn": "Contents/Resources/app/bin/trae-cn"
    },
@@ -1671,7 +1671,7 @@
      }
     }
    ],
-   "expect": "428b3440427a64b51632df94fd7d6611443d246b",
+   "expect": "88f1a4b6dac6800abfb8f728a1327582e4e3e53f",
    "release": {
     "feed": "json",
     "url": "https://api.trae.cn/icube/api/v1/native/version/trae/cn/latest",
@@ -1690,12 +1690,12 @@
    ],
    "method": "app",
    "format": "dmg",
-   "version": "2.25.0",
-   "url": "https://storage.googleapis.com/antigravity-public/antigravity-hub/2.25.0-6535192714805248/darwin-arm/Antigravity.dmg",
-   "sha256": "a61814653f617b8dec7815427364ee29b5a4811f8d401df9bc60308171e96bd3",
+   "version": "2.28.2",
+   "url": "https://storage.googleapis.com/antigravity-public/antigravity-hub/2.28.2-5937220255875072/darwin-arm/Antigravity.dmg",
+   "sha256": "9174721d9cd8528719c8fcb3ea79d438f75c283ee5921189aca7391571a8bf1f",
    "app": "Antigravity.app",
    "bundleId": "com.google.antigravity",
-   "bundleVersion": "2.25.0",
+   "bundleVersion": "2.28.2",
    "links": {},
    "source": "https://antigravity.google/docs/getting-started",
    "check": null,
@@ -1727,12 +1727,12 @@
    ],
    "method": "app",
    "format": "dmg",
-   "version": "2.33.1",
-   "url": "https://desktop-release.q.us-east-1.amazonaws.com/2.33.1/Kiro%20CLI.dmg",
-   "sha256": "f544b4f9de51a457e1ed0849ffdf2be7b6b70af491330006b01cb71fa2111f44",
+   "version": "2.37.0",
+   "url": "https://desktop-release.q.us-east-1.amazonaws.com/2.37.0/Kiro%20CLI.dmg",
+   "sha256": "4561ff083c7468539aff1fa1e4bad8235854023495280d8827db1f63934d6f21",
    "app": "Kiro CLI.app",
    "bundleId": "com.amazon.codewhisperer",
-   "bundleVersion": "2.33.1",
+   "bundleVersion": "2.37.0",
    "links": {
     "kiro-cli": "Contents/MacOS/kiro-cli"
    },
@@ -1812,9 +1812,9 @@
    ],
    "method": "app",
    "format": "zip",
-   "version": "2026.10.1-2",
-   "url": "https://cdn.posit.co/positron/releases/mac/arm64/Positron-darwin-2026.10.1-2-arm64.zip",
-   "sha256": "23e2f9eed067b540650d78ec252e8b53aad10098665a0050b507f20144e70400",
+   "version": "2026.10.2-3",
+   "url": "https://cdn.posit.co/positron/releases/mac/arm64/Positron-darwin-2026.10.2-3-arm64.zip",
+   "sha256": "253f0b625e3451ad1049492f751f522c1335d95430525384ed7f5652f570449e",
    "app": "Positron.app",
    "bundleId": "co.posit.positron",
    "bundleVersion": "1.134.0",
@@ -1849,12 +1849,12 @@
    ],
    "method": "app",
    "format": "dmg",
-   "version": "3.1.4",
-   "url": "https://file.cdn.minimax.io/public/minimax-agent-prod/release/MiniMax%20Code-3.1.4-arm64.dmg",
-   "sha256": "b8b78c6f3e19af51c25dd64a756e1e0394abf3bea77bd356aafe67e2128caf79",
+   "version": "3.1.9",
+   "url": "https://file.cdn.minimax.io/public/minimax-agent-prod/release/MiniMax%20Code-3.1.9-arm64.dmg",
+   "sha256": "25de500842ef8ea05a8b2de2ec26d69f1a67c6bc1099c082947ea0f3351169c0",
    "app": "MiniMax Code.app",
    "bundleId": "com.minimax.agent",
-   "bundleVersion": "3.1.4",
+   "bundleVersion": "3.1.9",
    "links": {},
    "source": "https://agent.minimax.io/",
    "check": null,
@@ -1882,12 +1882,12 @@
    ],
    "method": "app",
    "format": "dmg",
-   "version": "3.16.2",
-   "url": "https://cdn-zcode.z.ai/zcode/electron/releases/3.16.2/macos-arm64/ZCode-3.16.2-mac-arm64.dmg",
-   "sha256": "69d836ed653d4a57de3315e26e0683dfeb3e8b8e0a610a1c5b6063ac81643714",
+   "version": "3.16.3",
+   "url": "https://cdn-zcode.z.ai/zcode/electron/releases/3.16.3/macos-arm64/ZCode-3.16.3-mac-arm64.dmg",
+   "sha256": "f010c3434ede382409976567ea0523cd66798dfb3bb999dd28bcdbe79812729d",
    "app": "ZCode.app",
    "bundleId": "dev.zcode.app",
-   "bundleVersion": "3.16.2",
+   "bundleVersion": "3.16.3",
    "links": {},
    "source": "https://zcode.z.ai/",
    "check": [
@@ -1961,12 +1961,12 @@
    ],
    "method": "app",
    "format": "dmg",
-   "version": "0.88.0",
-   "url": "https://github.com/hotovo/aider-desk/releases/download/v0.88.0/aider-desk-0.88.0-macos-arm64.dmg",
-   "sha256": "b7c0562ef638e0a5b61e9008bad087d71ae570080662bc2148dbaef7261e84bd",
+   "version": "0.89.0",
+   "url": "https://github.com/hotovo/aider-desk/releases/download/v0.89.0/aider-desk-0.89.0-macos-arm64.dmg",
+   "sha256": "821616e1c667ff02c0b0b0da200ddbfb3950cd4d093fd069c9137abf666804d8",
    "app": "aider-desk.app",
    "bundleId": "com.hotovo.aider-desk",
-   "bundleVersion": "0.88.0",
+   "bundleVersion": "0.89.0",
    "links": {},
    "source": "https://github.com/hotovo/aider-desk",
    "check": null,

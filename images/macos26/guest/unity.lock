@@ -1,14 +1,14 @@
 # Unity Editor pinned for the macos26 line. Read by 80-unity.zsh beside it and by
 # checks/acceptance.zsh.
-# Source of every value: Unity's public release API, read 2026-10-20
-#   https://services.api.unity.com/unity/editor/release/v1/releases?version=6000.3.26f1&platform=MAC_OS&architecture=ARM64
-# 6000.3 is the newest LTS stream (6000.3.26f1 released 2026-10-08). The
+# Source of every value: Unity's public release API, read 2026-10-31
+#   https://services.api.unity.com/unity/editor/release/v1/releases?version=6000.3.27f2&platform=MAC_OS&architecture=ARM64
+# 6000.3 is the newest LTS stream (6000.3.27f2 released 2026-10-30). The
 # downloads need no Unity ID; running the editor needs a license (README).
-UNITY_VERSION="6000.3.26f1"
-UNITY_CHANGESET="de8167e7440c"
-UNITY_EDITOR_URL="https://download.unity3d.com/download_unity/de8167e7440c/MacEditorInstallerArm64/Unity-6000.3.26f1.pkg"
-UNITY_EDITOR_BYTES="5189868460"
-UNITY_EDITOR_MD5_B64="OYM2IlbzPmOOdLJgKKz1iA=="
-UNITY_WEBGL_URL="https://download.unity3d.com/download_unity/de8167e7440c/MacEditorTargetInstaller/UnitySetup-WebGL-Support-for-Editor-Arm64-6000.3.26f1.pkg"
-UNITY_WEBGL_BYTES="1610719782"
-UNITY_WEBGL_MD5_B64="k1Usi2NIHAzUwBCLu0+lkQ=="
+UNITY_VERSION="6000.3.27f2"
+UNITY_CHANGESET="22188f149405"
+UNITY_EDITOR_URL="https://download.unity3d.com/download_unity/22188f149405/MacEditorInstallerArm64/Unity-6000.3.27f2.pkg"
+UNITY_EDITOR_BYTES="5220584080"
+UNITY_EDITOR_MD5_B64="WXEVrfMCcC1hJEzUtBIa3Q=="
+UNITY_WEBGL_URL="https://download.unity3d.com/download_unity/22188f149405/MacEditorTargetInstaller/UnitySetup-WebGL-Support-for-Editor-Arm64-6000.3.27f2.pkg"
+UNITY_WEBGL_BYTES="1610986127"
+UNITY_WEBGL_MD5_B64="oCe7wpc5OTq8FexbF/cbpQ=="
