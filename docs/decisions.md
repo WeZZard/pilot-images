@@ -2,6 +2,15 @@
 
 Owner decisions that shape the images in this repo. Newest first.
 
+## 2026-11-01 — macos15 line retired
+
+- **[User] Decision:** delete `images/macos15`. No supported product targets
+  macOS 15, and no VM host has its base built, so every host listed it as an
+  image it could not create.
+- **[Agent] Default applied:** the history of the line stays in Git and in the
+  2026-10-18 entry below. A host that still has `pilot-macos15-*` VMs in its
+  Tart store can delete them with `tart delete`; nothing here does that.
+
 ## 2026-10-23 — macos27 disk, and updaters switched off instead of excluded
 
 - **[User] Decision:** `pilot-macos27-base` gets the 200 GB disk that
