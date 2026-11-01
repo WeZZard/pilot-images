@@ -102,7 +102,9 @@ def main():
     with tempfile.TemporaryDirectory(prefix='pilot-capture-') as directory:
         output = Path(directory) / 'desktop.png'
         result = json.loads(subprocess.check_output(['cua-driver', 'call', 'get_desktop_state', '--json', json.dumps({'screenshot_out_file': str(output)})], timeout=40))
-        if result.get('screenshot_file_path') != str(output) or output.is_symlink() or output.stat().st_size > 64 * 1024 * 1024:
+        # The driver reports the canonical path: /var and /tmp come back under /private on macOS.
+        reported = result.get('screenshot_file_path')
+        if not reported or Path(reported).resolve() != output.resolve() or output.is_symlink() or output.stat().st_size > 64 * 1024 * 1024:
             raise RuntimeError('capture returned an invalid artifact')
         raw = output.read_bytes()
         width, height = png_dimensions(raw)
