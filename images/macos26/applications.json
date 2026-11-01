@@ -5,7 +5,7 @@
     "schemaVersion": 1,
     "os": "macos",
     "architecture": "arm64",
-    "collectedAt": "2026-10-22T18:15:36.754843Z",
+    "collectedAt": "2026-11-01T10:00:02.754133Z",
     "sources": [
       {
         "id": "bundles",
@@ -48,19 +48,19 @@
         "id": "brew-cask:ghostty",
         "name": "ghostty",
         "aliases": [],
-        "version": "1.3.1"
+        "version": "1.4.0"
       },
       {
         "id": "brew-cask:git-credential-manager",
         "name": "git-credential-manager",
         "aliases": [],
-        "version": "2.9.1"
+        "version": "3.0.1"
       },
       {
         "id": "brew-cask:google-chrome",
         "name": "google-chrome",
         "aliases": [],
-        "version": "153.0.8010.48"
+        "version": "156.0.8078.80"
       },
       {
         "id": "brew-formula:autoconf",
@@ -69,10 +69,76 @@
         "version": "2.73"
       },
       {
+        "id": "brew-formula:aws-c-auth",
+        "name": "aws-c-auth",
+        "aliases": [],
+        "version": "1.0.1"
+      },
+      {
+        "id": "brew-formula:aws-c-cal",
+        "name": "aws-c-cal",
+        "aliases": [],
+        "version": "1.0.0_1"
+      },
+      {
+        "id": "brew-formula:aws-c-common",
+        "name": "aws-c-common",
+        "aliases": [],
+        "version": "1.0.3"
+      },
+      {
+        "id": "brew-formula:aws-c-compression",
+        "name": "aws-c-compression",
+        "aliases": [],
+        "version": "1.0.0"
+      },
+      {
+        "id": "brew-formula:aws-c-event-stream",
+        "name": "aws-c-event-stream",
+        "aliases": [],
+        "version": "1.0.0_1"
+      },
+      {
+        "id": "brew-formula:aws-c-http",
+        "name": "aws-c-http",
+        "aliases": [],
+        "version": "1.1.0"
+      },
+      {
+        "id": "brew-formula:aws-c-io",
+        "name": "aws-c-io",
+        "aliases": [],
+        "version": "1.1.0"
+      },
+      {
+        "id": "brew-formula:aws-c-mqtt",
+        "name": "aws-c-mqtt",
+        "aliases": [],
+        "version": "1.1.1"
+      },
+      {
+        "id": "brew-formula:aws-c-s3",
+        "name": "aws-c-s3",
+        "aliases": [],
+        "version": "1.3.1_1"
+      },
+      {
+        "id": "brew-formula:aws-c-sdkutils",
+        "name": "aws-c-sdkutils",
+        "aliases": [],
+        "version": "1.0.0"
+      },
+      {
+        "id": "brew-formula:aws-checksums",
+        "name": "aws-checksums",
+        "aliases": [],
+        "version": "1.0.1"
+      },
+      {
         "id": "brew-formula:awscli",
         "name": "awscli",
         "aliases": [],
-        "version": "2.36.18"
+        "version": "2.38.1"
       },
       {
         "id": "brew-formula:brotli",
@@ -90,19 +156,19 @@
         "id": "brew-formula:ca-certificates",
         "name": "ca-certificates",
         "aliases": [],
-        "version": "2026-08-13"
+        "version": "2026-10-20"
       },
       {
         "id": "brew-formula:cmake",
         "name": "cmake",
         "aliases": [],
-        "version": "4.4.2"
+        "version": "4.4.4"
       },
       {
         "id": "brew-formula:curl",
         "name": "curl",
         "aliases": [],
-        "version": "8.21.0"
+        "version": "8.23.0"
       },
       {
         "id": "brew-formula:dav1d",
@@ -114,13 +180,13 @@
         "id": "brew-formula:ffmpeg",
         "name": "ffmpeg",
         "aliases": [],
-        "version": "9.0.1_1"
+        "version": "9.0.2_1"
       },
       {
         "id": "brew-formula:gcc",
         "name": "gcc",
         "aliases": [],
-        "version": "16.1.0"
+        "version": "16.2.0"
       },
       {
         "id": "brew-formula:gettext",
@@ -132,19 +198,19 @@
         "id": "brew-formula:gh",
         "name": "gh",
         "aliases": [],
-        "version": "2.101.0"
+        "version": "2.103.3"
       },
       {
         "id": "brew-formula:git-lfs",
         "name": "git-lfs",
         "aliases": [],
-        "version": "3.7.1"
+        "version": "3.8.0"
       },
       {
         "id": "brew-formula:gitlab-runner",
         "name": "gitlab-runner",
         "aliases": [],
-        "version": "19.2.1"
+        "version": "19.5.0"
       },
       {
         "id": "brew-formula:gmp",
@@ -156,7 +222,7 @@
         "id": "brew-formula:hdrhistogram_c",
         "name": "hdrhistogram_c",
         "aliases": [],
-        "version": "0.11.10"
+        "version": "0.12.0"
       },
       {
         "id": "brew-formula:icu4c@78",
@@ -216,19 +282,19 @@
         "id": "brew-formula:libngtcp2",
         "name": "libngtcp2",
         "aliases": [],
-        "version": "1.25.0"
+        "version": "1.25.0_1"
       },
       {
         "id": "brew-formula:libpsl",
         "name": "libpsl",
         "aliases": [],
-        "version": "0.23.1"
+        "version": "0.23.3"
       },
       {
         "id": "brew-formula:libssh2",
         "name": "libssh2",
         "aliases": [],
-        "version": "1.11.1_4"
+        "version": "1.11.1_7"
       },
       {
         "id": "brew-formula:libunistring",
@@ -240,7 +306,7 @@
         "id": "brew-formula:libuv",
         "name": "libuv",
         "aliases": [],
-        "version": "1.52.1"
+        "version": "1.53.0"
       },
       {
         "id": "brew-formula:libvmaf",
@@ -276,7 +342,7 @@
         "id": "brew-formula:mise",
         "name": "mise",
         "aliases": [],
-        "version": "2026.8.2"
+        "version": "2026.10.10"
       },
       {
         "id": "brew-formula:mpdecimal",
@@ -300,7 +366,7 @@
         "id": "brew-formula:node@24",
         "name": "node@24",
         "aliases": [],
-        "version": "24.19.0"
+        "version": "24.22.0"
       },
       {
         "id": "brew-formula:oniguruma",
@@ -312,7 +378,13 @@
         "id": "brew-formula:openssl@3",
         "name": "openssl@3",
         "aliases": [],
-        "version": "3.6.4"
+        "version": "3.5.9"
+      },
+      {
+        "id": "brew-formula:openssl@4",
+        "name": "openssl@4",
+        "aliases": [],
+        "version": "4.1.0"
       },
       {
         "id": "brew-formula:opus",
@@ -324,19 +396,19 @@
         "id": "brew-formula:pkgconf",
         "name": "pkgconf",
         "aliases": [],
-        "version": "3.0.7"
+        "version": "3.0.10"
       },
       {
         "id": "brew-formula:pyenv",
         "name": "pyenv",
         "aliases": [],
-        "version": "2.8.5"
+        "version": "2.8.14"
       },
       {
-        "id": "brew-formula:python@3.14",
-        "name": "python@3.14",
+        "id": "brew-formula:python@3.15",
+        "name": "python@3.15",
         "aliases": [],
-        "version": "3.14.6"
+        "version": "3.15.0"
       },
       {
         "id": "brew-formula:rbenv",
@@ -348,37 +420,43 @@
         "id": "brew-formula:readline",
         "name": "readline",
         "aliases": [],
-        "version": "8.3.3"
+        "version": "8.3.6"
       },
       {
         "id": "brew-formula:ruby-build",
         "name": "ruby-build",
         "aliases": [],
-        "version": "20260716"
+        "version": "20261013"
+      },
+      {
+        "id": "brew-formula:s2n",
+        "name": "s2n",
+        "aliases": [],
+        "version": "1.7.11_1"
       },
       {
         "id": "brew-formula:sdl2-compat",
         "name": "sdl2-compat",
         "aliases": [],
-        "version": "2.32.72"
+        "version": "2.32.74"
       },
       {
         "id": "brew-formula:sdl3",
         "name": "sdl3",
         "aliases": [],
-        "version": "3.4.16"
+        "version": "3.4.18"
       },
       {
         "id": "brew-formula:simdjson",
         "name": "simdjson",
         "aliases": [],
-        "version": "4.6.6"
+        "version": "5.0.5"
       },
       {
         "id": "brew-formula:sqlite",
         "name": "sqlite",
         "aliases": [],
-        "version": "3.53.4"
+        "version": "3.54.0"
       },
       {
         "id": "brew-formula:svt-av1",
@@ -393,16 +471,10 @@
         "version": "6.0_8"
       },
       {
-        "id": "brew-formula:usage",
-        "name": "usage",
-        "aliases": [],
-        "version": "5.0.0"
-      },
-      {
         "id": "brew-formula:uv",
         "name": "uv",
         "aliases": [],
-        "version": "0.12.15"
+        "version": "0.13.6"
       },
       {
         "id": "brew-formula:uvwasi",
@@ -414,7 +486,7 @@
         "id": "brew-formula:wget",
         "name": "wget",
         "aliases": [],
-        "version": "1.25.0"
+        "version": "1.25.0_2"
       },
       {
         "id": "brew-formula:x264",
@@ -432,13 +504,13 @@
         "id": "brew-formula:xz",
         "name": "xz",
         "aliases": [],
-        "version": "5.8.3"
+        "version": "5.8.4"
       },
       {
         "id": "brew-formula:yq",
         "name": "yq",
         "aliases": [],
-        "version": "4.53.3"
+        "version": "4.54.1"
       },
       {
         "id": "brew-formula:zip",
@@ -456,7 +528,7 @@
         "id": "bundle:cn.trae.app",
         "name": "Trae CN",
         "aliases": [],
-        "version": "3.3.83"
+        "version": "3.4.11"
       },
       {
         "id": "bundle:co.posit.positron",
@@ -468,7 +540,7 @@
         "id": "bundle:com.amazon.codewhisperer",
         "name": "Kiro CLI",
         "aliases": [],
-        "version": "2.33.1"
+        "version": "2.37.0"
       },
       {
         "id": "bundle:com.apple.ActivityMonitor",
@@ -606,7 +678,7 @@
         "id": "bundle:com.apple.Passwords",
         "name": "Passwords",
         "aliases": [],
-        "version": "2.6"
+        "version": "2.6.2"
       },
       {
         "id": "bundle:com.apple.PhotoBooth",
@@ -636,7 +708,7 @@
         "id": "bundle:com.apple.Safari",
         "name": "Safari",
         "aliases": [],
-        "version": "26.6"
+        "version": "26.6.2"
       },
       {
         "id": "bundle:com.apple.ScreenContinuity",
@@ -876,31 +948,31 @@
         "id": "bundle:com.exafunction.windsurf",
         "name": "Devin",
         "aliases": [],
-        "version": "3.10.67"
+        "version": "3.11.238"
       },
       {
         "id": "bundle:com.google.antigravity",
         "name": "Antigravity",
         "aliases": [],
-        "version": "2.25.0"
+        "version": "2.28.2"
       },
       {
         "id": "bundle:com.hotovo.aider-desk",
         "name": "aider-desk",
         "aliases": [],
-        "version": "0.88.0"
+        "version": "0.89.0"
       },
       {
         "id": "bundle:com.minimax.agent",
         "name": "MiniMax Code",
         "aliases": [],
-        "version": "3.1.4"
+        "version": "3.1.9"
       },
       {
         "id": "bundle:com.mitchellh.ghostty",
         "name": "Ghostty",
         "aliases": [],
-        "version": "1.3.1"
+        "version": "1.4.0"
       },
       {
         "id": "bundle:com.syncfusion.code.studio",
@@ -912,25 +984,25 @@
         "id": "bundle:com.todesktop.230313mzl4w4u92",
         "name": "Cursor",
         "aliases": [],
-        "version": "3.26.16"
+        "version": "3.27.22"
       },
       {
         "id": "bundle:com.trae.app",
         "name": "Trae",
         "aliases": [],
-        "version": "3.5.81"
+        "version": "3.6.4"
       },
       {
         "id": "bundle:com.trycua.driver",
         "name": "Cua Driver",
         "aliases": [],
-        "version": "0.12.6"
+        "version": "0.38.0"
       },
       {
         "id": "bundle:com.unity3d.UnityEditor5.x",
         "name": "Unity",
         "aliases": [],
-        "version": "Unity version 6000.3.26f1"
+        "version": "Unity version 6000.3.27f2"
       },
       {
         "id": "bundle:com.zenflow.desktop",
@@ -942,13 +1014,13 @@
         "id": "bundle:dev.zcode.app",
         "name": "ZCode",
         "aliases": [],
-        "version": "3.16.2"
+        "version": "3.16.3"
       },
       {
         "id": "bundle:dev.zed.Zed",
         "name": "Zed",
         "aliases": [],
-        "version": "1.25.2"
+        "version": "1.26.2"
       },
       {
         "id": "google-chrome",
@@ -956,13 +1028,13 @@
         "aliases": [
           "Chrome"
         ],
-        "version": "153.0.8010.48"
+        "version": "156.0.8078.80"
       },
       {
         "id": "npm:@ampcode/cli",
         "name": "@ampcode/cli",
         "aliases": [],
-        "version": "0.0.1792641650-gd4ebfb"
+        "version": "0.0.1793476832-ga2d2ae"
       },
       {
         "id": "npm:@augmentcode/auggie",
@@ -980,7 +1052,7 @@
         "id": "npm:@earendil-works/pi-coding-agent",
         "name": "@earendil-works/pi-coding-agent",
         "aliases": [],
-        "version": "0.85.1"
+        "version": "1.4.0"
       },
       {
         "id": "npm:@getpochi/cli",
@@ -992,37 +1064,37 @@
         "id": "npm:@github/copilot",
         "name": "@github/copilot",
         "aliases": [],
-        "version": "1.0.102"
+        "version": "1.0.105"
       },
       {
         "id": "npm:@google/gemini-cli",
         "name": "@google/gemini-cli",
         "aliases": [],
-        "version": "0.65.0"
+        "version": "0.66.0"
       },
       {
         "id": "npm:@ibm/bob",
         "name": "@ibm/bob",
         "aliases": [],
-        "version": "2.0.8"
+        "version": "2.0.9"
       },
       {
         "id": "npm:@kilocode/cli",
         "name": "@kilocode/cli",
         "aliases": [],
-        "version": "7.8.15"
+        "version": "7.8.18"
       },
       {
         "id": "npm:@mcpjam/inspector",
         "name": "@mcpjam/inspector",
         "aliases": [],
-        "version": "3.16.2"
+        "version": "3.18.0"
       },
       {
         "id": "npm:@moonshot-ai/kimi-code",
         "name": "@moonshot-ai/kimi-code",
         "aliases": [],
-        "version": "2.3.0"
+        "version": "2.4.1"
       },
       {
         "id": "npm:@neovate/code",
@@ -1034,31 +1106,31 @@
         "id": "npm:@openai/codex",
         "name": "@openai/codex",
         "aliases": [],
-        "version": "0.154.0"
+        "version": "0.166.0"
       },
       {
         "id": "npm:@opencode/cli",
         "name": "@opencode/cli",
         "aliases": [],
-        "version": "2.1.2"
+        "version": "2.2.5"
       },
       {
         "id": "npm:@qoder-ai/qodercli",
         "name": "@qoder-ai/qodercli",
         "aliases": [],
-        "version": "1.1.76"
+        "version": "1.1.81"
       },
       {
         "id": "npm:@qodercn-ai/qoderclicn",
         "name": "@qodercn-ai/qoderclicn",
         "aliases": [],
-        "version": "1.1.76"
+        "version": "1.1.81"
       },
       {
         "id": "npm:@qwen-code/qwen-code",
         "name": "@qwen-code/qwen-code",
         "aliases": [],
-        "version": "0.26.0"
+        "version": "0.26.4"
       },
       {
         "id": "npm:@shareai-lab/kode",
@@ -1070,74 +1142,74 @@
         "id": "npm:@tencent-ai/codebuddy-code",
         "name": "@tencent-ai/codebuddy-code",
         "aliases": [],
-        "version": "2.172.1"
+        "version": "2.179.1"
       },
       {
         "id": "npm:autohand-cli",
         "name": "autohand-cli",
         "aliases": [],
-        "version": "0.9.8"
+        "version": "0.9.9"
       },
       {
         "id": "npm:cline",
         "name": "cline",
         "aliases": [],
-        "version": "3.0.73"
+        "version": "3.0.74"
       },
       {
         "id": "npm:command-code",
         "name": "command-code",
         "aliases": [],
-        "version": "1.87.1"
+        "version": "1.88.2"
       },
       {
         "id": "npm:corepack",
         "name": "corepack",
         "aliases": [],
-        "version": "0.34.6"
+        "version": "0.36.0"
       },
       {
         "id": "npm:dexto",
         "name": "dexto",
         "aliases": [],
-        "version": "1.14.2"
+        "version": "1.14.4"
       },
       {
         "id": "npm:jazz-ai",
         "name": "jazz-ai",
         "aliases": [],
-        "version": "0.16.20"
+        "version": "0.16.28"
       },
       {
         "id": "npm:npm",
         "name": "npm",
         "aliases": [],
-        "version": "10.9.8"
+        "version": "10.9.9"
       },
       {
         "id": "npm:playwright",
         "name": "playwright",
         "aliases": [],
-        "version": "1.63.0"
+        "version": "1.64.1"
       },
       {
         "id": "npm:reasonix",
         "name": "reasonix",
         "aliases": [],
-        "version": "2.48.0"
+        "version": "2.56.0"
       },
       {
         "id": "npm:terramind",
         "name": "terramind",
         "aliases": [],
-        "version": "0.2.156"
+        "version": "0.2.187"
       }
     ]
   },
   "provenance": {
     "extractionMode": "work",
-    "evidenceId": "macos26-jP0qBnfR",
-    "rawSha256": "068af4dac58beeaa22cecd55ea48955c5508956e55c5f67fea22c646baa8eeab",
+    "evidenceId": "macos26-13uOZ9T6",
+    "rawSha256": "e1912a346bc0cc17d3ef2909d0339fc429819687225fad3e3e256b069225560e",
     "collectorSha256": "54497d48f69d6b12f653a3a6efbbe87310345329edd17d0894570f243fec4e40",
     "aliasesSha256": "fb88e6b824c4d17578f498a265333f56a580d974c8f07a547d715a2744cdbed5"
   }
