@@ -7,9 +7,10 @@
 # For each line: the base VM and, when present, its pristine seed are copied to
 # the same names in <host>'s Tart store, replacing what is there (no -prev copy
 # is kept), and the bytes are compared on both sides before the swap. The
-# line's application inventory travels through git: <host>'s checkout at the
-# same path under $HOME pulls, and the copied base is associated with the
-# inventory its source base was accepted with (host/inventory.py adopt).
+# line's application inventory travels through git: this host pushes its commit
+# into <host>'s checkout at the same path under $HOME, which fast-forwards to
+# it (so <host> needs no GitHub access), and the copied base is associated with
+# the inventory its source base was accepted with (host/inventory.py adopt).
 #
 # Run on the host that built and promoted the images, with every base stopped
 # and its images/<line>/applications.json committed and pushed.
@@ -78,7 +79,14 @@ sync_line() {  # sync_line <line>
   copy_vm "$BASE_VM" || return 1
   if [[ -n "${SEED_LOCAL:-}" ]] && vm_exists "$SEED_LOCAL"; then copy_vm "$SEED_LOCAL" || return 1; fi
 
-  remote "cd ~/$REL && git pull -q --ff-only" || { warn "$line: git pull failed on $DEST"; return 1 }
+  # The destination may hold no GitHub credentials: this host hands it the
+  # commit over the same SSH link, and its checkout fast-forwards to it.
+  local branch; branch=$(git rev-parse --abbrev-ref HEAD)
+  [[ "$(remote "git -C ~/$REL rev-parse --abbrev-ref HEAD")" == "$branch" ]] \
+    || { warn "$line: $DEST's checkout is not on $branch"; return 1 }
+  git push -q "$DEST:$REL" "HEAD:refs/remotes/origin/$branch" \
+    && remote "git -C ~/$REL merge -q --ff-only origin/$branch" \
+    || { warn "$line: $DEST's checkout could not fast-forward to $(git rev-parse --short HEAD)"; return 1 }
   scp -q "$BASE_INVENTORY" "$DEST:$STAGING/$line-source-$TS.json" || return 1
   remote "cd ~/$REL && out=\$(python3 host/inventory.py state-path --root ~/.tart/vms)/base/$line.json &&
     python3 host/inventory.py adopt --source $STAGING/$line-source-$TS.json --output \"\$out\" --root ~/.tart/vms \

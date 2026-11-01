@@ -169,8 +169,9 @@ host/promote-base.zsh macos27                    # after the manual doctrine che
   `<host>`'s Tart store, replacing what is there (no `-prev` copy). The bytes
   are compared on both sides before the swap, and an identical copy is skipped.
 - The application inventory travels through git: commit and push
-  `images/<line>/applications.json` after promotion, and `<host>`'s checkout at
-  the same path pulls it. The copied base is then associated with the inventory
+  `images/<line>/applications.json` after promotion. The script pushes that
+  commit into `<host>`'s checkout at the same path, which fast-forwards to it,
+  so `<host>` needs no GitHub access. The copied base is then associated with the inventory
   its source base was accepted with (`host/inventory.py adopt`), so
   machine-service on `<host>` lists the same images and applications.
 
