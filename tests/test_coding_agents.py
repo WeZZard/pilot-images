@@ -11,7 +11,7 @@ import unittest
 from unittest import mock
 
 REPO = pathlib.Path(__file__).resolve().parents[1]
-LINES = ('macos15', 'macos26', 'macos27')
+LINES = ('macos26', 'macos27')
 GUEST_FILES = ('85-coding-agents.zsh', 'coding-agents.py', 'coding-agents.lock.json')
 LOCK = json.loads((REPO / 'images/macos26/guest/coding-agents.lock.json').read_text())
 SHA256 = re.compile(r'^[0-9a-f]{64}$')

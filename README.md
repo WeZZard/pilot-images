@@ -183,9 +183,6 @@ host/promote-base.zsh macos27                    # after the manual doctrine che
   + lock-screen-off per the always-on-unlocked doctrine. Carries the Unity
   editor (phase 80; see "Unity in macos26" below) and, like every macOS
   line, the coding agents (phase 85; see "Coding agents" below).
-- `images/macos15/` — macOS 15. Seed: cirruslabs macos-sequoia-base; Xcode
-  16.4 (`Xcode_16.4.xip`). Same account, phases and checks as macos26; clones
-  are `pilot-mac15-<purpose>`.
 - `images/macos27/` — macOS 27. Seed: cirruslabs macos-golden-gate-base; Xcode
   27.2 (`Xcode_27.2.xip`). Same account, phases and checks as macos26; clones
   are `pilot-mac27-<purpose>`.
