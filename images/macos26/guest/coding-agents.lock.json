@@ -729,7 +729,7 @@
    "package": "deepagents-code",
    "version": "0.2.2",
    "spec": "deepagents-code==0.2.2",
-   "python": "3.13",
+   "python": "3.14",
    "bin": "dcode",
    "source": "https://github.com/langchain-ai/deepagents",
    "check": [
