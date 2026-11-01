@@ -89,9 +89,9 @@ sync_line() {  # sync_line <line>
     || { warn "$line: $DEST's checkout could not fast-forward to $(git rev-parse --short HEAD)"; return 1 }
   scp -q "$BASE_INVENTORY" "$DEST:$STAGING/$line-source-$TS.json" || return 1
   remote "cd ~/$REL && out=\$(python3 host/inventory.py state-path --root ~/.tart/vms)/base/$line.json &&
-    python3 host/inventory.py adopt --source $STAGING/$line-source-$TS.json --output \"\$out\" --root ~/.tart/vms \
+    python3 host/inventory.py adopt --source ~/$STAGING/$line-source-$TS.json --output \"\$out\" --root ~/.tart/vms \
       --vm $BASE_VM --image $line --os $LINE_KIND --portable images/$line/applications.json &&
-    rm $STAGING/$line-source-$TS.json" \
+    rm ~/$STAGING/$line-source-$TS.json" \
     || { warn "$line: the application inventory was not associated on $DEST"; return 1 }
   log "$line: synced to $DEST"
 }

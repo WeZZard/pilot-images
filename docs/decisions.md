@@ -314,3 +314,7 @@ Owner decisions that shape the images in this repo. Newest first.
   untouched. Verification now compares the fingerprint without `st_dev`; the
   inode, size and modification time still catch a changed or replaced file.
   The line's `applications.json` from that acceptance is committed with it.
+- **Also found (agent):** `sync-images.zsh` staged the source association under
+  the destination's home but read it from inside the checkout, so every copy
+  ended without its inventory associated. The adopt step now reads it from the
+  home staging folder.
