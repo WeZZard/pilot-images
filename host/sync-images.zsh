@@ -50,7 +50,11 @@ copy_vm() {  # copy_vm <vm>
   if [[ "$theirs" == "$mine" ]]; then log "$vm: already identical on $DEST"; return 0; fi
   log "$vm: copying to $DEST"
   remote "mkdir -p $STAGING"
-  until rsync -aS --partial --timeout=120 --exclude control.sock "$src/" "$DEST:$STAGING/$vm/"; do
+  # A resumed copy first checksums the partial disk on $DEST, which can stay
+  # silent for minutes; SSH keepalives, not an rsync I/O timeout, detect a
+  # dead link.
+  until rsync -aS --partial -e 'ssh -o ServerAliveInterval=30 -o ServerAliveCountMax=4' \
+      --exclude control.sock "$src/" "$DEST:$STAGING/$vm/"; do
     warn "$vm: copy interrupted; resuming in 30 s"; sleep 30
   done
   theirs=$(remote "cd $STAGING/$vm && shasum -a 256 ${files[*]}") || return 1
