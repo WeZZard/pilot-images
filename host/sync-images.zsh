@@ -53,10 +53,17 @@ copy_vm() {  # copy_vm <vm>
   # A resumed copy first checksums the partial disk on $DEST, which can stay
   # silent for minutes; SSH keepalives, not an rsync I/O timeout, detect a
   # dead link.
-  until rsync -aS --partial -e 'ssh -o ServerAliveInterval=30 -o ServerAliveCountMax=4' \
+  # A dropped link can leave the receiving rsync on $DEST alive, still writing
+  # into the staging folder, and its temporary files behind: settle both
+  # before every attempt and before the copy is checked and installed.
+  local receiver="[r]sync --server.* $STAGING/$vm/\$"
+  settle() { remote "pkill -f '$receiver'; while pgrep -f '$receiver' >/dev/null; do sleep 1; done
+    find $STAGING/$vm -maxdepth 1 -type f -name '.*' -delete 2>/dev/null; true" }
+  until settle && rsync -aS --partial -e 'ssh -o ServerAliveInterval=30 -o ServerAliveCountMax=4' \
       --exclude control.sock "$src/" "$DEST:$STAGING/$vm/"; do
     warn "$vm: copy interrupted; resuming in 30 s"; sleep 30
   done
+  settle || return 1
   theirs=$(remote "cd $STAGING/$vm && shasum -a 256 ${files[*]}") || return 1
   [[ "$theirs" == "$mine" ]] || { warn "$vm: the copy on $DEST differs from the source"; return 1 }
   remote "if tart list | awk '\$2==\"$vm\" {print \$NF}' | grep -q running; then echo '$vm is running on $DEST' >&2; exit 1; fi
