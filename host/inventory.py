@@ -282,11 +282,35 @@ def bind(raw, output, root, vm, image, kind, previous=None, *, portable,
     return document
 
 
+def adopt(source, output, root, vm, image, kind, *, portable):
+    """Associate a base copied from another host with the same portable inventory.
+
+    The source association names the copied base's files on the source host;
+    sync-images.zsh has already checked the copy's bytes against the source. Here
+    the copy keeps the source's inventory and is fingerprinted where it now lives.
+    """
+    invalidate(output)
+    recorded = validate_association(read_json(source), image)
+    raw = portable_bytes(portable, image, kind)
+    before = fingerprint(root, vm, kind)
+    if recorded['inventorySha256'] != digest(raw):
+        raise ValueError('portable inventory differs from the source association')
+    if recorded['base']['base_vm'] != vm or {name: values['st_size'] for name, values in recorded['base']['files'].items()} \
+            != {name: values['st_size'] for name, values in before['files'].items()}:
+        raise ValueError('copied base differs from the source base')
+    document = dict(schemaVersion=2, image=key(image), base=before, inventorySha256=recorded['inventorySha256'])
+    atomic_write(output, encode(document))
+    if before != fingerprint(root, vm, kind) or raw != read_bytes(portable):
+        invalidate(output)
+        raise ValueError('pair changed during adoption')
+    return document
+
+
 def main():
     from environment import initialize, check_store_root
     initialize()
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('action', choices=('state-path', 'invalidate', 'bind', 'verify'))
+    parser.add_argument('action', choices=('state-path', 'invalidate', 'bind', 'verify', 'adopt'))
     parser.add_argument('--output', type=Path)
     parser.add_argument('--root', type=Path, default=Path(os.environ['TART_HOME']) / 'vms' if os.environ.get('VM_ENVIRONMENT_FILE') else Path.home() / '.tart/vms')
     parser.add_argument('--vm')
@@ -294,6 +318,7 @@ def main():
     parser.add_argument('--os', choices=('linux', 'macos'))
     parser.add_argument('--raw', type=Path)
     parser.add_argument('--previous', type=Path)
+    parser.add_argument('--source', type=Path, help='adopt: the association the source host recorded')
     parser.add_argument('--portable', type=Path)
     parser.add_argument('--mode', choices=('disposable-clone', 'work', 'base-maintenance'))
     parser.add_argument('--evidence-id')
@@ -309,6 +334,8 @@ def main():
             raise ValueError('--output is required')
         if args.action == 'invalidate':
             invalidate(args.output)
+        elif args.action == 'adopt':
+            adopt(args.source, args.output, args.root, args.vm, args.image, args.os, portable=args.portable)
         elif args.action == 'verify':
             verify(read_json(args.output), args.root, args.vm, args.image, args.os, args.portable)
         else:

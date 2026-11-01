@@ -162,6 +162,18 @@ host/promote-base.zsh macos27                    # after the manual doctrine che
 - `update-images.zsh` sets the previous seed copy and work VM aside under a
   dated suffix instead of deleting them, and builds one line at a time.
 
+### Syncing the images to another VM host
+
+- `host/sync-images.zsh <host> [line ...]`, run on the host that built and
+  promoted the images, copies each line's base and seed to the same names in
+  `<host>`'s Tart store, replacing what is there (no `-prev` copy). The bytes
+  are compared on both sides before the swap, and an identical copy is skipped.
+- The application inventory travels through git: commit and push
+  `images/<line>/applications.json` after promotion, and `<host>`'s checkout at
+  the same path pulls it. The copied base is then associated with the inventory
+  its source base was accepted with (`host/inventory.py adopt`), so
+  machine-service on `<host>` lists the same images and applications.
+
 ## Images
 
 - `images/macos26/` — active. Seed: cirruslabs macos-tahoe-base (ships an
@@ -175,7 +187,7 @@ host/promote-base.zsh macos27                    # after the manual doctrine che
   16.4 (`Xcode_16.4.xip`). Same account, phases and checks as macos26; clones
   are `pilot-mac15-<purpose>`.
 - `images/macos27/` — macOS 27. Seed: cirruslabs macos-golden-gate-base; Xcode
-  27.1 (`Xcode_27.1.xip`). Same account, phases and checks as macos26; clones
+  27.2 (`Xcode_27.2.xip`). Same account, phases and checks as macos26; clones
   are `pilot-mac27-<purpose>`.
 - `images/ubuntu2404/` — adoption of the existing `pilot-ubuntu-base`; see its
   README.

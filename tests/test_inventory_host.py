@@ -81,6 +81,36 @@ class HostInventoryTests(unittest.TestCase):
         self.assertEqual(result['base']['path'], str(self.vms / 'base'))
         host.verify(result, self.vms, 'base', 'macos26', 'macos', self.portable)
 
+    def copied_store(self):
+        source = self.root / 'source.json'
+        source.write_bytes(self.output.read_bytes())
+        copy = self.root / 'other-host/vms'
+        (copy / 'work').mkdir(parents=True)
+        for name in ('disk.img', 'config.json', 'nvram.bin'):
+            (copy / 'work' / name).write_bytes((self.work / name).read_bytes())
+        return source, copy, self.root / 'other-host/state/base/macos26.json'
+
+    def test_a_copied_base_adopts_the_source_inventory(self):
+        self.bind()
+        source, copy, output = self.copied_store()
+        result = host.adopt(source, output, copy, 'work', 'macos26', 'macos', portable=self.portable)
+        self.assertEqual(result['inventorySha256'], json.loads(source.read_text())['inventorySha256'])
+        self.assertEqual(result['base']['path'], str(copy / 'work'))
+        host.verify(json.loads(output.read_text()), copy, 'work', 'macos26', 'macos', self.portable)
+
+    def test_adoption_refuses_another_inventory_or_a_different_base(self):
+        self.bind()
+        source, copy, output = self.copied_store()
+        (copy / 'work/disk.img').write_bytes(b'a different disk')
+        with self.assertRaises(ValueError):
+            host.adopt(source, output, copy, 'work', 'macos26', 'macos', portable=self.portable)
+        self.assertFalse(output.exists())
+        (copy / 'work/disk.img').write_bytes(b'fixture')
+        self.portable.write_bytes(self.portable.read_bytes() + b' ')
+        with self.assertRaises(ValueError):
+            host.adopt(source, output, copy, 'work', 'macos26', 'macos', portable=self.portable)
+        self.assertFalse(output.exists())
+
     def test_mutation_after_rename_removes_old_publication(self):
         self.bind()
         saved = self.root / 'work.json'
