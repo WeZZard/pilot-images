@@ -18,6 +18,10 @@ fi
 if (( ${+_PILOT_ENVIRONMENT_BOUND} )); then
   # The selected executable/store cannot drift after sourcing an image config.
   tart() { command /usr/bin/env "TART_HOME=$_PILOT_TART_HOME" "$_PILOT_TART_EXECUTABLE" "$@"; }
+else
+  # A non-login SSH shell lacks Homebrew's prefix; without Tart on PATH every
+  # VM check would quietly answer "absent".
+  command -v tart >/dev/null 2>&1 || path+=(/opt/homebrew/bin /usr/local/bin)
 fi
 
 # Tart owns a separate process session. Cancelling a build must not implicitly
