@@ -11,7 +11,7 @@
 
 - The `inventory` member contains the unchanged, validated collector document. Provenance hashes preserve the raw inventory, collector, and alias inputs.
 - Host-local associations retain schema 2 with exactly `schemaVersion`, `image`, `base`, and `inventorySha256`. The digest covers complete portable file bytes, including whitespace.
-- The base fingerprint contains `base_vm`, canonical absolute `path`, and `files`. Files include `config.json`, `disk.img`, and `nvram.bin` when present; macOS requires `nvram.bin`. Each file records `st_dev`, `st_ino`, `st_size`, and `st_mtime_ns`.
+- The base fingerprint contains `base_vm`, canonical absolute `path`, and `files`. Files include `config.json`, `disk.img`, and `nvram.bin` when present; macOS requires `nvram.bin`. Each file records `st_dev`, `st_ino`, `st_size`, and `st_mtime_ns`. Verification ignores `st_dev`: macOS can renumber a volume when the Mac restarts.
 - This fingerprint detects ordinary local staleness. It is not a content hash, signature, lock, or attestation. Symlink paths and nonregular selected files are rejected.
 - Both historical portable observations were moved without changing their bytes. They remain historical observations, not evidence of current readiness. No live association is generated from them.
 

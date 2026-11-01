@@ -304,3 +304,13 @@ Owner decisions that shape the images in this repo. Newest first.
   until macOS has shown its once-per-app screen-capture alert, which TCC rows
   do not record. Phase 60 now pre-records that approval the way the vendor's
   own CI does.
+
+## 2026-11-01 — A restart does not make a promoted base stale
+
+- **Decision (WeZZard):** every VM host offers the Ubuntu line too.
+- **Found while doing it (agent):** the Ubuntu base, accepted on 2026-09-22,
+  no longer verified after its host restarted, so `sync-images.zsh` refused to
+  copy it. macOS gave the volume a new device number; the base's files were
+  untouched. Verification now compares the fingerprint without `st_dev`; the
+  inode, size and modification time still catch a changed or replaced file.
+  The line's `applications.json` from that acceptance is committed with it.

@@ -209,11 +209,19 @@ def validate_association(document, image):
     return document
 
 
+def stable(base):
+    """The fingerprint without device numbers: macOS can renumber a volume when
+    the Mac restarts, while the inode, size and modification time on the same
+    path still name the same file."""
+    return dict(base, files={name: {k: v for k, v in values.items() if k != 'st_dev'}
+                             for name, values in base['files'].items()})
+
+
 def verify(document, root, vm, image, kind, portable):
     validate_association(document, image)
     raw = portable_bytes(portable, image, kind)
     before = fingerprint(root, vm, kind)
-    if document['inventorySha256'] != digest(raw) or document['base'] != before:
+    if document['inventorySha256'] != digest(raw) or stable(document['base']) != stable(before):
         raise ValueError('inventory no longer matches stopped image')
     if raw != read_bytes(portable) or before != fingerprint(root, vm, kind):
         raise ValueError('pair changed during verification')

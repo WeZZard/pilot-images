@@ -50,6 +50,15 @@ class HostInventoryTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             host.verify(doc, self.vms, 'work', 'macos26', 'macos', self.portable)
 
+    def test_a_restart_that_renumbers_the_volume_still_verifies(self):
+        doc = self.bind()
+        for values in doc['base']['files'].values():
+            values['st_dev'] += 3
+        host.verify(doc, self.vms, 'work', 'macos26', 'macos', self.portable)
+        doc['base']['files']['disk.img']['st_ino'] += 1
+        with self.assertRaises(ValueError):
+            host.verify(doc, self.vms, 'work', 'macos26', 'macos', self.portable)
+
     def test_portable_precedes_association_and_failure_invalidates(self):
         real = host.atomic_write
         calls = []
