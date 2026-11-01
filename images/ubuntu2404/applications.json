@@ -5,7 +5,7 @@
     "schemaVersion": 1,
     "os": "linux",
     "architecture": "arm64",
-    "collectedAt": "2026-09-19T01:47:59.820938Z",
+    "collectedAt": "2026-09-22T01:24:52.545781Z",
     "sources": [
       {
         "id": "dpkg-query",
@@ -43,7 +43,7 @@
         "aliases": [
           "Chromium Browser"
         ],
-        "version": "152.0.7977.82"
+        "version": "153.0.8010.36"
       },
       {
         "id": "dpkg:accountsservice",
@@ -1201,7 +1201,7 @@
         "id": "dpkg:ghostscript",
         "name": "ghostscript",
         "aliases": [],
-        "version": "10.02.1~dfsg1-0ubuntu7.8"
+        "version": "10.02.1~dfsg1-0ubuntu7.9"
       },
       {
         "id": "dpkg:gir1.2-accountsservice-1.0:arm64",
@@ -1279,7 +1279,7 @@
         "id": "dpkg:gir1.2-glib-2.0:arm64",
         "name": "gir1.2-glib-2.0:arm64",
         "aliases": [],
-        "version": "2.80.0-6ubuntu3.8"
+        "version": "2.80.0-6ubuntu3.9"
       },
       {
         "id": "dpkg:gir1.2-gmenu-3.0:arm64",
@@ -1867,13 +1867,13 @@
         "id": "dpkg:gstreamer1.0-alsa:arm64",
         "name": "gstreamer1.0-alsa:arm64",
         "aliases": [],
-        "version": "1.24.2-1ubuntu0.4"
+        "version": "1.24.2-1ubuntu0.5"
       },
       {
         "id": "dpkg:gstreamer1.0-gl:arm64",
         "name": "gstreamer1.0-gl:arm64",
         "aliases": [],
-        "version": "1.24.2-1ubuntu0.4"
+        "version": "1.24.2-1ubuntu0.5"
       },
       {
         "id": "dpkg:gstreamer1.0-packagekit",
@@ -1891,19 +1891,19 @@
         "id": "dpkg:gstreamer1.0-plugins-base-apps",
         "name": "gstreamer1.0-plugins-base-apps",
         "aliases": [],
-        "version": "1.24.2-1ubuntu0.4"
+        "version": "1.24.2-1ubuntu0.5"
       },
       {
         "id": "dpkg:gstreamer1.0-plugins-base:arm64",
         "name": "gstreamer1.0-plugins-base:arm64",
         "aliases": [],
-        "version": "1.24.2-1ubuntu0.4"
+        "version": "1.24.2-1ubuntu0.5"
       },
       {
         "id": "dpkg:gstreamer1.0-plugins-good:arm64",
         "name": "gstreamer1.0-plugins-good:arm64",
         "aliases": [],
-        "version": "1.24.2-1ubuntu1.6"
+        "version": "1.24.2-1ubuntu1.7"
       },
       {
         "id": "dpkg:gstreamer1.0-tools",
@@ -1915,7 +1915,7 @@
         "id": "dpkg:gstreamer1.0-x:arm64",
         "name": "gstreamer1.0-x:arm64",
         "aliases": [],
-        "version": "1.24.2-1ubuntu0.4"
+        "version": "1.24.2-1ubuntu0.5"
       },
       {
         "id": "dpkg:gtk-update-icon-cache",
@@ -3349,7 +3349,7 @@
         "id": "dpkg:libexpat1:arm64",
         "name": "libexpat1:arm64",
         "aliases": [],
-        "version": "2.6.1-2ubuntu0.4"
+        "version": "2.6.1-2ubuntu0.5"
       },
       {
         "id": "dpkg:libext2fs2t64:arm64",
@@ -3721,19 +3721,19 @@
         "id": "dpkg:libglib2.0-0t64:arm64",
         "name": "libglib2.0-0t64:arm64",
         "aliases": [],
-        "version": "2.80.0-6ubuntu3.8"
+        "version": "2.80.0-6ubuntu3.9"
       },
       {
         "id": "dpkg:libglib2.0-bin",
         "name": "libglib2.0-bin",
         "aliases": [],
-        "version": "2.80.0-6ubuntu3.8"
+        "version": "2.80.0-6ubuntu3.9"
       },
       {
         "id": "dpkg:libglib2.0-data",
         "name": "libglib2.0-data",
         "aliases": [],
-        "version": "2.80.0-6ubuntu3.8"
+        "version": "2.80.0-6ubuntu3.9"
       },
       {
         "id": "dpkg:libglibmm-2.68-1t64:arm64",
@@ -3925,19 +3925,19 @@
         "id": "dpkg:libgs-common",
         "name": "libgs-common",
         "aliases": [],
-        "version": "10.02.1~dfsg1-0ubuntu7.8"
+        "version": "10.02.1~dfsg1-0ubuntu7.9"
       },
       {
         "id": "dpkg:libgs10-common",
         "name": "libgs10-common",
         "aliases": [],
-        "version": "10.02.1~dfsg1-0ubuntu7.8"
+        "version": "10.02.1~dfsg1-0ubuntu7.9"
       },
       {
         "id": "dpkg:libgs10:arm64",
         "name": "libgs10:arm64",
         "aliases": [],
-        "version": "10.02.1~dfsg1-0ubuntu7.8"
+        "version": "10.02.1~dfsg1-0ubuntu7.9"
       },
       {
         "id": "dpkg:libgsf-1-114:arm64",
@@ -3991,19 +3991,19 @@
         "id": "dpkg:libgstreamer-gl1.0-0:arm64",
         "name": "libgstreamer-gl1.0-0:arm64",
         "aliases": [],
-        "version": "1.24.2-1ubuntu0.4"
+        "version": "1.24.2-1ubuntu0.5"
       },
       {
         "id": "dpkg:libgstreamer-plugins-base1.0-0:arm64",
         "name": "libgstreamer-plugins-base1.0-0:arm64",
         "aliases": [],
-        "version": "1.24.2-1ubuntu0.4"
+        "version": "1.24.2-1ubuntu0.5"
       },
       {
         "id": "dpkg:libgstreamer-plugins-good1.0-0:arm64",
         "name": "libgstreamer-plugins-good1.0-0:arm64",
         "aliases": [],
-        "version": "1.24.2-1ubuntu1.6"
+        "version": "1.24.2-1ubuntu1.7"
       },
       {
         "id": "dpkg:libgstreamer1.0-0:arm64",
@@ -4993,7 +4993,7 @@
         "id": "dpkg:libnetplan1:arm64",
         "name": "libnetplan1:arm64",
         "aliases": [],
-        "version": "1.1.2-8ubuntu1~24.04.2"
+        "version": "1.1.2-8ubuntu1~24.04.3"
       },
       {
         "id": "dpkg:libnettle8t64:arm64",
@@ -6238,6 +6238,12 @@
         "version": "1.3.4+ds-1.1build1"
       },
       {
+        "id": "dpkg:libtk8.6:arm64",
+        "name": "libtk8.6:arm64",
+        "aliases": [],
+        "version": "8.6.14-1build1"
+      },
+      {
         "id": "dpkg:libtotem-plparser-common",
         "name": "libtotem-plparser-common",
         "aliases": [],
@@ -6518,6 +6524,18 @@
         "name": "libvisual-0.4-0:arm64",
         "aliases": [],
         "version": "0.4.2-2build1"
+      },
+      {
+        "id": "dpkg:libvncclient1:arm64",
+        "name": "libvncclient1:arm64",
+        "aliases": [],
+        "version": "0.9.14+dfsg-1ubuntu0.2"
+      },
+      {
+        "id": "dpkg:libvncserver1:arm64",
+        "name": "libvncserver1:arm64",
+        "aliases": [],
+        "version": "0.9.14+dfsg-1ubuntu0.2"
       },
       {
         "id": "dpkg:libvolume-key1:arm64",
@@ -7009,7 +7027,7 @@
         "id": "dpkg:libxml2:arm64",
         "name": "libxml2:arm64",
         "aliases": [],
-        "version": "2.9.14+dfsg-1.3ubuntu3.8"
+        "version": "2.9.14+dfsg-1.3ubuntu3.9"
       },
       {
         "id": "dpkg:libxmlb2:arm64",
@@ -7076,6 +7094,12 @@
         "name": "libxslt1.1:arm64",
         "aliases": [],
         "version": "1.1.39-0exp1ubuntu0.24.04.3"
+      },
+      {
+        "id": "dpkg:libxss1:arm64",
+        "name": "libxss1:arm64",
+        "aliases": [],
+        "version": "1:1.2.3-1build3"
       },
       {
         "id": "dpkg:libxt6t64:arm64",
@@ -7555,13 +7579,13 @@
         "id": "dpkg:netplan-generator",
         "name": "netplan-generator",
         "aliases": [],
-        "version": "1.1.2-8ubuntu1~24.04.2"
+        "version": "1.1.2-8ubuntu1~24.04.3"
       },
       {
         "id": "dpkg:netplan.io",
         "name": "netplan.io",
         "aliases": [],
-        "version": "1.1.2-8ubuntu1~24.04.2"
+        "version": "1.1.2-8ubuntu1~24.04.3"
       },
       {
         "id": "dpkg:network-manager",
@@ -8395,7 +8419,7 @@
         "id": "dpkg:python3-netplan",
         "name": "python3-netplan",
         "aliases": [],
-        "version": "1.1.2-8ubuntu1~24.04.2"
+        "version": "1.1.2-8ubuntu1~24.04.3"
       },
       {
         "id": "dpkg:python3-newt:arm64",
@@ -8653,7 +8677,7 @@
         "id": "dpkg:rsyslog",
         "name": "rsyslog",
         "aliases": [],
-        "version": "8.2312.0-3ubuntu9.3"
+        "version": "8.2312.0-3ubuntu9.4"
       },
       {
         "id": "dpkg:rtkit",
@@ -9044,6 +9068,18 @@
         "name": "time",
         "aliases": [],
         "version": "1.9-0.2build1"
+      },
+      {
+        "id": "dpkg:tk",
+        "name": "tk",
+        "aliases": [],
+        "version": "8.6.14build1"
+      },
+      {
+        "id": "dpkg:tk8.6",
+        "name": "tk8.6",
+        "aliases": [],
+        "version": "8.6.14-1build1"
       },
       {
         "id": "dpkg:tmux",
@@ -9448,6 +9484,12 @@
         "version": "7.7+10build2"
       },
       {
+        "id": "dpkg:x11vnc",
+        "name": "x11vnc",
+        "aliases": [],
+        "version": "0.9.16-10"
+      },
+      {
         "id": "dpkg:xauth",
         "name": "xauth",
         "aliases": [],
@@ -9789,7 +9831,7 @@
         "id": "npm:@earendil-works/pi-coding-agent",
         "name": "@earendil-works/pi-coding-agent",
         "aliases": [],
-        "version": "0.85.1"
+        "version": "0.87.0"
       },
       {
         "id": "npm:@playwright/cli",
@@ -9867,8 +9909,8 @@
   },
   "provenance": {
     "extractionMode": "work",
-    "evidenceId": "ubuntu2404-wRRmMdnN",
-    "rawSha256": "704a7f151a0b9c318b0ab70a38d3dda68121eb80f0361a1347e15c47636a35c9",
+    "evidenceId": "ubuntu2404-o8QGozuL",
+    "rawSha256": "e3e781ab58268c44139639de8b0e065ad93b3e216b9b7aa79186b61d58d114bd",
     "collectorSha256": "54497d48f69d6b12f653a3a6efbbe87310345329edd17d0894570f243fec4e40",
     "aliasesSha256": "fb88e6b824c4d17578f498a265333f56a580d974c8f07a547d715a2744cdbed5"
   }
