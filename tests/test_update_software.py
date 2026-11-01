@@ -65,6 +65,20 @@ class FeedTests(unittest.TestCase):
         self.assertEqual(self.u.normalized({'version': 'v1.0', 'sha256': 'sha256:ab'}), {'version': '1.0', 'sha256': 'ab'})
 
 
+class PythonRequirementTests(unittest.TestCase):
+    def setUp(self):
+        self.u = load()
+
+    def test_a_python_that_still_fits_is_kept(self):
+        self.assertEqual(self.u.python_for('3.13', '>=3.11'), '3.13')
+        self.assertEqual(self.u.python_for('3.12', ''), '3.12')
+
+    def test_a_release_that_needs_a_newer_python_moves_it(self):
+        self.assertEqual(self.u.python_for('3.13', '>=3.14,<3.15'), '3.14')
+        self.assertEqual(self.u.python_for('3.11', '>=3.12.1'), '3.12')
+        self.assertEqual(self.u.python_for('3.13', '==3.12.*'), '3.12')
+
+
 class LockFeedTests(unittest.TestCase):
     def setUp(self):
         self.u = load()

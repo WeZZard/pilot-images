@@ -274,7 +274,34 @@ def npm_latest(package):
 def pypi_latest(package):
     data = get_json('https://pypi.org/pypi/%s/json' % package)
     version = data['info']['version']
-    return {'version': version, 'published': data['releases'][version][0]['upload_time_iso_8601']}
+    return {'version': version, 'published': data['releases'][version][0]['upload_time_iso_8601'],
+            'requires_python': data['info'].get('requires_python') or ''}
+
+
+def python_allowed(minor, requires):
+    """Whether Python <minor> (e.g. '3.13') meets a Requires-Python like '>=3.14,<3.15'."""
+    have = vkey(minor)
+    for clause in filter(None, (c.strip() for c in requires.split(','))):
+        op, version = re.match(r'(~=|==|!=|>=|<=|>|<)\s*([\d.*]+)', clause).groups()
+        if version.endswith('.*'):
+            same = vkey(minor)[:len(vkey(version[:-2]))] == vkey(version[:-2])
+            if (op == '==') != same:
+                return False
+            continue
+        want = vkey('.'.join(version.split('.')[:2]))
+        ok = {'>=': have >= want, '>': have > want or (have == want and version.count('.') > 1),
+              '<=': have <= want, '<': have < want, '==': have == want, '!=': True,
+              '~=': have >= want}[op]
+        if not ok:
+            return False
+    return True
+
+
+def python_for(current, requires):
+    """The lock's python, moved to the oldest minor the release accepts when it no longer fits."""
+    if python_allowed(current, requires):
+        return current
+    return next((m for m in ('3.%d' % n for n in range(10, 20)) if python_allowed(m, requires)), current)
 
 
 def node_latest(major):
@@ -397,6 +424,7 @@ def agent_update(agent, apply_changes):
         entry = dict(agent, version=latest['version'])
         if method == 'uv':
             entry['spec'] = '%s==%s' % (agent['package'], latest['version'])
+            entry['python'] = python_for(agent['python'], latest['requires_python'])
         if 'expect' in agent:
             entry['expect'] = agent['expect'].replace(agent['version'], latest['version'])
         if method == 'npm-node':
