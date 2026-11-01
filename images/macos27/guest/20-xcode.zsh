@@ -34,7 +34,15 @@ glog "runFirstLaunch"
 sudo xcodebuild -runFirstLaunch
 
 glog "downloading ALL simulator platforms — tens of GB, the long pole of the build"
-xcodebuild -downloadAllPlatforms
+# Apple's asset catalog fails transiently ("general networking error",
+# tryAgainLater=true; seen 2026-11-01); platforms already installed are skipped
+# on the next attempt.
+for attempt in 1 2 3 4 5; do
+  xcodebuild -downloadAllPlatforms && break
+  (( attempt < 5 )) || { glog "simulator platforms failed 5 times"; exit 1 }
+  glog "platform download failed (attempt $attempt); retrying in 2 minutes"
+  sleep 120
+done
 
 # Xcode 26 split the Metal toolchain out as a component; earlier Xcodes bundle it.
 XCODE_MAJOR="$(xcodebuild -version | awk 'NR==1 {split($2, v, "."); print v[1]}')"
