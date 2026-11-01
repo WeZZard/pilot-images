@@ -29,6 +29,17 @@ STORE="${TART_HOME:-$HOME/.tart}/vms"
 STAGING=.cache/pilot-images/sync
 TS=$(date -u +%Y%m%dT%H%M%SZ)
 
+# One sync per destination at a time: a second run would stop this run's
+# receivers (see settle) and race it into the same staging folders.
+zmodload zsh/system
+LOCK=${XDG_CACHE_HOME:-$HOME/.cache}/pilot-images/sync-$DEST.lock
+mkdir -p "${LOCK:h}" && : >> "$LOCK" || die "cannot create $LOCK"
+zsystem flock -t 0 "$LOCK" || die "another sync to $DEST is running"
+
+# rsync exit codes for a lost link, which a retry resumes; any other failure
+# (a full disk, a refused login) stops the copy.
+LINK_LOST=(10 12 30 35 255)
+
 has_base() { (source "images/$1/line.conf"; vm_exists "$BASE_VM") }
 typeset -a lines; lines=("$@")
 if (( ${#lines} == 0 )); then
@@ -37,6 +48,16 @@ fi
 (( ${#lines} )) || die "no promoted base here"
 
 remote() { ssh -o ConnectTimeout=20 "$DEST" "export PATH=/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin; $*" }
+
+# remote_retry <command>: remote, retried while the link is down (ssh exit 255).
+remote_retry() {
+  local rc
+  while true; do
+    remote "$@" && return 0
+    rc=$?; (( rc == 255 )) || return $rc
+    warn "$DEST unreachable; retrying in 30 s"; sleep 30
+  done
+}
 
 # sums <dir> <file...>: one "sha256  name" line per file.
 sums() { (cd "$1" && shasum -a 256 "${@[2,-1]}") }
@@ -49,22 +70,28 @@ copy_vm() {  # copy_vm <vm>
   theirs=$(remote "cd ~/.tart/vms/$vm 2>/dev/null && shasum -a 256 ${files[*]}" 2>/dev/null)
   if [[ "$theirs" == "$mine" ]]; then log "$vm: already identical on $DEST"; return 0; fi
   log "$vm: copying to $DEST"
-  remote "mkdir -p $STAGING"
-  # A resumed copy first checksums the partial disk on $DEST, which can stay
-  # silent for minutes; SSH keepalives, not an rsync I/O timeout, detect a
-  # dead link.
   # A dropped link can leave the receiving rsync on $DEST alive, still writing
   # into the staging folder, and its temporary files behind: settle both
   # before every attempt and before the copy is checked and installed.
-  local receiver="[r]sync --server.* $STAGING/$vm/\$"
-  settle() { remote "pkill -f '$receiver'; while pgrep -f '$receiver' >/dev/null; do sleep 1; done
-    find $STAGING/$vm -maxdepth 1 -type f -name '.*' -delete 2>/dev/null; true" }
-  until settle && rsync -aS --partial -e 'ssh -o ServerAliveInterval=30 -o ServerAliveCountMax=4' \
-      --exclude control.sock "$src/" "$DEST:$STAGING/$vm/"; do
-    warn "$vm: copy interrupted; resuming in 30 s"; sleep 30
+  local receiver="[r]sync --server.* $STAGING/$vm/\$" code
+  settle() {
+    remote_retry "mkdir -p $STAGING/$vm && pkill -f '$receiver'
+      while pgrep -f '$receiver' >/dev/null; do sleep 1; done
+      find $STAGING/$vm -maxdepth 1 -type f -name '.*' -delete"
+  }
+  # A resumed copy first checksums the partial disk on $DEST, which can stay
+  # silent for minutes; SSH keepalives, not an rsync I/O timeout, detect a
+  # dead link. --delete leaves the staged folder holding exactly the source.
+  while true; do
+    settle || return 1
+    rsync -aS --partial --delete -e 'ssh -o ServerAliveInterval=30 -o ServerAliveCountMax=4' \
+      --exclude control.sock "$src/" "$DEST:$STAGING/$vm/" && break
+    code=$?
+    (( ${LINK_LOST[(Ie)$code]} )) || { warn "$vm: copy to $DEST failed (rsync exit $code)"; return 1 }
+    warn "$vm: link to $DEST lost; resuming in 30 s"; sleep 30
   done
   settle || return 1
-  theirs=$(remote "cd $STAGING/$vm && shasum -a 256 ${files[*]}") || return 1
+  theirs=$(remote_retry "cd $STAGING/$vm && shasum -a 256 ${files[*]}") || return 1
   [[ "$theirs" == "$mine" ]] || { warn "$vm: the copy on $DEST differs from the source"; return 1 }
   remote "if tart list | awk '\$2==\"$vm\" {print \$NF}' | grep -q running; then echo '$vm is running on $DEST' >&2; exit 1; fi
     if tart list | awk '{print \$2}' | grep -qx -- '$vm'; then tart delete '$vm' || exit 1; fi
@@ -87,9 +114,9 @@ sync_line() {  # sync_line <line>
     || { warn "$line: commit and push $PORTABLE_INVENTORY first"; return 1 }
   [[ -n "$(git branch -r --contains HEAD 2>/dev/null)" ]] || { warn "$line: push $(git rev-parse --short HEAD) first"; return 1 }
 
+  # The base and its inventory first, so $DEST lists the line even if the seed
+  # copy (needed only to build there) fails.
   copy_vm "$BASE_VM" || return 1
-  if [[ -n "${SEED_LOCAL:-}" ]] && vm_exists "$SEED_LOCAL"; then copy_vm "$SEED_LOCAL" || return 1; fi
-
   # The destination may hold no GitHub credentials: this host hands it the
   # commit over the same SSH link, and its checkout fast-forwards to it.
   local branch; branch=$(git rev-parse --abbrev-ref HEAD)
@@ -104,6 +131,7 @@ sync_line() {  # sync_line <line>
       --vm $BASE_VM --image $line --os $LINE_KIND --portable images/$line/applications.json &&
     rm ~/$STAGING/$line-source-$TS.json" \
     || { warn "$line: the application inventory was not associated on $DEST"; return 1 }
+  if [[ -n "${SEED_LOCAL:-}" ]] && vm_exists "$SEED_LOCAL"; then copy_vm "$SEED_LOCAL" || return 1; fi
   log "$line: synced to $DEST"
 }
 

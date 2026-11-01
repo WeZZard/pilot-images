@@ -168,6 +168,8 @@ host/promote-base.zsh macos27                    # after the manual doctrine che
   promoted the images, copies each line's base and seed to the same names in
   `<host>`'s Tart store, replacing what is there (no `-prev` copy). The bytes
   are compared on both sides before the swap, and an identical copy is skipped.
+- A lost link resumes the copy where it stopped; any other failure stops it.
+  One sync per destination runs at a time.
 - The application inventory travels through git: commit and push
   `images/<line>/applications.json` after promotion. The script pushes that
   commit into `<host>`'s checkout at the same path, which fast-forwards to it,
