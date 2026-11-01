@@ -657,8 +657,7 @@
     "terramind",
     "--version"
    ],
-   "updates": [],
-   "expect": "terramind v0.2.154"
+   "updates": []
   },
   {
    "id": "neovate",
