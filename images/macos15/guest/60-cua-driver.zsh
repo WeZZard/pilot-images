@@ -53,16 +53,22 @@ else
   # Since cua-driver 0.37.0 a capture refuses with direct_capture_consent_required
   # until macOS has shown its once-per-app screen-capture alert. That record lives
   # in replayd's approvals, not in TCC, so pre-record it as the vendor's own CI
-  # does (trycua/cua scripts/ci/macos/run-hosted-rust-e2e.sh at 8347d6c).
+  # does (trycua/cua scripts/ci/macos/run-hosted-rust-e2e.sh at 8347d6c). The
+  # driver's guard (platform-macos/src/capture_consent.rs at cua-driver-rs-v0.38.0)
+  # matches a key against its main bundle's identifier or its bundle's file URL.
+  # The daemon runs through the ~/.local/bin symlink, where CFBundleGetMainBundle
+  # finds no identifier, so record the file URL too, the key replayd itself writes.
   APPROVALS="$HOME/Library/Group Containers/group.com.apple.replayd/ScreenCaptureApprovals.plist"
   mkdir -p "${APPROVALS:h}"
-  defaults write "$APPROVALS" "$BID" -dict \
-    kScreenCaptureApprovalLastAlerted -date "3024-01-01 00:00:00 +0000" \
-    kScreenCaptureApprovalLastUsed -date "3024-01-01 00:00:00 +0000"
+  for key in "$BID" "file:///Applications/CuaDriver.app/"; do
+    defaults write "$APPROVALS" "$key" -dict \
+      kScreenCaptureApprovalLastAlerted -date "3024-01-01 00:00:00 +0000" \
+      kScreenCaptureApprovalLastUsed -date "3024-01-01 00:00:00 +0000"
+    defaults read "$APPROVALS" "$key" | grep -q kScreenCaptureApprovalLastAlerted \
+      || { glog "screen-capture approval for $key was not stored"; exit 1 }
+  done
   killall -HUP replayd 2>/dev/null || true
-  defaults read "$APPROVALS" "$BID" | grep -q kScreenCaptureApprovalLastAlerted \
-    || { glog "screen-capture approval for $BID was not stored"; exit 1 }
-  glog "screen-capture approval recorded for $BID"
+  glog "screen-capture approval recorded for $BID and its bundle URL"
 
   # Bring the daemon up now as a proper launchd job so acceptance can verify it.
   sudo launchctl bootstrap "gui/$UIDN" ~/Library/LaunchAgents/com.trycua.driver.serve.plist 2>/dev/null \
