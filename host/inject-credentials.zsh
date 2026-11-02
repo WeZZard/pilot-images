@@ -40,6 +40,12 @@ if [[ -s /tmp/secrets.zsh ]]; then
   echo "installed: ~/.config/zsh/secrets.zsh ($(grep -c '^export' env.extra) env vars)"
 fi
 rm -f /tmp/secrets.zsh
+# Every zsh loads the keys, not only interactive ones (~/.zshrc): an agent run
+# over SSH with a command gets them too. Same line as machine-service adds.
+if [[ -s ~/.config/zsh/secrets.zsh ]]; then
+  line='[ -f "$HOME/.config/zsh/secrets.zsh" ] && source "$HOME/.config/zsh/secrets.zsh"'
+  grep -qxF "$line" ~/.zshenv 2>/dev/null || printf '%s\n' "$line" >> ~/.zshenv
+fi
 
 if [[ -f git-identity ]]; then
   name=$(sed 's/ <.*//' git-identity)
