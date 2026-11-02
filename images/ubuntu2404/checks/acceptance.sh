@@ -139,6 +139,90 @@ if pgrep -f gnome-initial-setup >/dev/null 2>&1; then bad "gnome-initial-setup p
 if grep -q '^AutomaticLoginEnable=true' /etc/gdm3/custom.conf 2>/dev/null; then ok "gdm autologin"; else bad "gdm autologin"; fi
 if [ "$(systemctl is-enabled sleep.target 2>/dev/null)" = masked ]; then ok "sleep.target masked"; else bad "sleep.target masked"; fi
 
+if [ "$(systemctl is-enabled systemd-networkd-wait-online.service 2>/dev/null)" = enabled ]; then bad "systemd-networkd-wait-online enabled (gates boot by 120 s)"; else ok "boot not gated by systemd-networkd-wait-online"; fi
+
+# --- desktop session + login keyring (phase 30; relay agent RA-I5) ---
+# After a boot, gdm's automatic login must give the image user a local, active
+# graphical session, gnome-keyring-daemon must hold an unlocked default
+# collection, and a process inside that session must store and read back a
+# Secret Service item without any prompt. The session can appear a few
+# seconds after SSH does, so wait for it before judging.
+desktop_session() {
+  loginctl list-sessions --no-legend 2>/dev/null | awk '{print $1}' | while read -r sid; do
+    got="$(loginctl show-session "$sid" -p Name -p Type -p Remote -p Active -p Class 2>/dev/null | sort)"
+    for type in x11 wayland; do
+      want="$(printf 'Active=yes\nClass=user\nName=%s\nRemote=no\nType=%s\n' "$(id -un)" "$type")"
+      if [ "$got" = "$want" ]; then echo "$sid"; return; fi
+    done
+  done
+}
+n=0
+DESKTOP_SID="$(desktop_session)"
+while [ -z "$DESKTOP_SID" ] && [ $n -lt 60 ]; do sleep 2; n=$((n + 1)); DESKTOP_SID="$(desktop_session)"; done
+if [ -n "$DESKTOP_SID" ]; then
+  ok "desktop session $DESKTOP_SID: $(loginctl show-session "$DESKTOP_SID" -p Type --value), local, active, for $(id -un)"
+else
+  bad "no local active x11/wayland session for $(id -un) ($(loginctl list-sessions --no-legend 2>/dev/null | tr '\n' ';'))"
+fi
+
+if pgrep -u "$(id -u)" -x gnome-keyring-d >/dev/null 2>&1; then ok "gnome-keyring-daemon running"; else bad "gnome-keyring-daemon not running"; fi
+
+export DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/$(id -u)/bus"
+# The session's autostart entry unlocks the keyring about a second after
+# logind registers the session, so wait for that too before judging.
+default_collection() {
+  busctl --user call org.freedesktop.secrets /org/freedesktop/secrets \
+    org.freedesktop.Secret.Service ReadAlias s default 2>/dev/null | awk '{print $2}' | tr -d '"'
+}
+collection_unlocked() {
+  [ -n "$1" ] && [ "$1" != / ] && [ "$(busctl --user get-property org.freedesktop.secrets "$1" \
+    org.freedesktop.Secret.Collection Locked 2>/dev/null)" = "b false" ]
+}
+n=0
+DEFAULT_COLLECTION="$(default_collection)"
+while ! collection_unlocked "$DEFAULT_COLLECTION" && [ $n -lt 30 ]; do
+  sleep 1; n=$((n + 1)); DEFAULT_COLLECTION="$(default_collection)"
+done
+if collection_unlocked "$DEFAULT_COLLECTION"; then
+  ok "default keyring collection $DEFAULT_COLLECTION is unlocked"
+else
+  bad "no unlocked default keyring collection (alias default -> '${DEFAULT_COLLECTION:-none}')"
+fi
+
+if ! command -v secret-tool >/dev/null 2>&1; then
+  bad "secret-tool not on PATH (libsecret-tools)"
+elif [ -z "$DESKTOP_SID" ]; then
+  bad "secret-tool round trip: no desktop session to run it in"
+else
+  # Run the round trip from a process logind places in the desktop session:
+  # root moves the shell into the session's scope cgroup, which is how logind
+  # attributes a process to a session, and logind is asked to confirm it.
+  SCOPE="$(systemctl show -p ControlGroup --value "session-$DESKTOP_SID.scope" 2>/dev/null)"
+  INNER="$(mktemp)"
+  cat > "$INNER" <<'EOF'
+path="$(busctl call org.freedesktop.login1 /org/freedesktop/login1 \
+  org.freedesktop.login1.Manager GetSessionByPID u $$ 2>/dev/null | awk '{print $2}' | tr -d '"')"
+busctl get-property org.freedesktop.login1 "$path" org.freedesktop.login1.Session Id 2>/dev/null \
+  | awk '{print $2}' | tr -d '"'
+printf pilot-acceptance | timeout 15 secret-tool store --label=pilot-acceptance pilot-acceptance probe \
+  && timeout 15 secret-tool lookup pilot-acceptance probe
+echo
+timeout 15 secret-tool clear pilot-acceptance probe
+EOF
+  chmod 644 "$INNER"
+  ROUND="$(sudo -n sh -c 'echo $$ > "/sys/fs/cgroup$1/cgroup.procs" && exec setpriv \
+      --reuid="$2" --regid="$2" --init-groups env DBUS_SESSION_BUS_ADDRESS="$3" sh "$4"' \
+    sh "$SCOPE" "$(id -un)" "$DBUS_SESSION_BUS_ADDRESS" "$INNER" 2>&1)"
+  rm -f "$INNER"
+  ROUND_SID="$(printf '%s\n' "$ROUND" | sed -n 1p)"
+  ROUND_VALUE="$(printf '%s\n' "$ROUND" | sed -n 2p)"
+  if [ "$ROUND_SID" = "$DESKTOP_SID" ] && [ "$ROUND_VALUE" = pilot-acceptance ]; then
+    ok "secret-tool store/lookup round trip from inside session $DESKTOP_SID"
+  else
+    bad "secret-tool round trip from the desktop session failed (got: $(printf '%s' "$ROUND" | tr '\n' ' ' | head -c 300))"
+  fi
+fi
+
 # --- desktop dconf ---
 db=/etc/dconf/db/local.d/00-pilot-desktop
 if grep -q 'scaling-factor=uint32 2' "$db" 2>/dev/null && [ "$(gsettings get org.gnome.desktop.interface scaling-factor 2>/dev/null)" = 'uint32 2' ]; then ok "HiDPI scale=2 (configured and effective)"; else bad "HiDPI scale=2"; fi

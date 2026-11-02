@@ -12,8 +12,8 @@
 | --- | --- | --- |
 | Ship a pinned relay agent build | yes | yes |
 | Start it in the desktop session | per-user LaunchAgent with `LimitLoadToSessionType` set to `Aqua` | systemd user service wanted by `graphical-session.target` |
-| Log in automatically to a desktop session | already true | not true today; see below |
-| Unlock the login keychain or keyring at login | already true | not true today; see below |
+| Log in automatically to a desktop session | already true | yes, about 15 s after boot; see below |
+| Unlock the login keychain or keyring at login | already true | yes, from guest phase 30; see below |
 | Grant privacy permissions to the relay agent | yes, as phase 65 grants them to `sshd-keygen-wrapper` | not applicable |
 | Keep sshd enabled for bootstrap and rescue | yes | yes |
 | Hold no relay agent configuration or credential | yes | yes |
@@ -42,9 +42,14 @@
 
 ## RA-I5: The Ubuntu desktop session
 
-- On 2026-11-02, a fresh `ubuntu2404` lease ran gdm with `AutomaticLoginEnable=true` for `admin`, but it had no desktop session: the only session was the SSH session, and `gnome-keyring-daemon` was installed but not running.
-- [DOCTRINE](../images/ubuntu2404/DOCTRINE.md)'s interactive display contract launches the guest with `--vnc-experimental --no-graphics`. A lease that boots without a display may leave gdm with no display to start a session on. This cause is not confirmed yet.
-- The line must make an automatic login produce a desktop session on every lease boot, start `gnome-keyring-daemon` with the login keyring unlocked, and install `libsecret-tools`, so that the relay acceptance can read a test item with `secret-tool`.
+- On 2026-11-02, a fresh `ubuntu2404` lease seemed to have no desktop session: right after `machctl acquire` returned, `loginctl` listed only the SSH session, and `gnome-keyring-daemon` was not running.
+- The display was not the cause. `tart run --no-graphics` still gives the guest a virtio GPU, and the guest's DRM connector reported 3840x2160 connected. The session was late, not missing: on a fresh lease the check at 131 s of uptime saw only the SSH session, and the same check 15 s later saw an `x11` session from `gdm-autologin` on `seat0`, with the keyring daemon running.
+- It was late because the boot waited 120 s for `systemd-networkd-wait-online`, which waits for links that NetworkManager, not networkd, manages. gdm and sshd started only after that wait, and the automatic login came about 10 s after gdm. Guest phase 00 now disables that unit; the same lease then booted its userspace in 2.8 s.
+- The keyring was not usable even once the session came up. gdm's automatic login has no password, so `pam_gnome_keyring` logged `no password is available for user` and created no login keyring, and `secret-tool store` then waited for a create-keyring prompt that nobody could answer.
+- Guest phase 30 installs `libsecret-tools` and writes an empty login keyring with no password, set as the default keyring. gnome-keyring stores such a keyring unencrypted and unlocks it without a prompt. An autostart entry asks the Secret Service to unlock it as the session starts, so a client finds it unlocked.
+- The base stays credential-free: `checks/no-secrets.sh` fails if the login keyring holds any item, because an item in an unencrypted keyring would be in the base in plain text.
+- `checks/acceptance.sh` waits up to 120 s for a local, active `x11` or `wayland` session of the image user, then requires the keyring daemon to be running, the default collection to be unlocked, and a `secret-tool` store, lookup and clear to work from a process that logind places in that session.
+- A client that starts right after a lease's SSH answers must still wait for the session, which comes a few seconds later.
 
 ## RA-I6: Checks
 

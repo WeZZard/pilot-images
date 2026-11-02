@@ -25,11 +25,17 @@ unchanged; this line makes it rebuildable *from spec*.
     also writes the `gnome-initial-setup-done` marker so the first-login
     wizard never appears in any clone (added 2026-09-19; before that, the
     GUI pass had to dismiss it manually and bake the marker into the base).
+    It also disables `systemd-networkd-wait-online`: NetworkManager renders
+    the desktop's netplan, so networkd manages no link and its wait timed
+    out after 120 s on every boot, holding back gdm and sshd.
   - `10-fonts.sh` — `fonts-noto-cjk` (+extra) + color-emoji; verifies SC + TC.
   - `20-browsers.sh` — Firefox snap (primary) + Chromium snap (secondary); no
     x86 Chrome, no emulation.
   - `30-desktop.sh` — system dconf db: HiDPI scale 2 (3840x2160 → 1920x1080
-    logical) + idle/lock/blank disabled (desktop layer).
+    logical) + idle/lock/blank disabled (desktop layer); `libsecret-tools` and
+    an empty, passwordless login keyring that an autostart entry unlocks as
+    the auto-login session starts, so Secret Service clients work without a
+    prompt (added 2026-11-02, relay agent RA-I5).
   - `40-automation.sh` — browser-automation tooling, generic and
     credential-free like the phases above: Node.js 22.x (NodeSource,
     system-wide under `/usr` so it is on `PATH` for a non-interactive SSH

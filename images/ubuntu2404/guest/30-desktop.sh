@@ -37,6 +37,39 @@ fi
 grep -q 'scaling-factor=uint32 2' /etc/dconf/db/local.d/00-pilot-desktop
 grep -q 'lock-enabled=false' /etc/dconf/db/local.d/00-pilot-desktop
 sudo dconf update
+
+# Secret Service for the auto-login session (relay agent RA-I5). gdm's
+# automatic login has no password, so pam_gnome_keyring cannot create or
+# unlock a password-protected login keyring ("gkr-pam: no password is
+# available for user"), and with no keyring at all the first `secret-tool
+# store` waits on a create-keyring prompt that nobody answers. An empty
+# keyring with no password is stored unencrypted and unlocks without a
+# prompt; the autostart entry unlocks it as the session starts, so the
+# session finds it unlocked rather than unlocking it on first use. The base
+# stays credential-free: the keyring ships with no items, and
+# checks/no-secrets.sh fails if it ever holds one.
+glog "Secret Service: libsecret-tools + passwordless login keyring for autologin"
+apt_q install libsecret-tools
+KEYRINGS="$HOME/.local/share/keyrings"
+mkdir -p "$KEYRINGS"
+chmod 700 "$KEYRINGS"
+if [ ! -e "$KEYRINGS/login.keyring" ]; then
+  printf '[keyring]\ndisplay-name=Login\nctime=0\nmtime=0\nlock-on-idle=false\nlock-after=false\n' \
+    > "$KEYRINGS/login.keyring"
+fi
+[ -s "$KEYRINGS/default" ] || printf 'login' > "$KEYRINGS/default"
+chmod 600 "$KEYRINGS/login.keyring" "$KEYRINGS/default"
+grep -qx 'login' "$KEYRINGS/default" || { glog "default keyring is not 'login'"; exit 1; }
+sudo mkdir -p /etc/xdg/autostart
+sudo tee /etc/xdg/autostart/pilot-keyring-unlock.desktop >/dev/null <<'EOF'
+[Desktop Entry]
+Type=Application
+Name=Unlock the login keyring
+Exec=busctl --user call org.freedesktop.secrets /org/freedesktop/secrets org.freedesktop.Secret.Service Unlock ao 1 /org/freedesktop/secrets/collection/login
+OnlyShowIn=GNOME;
+NoDisplay=true
+X-GNOME-Autostart-Phase=Applications
+EOF
 sync
 glog "HiDPI scale=2 (3840x2160 -> 1920x1080 logical) + idle/lock/blank disabled"
 glog "NOTE: full Retina/VNC contract is validated interactively per DOCTRINE.md"

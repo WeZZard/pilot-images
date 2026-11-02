@@ -64,5 +64,20 @@ else
   echo "PASS  no cookie store under ~/.cache/ms-playwright"
 fi
 
+# The login keyring ships unencrypted so the auto-login session can use it
+# without a password (guest phase 30); any item stored in it would sit in the
+# base in plain text. It must hold only its [keyring] header.
+LOGIN_KEYRING="$HOME/.local/share/keyrings/login.keyring"
+if [ -f "$LOGIN_KEYRING" ] && grep -v '^\[keyring\]$' "$LOGIN_KEYRING" | grep -q '^\['; then
+  echo "FAIL  login keyring holds items: $LOGIN_KEYRING"; FAIL=1
+else
+  echo "PASS  login keyring holds no items"
+fi
+if find "$HOME/.local/share/keyrings" -type f ! -name login.keyring ! -name default 2>/dev/null | grep -q .; then
+  echo "FAIL  extra keyring files under ~/.local/share/keyrings"; FAIL=1
+else
+  echo "PASS  no other keyrings"
+fi
+
 if [ "$FAIL" != 0 ]; then echo "NO-SECRETS SCAN FAILED — do not promote / do not clone"; fi
 exit $FAIL
