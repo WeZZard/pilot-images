@@ -25,7 +25,7 @@ wait_ssh "$IP" || die "SSH unreachable"
 
 log "injecting pack ${PACK:t} into $VM ($IP)"
 vssh "$IP" "rm -rf /tmp/pack && mkdir -m 700 /tmp/pack"
-vscp "$IP" "$PACK"/* /tmp/pack/
+vscp "$IP" "$PACK"/*(.) /tmp/pack/   # files only: the pack's home/ folder travels as home.tgz
 
 vssh "$IP" "${GUEST_SHELL:-zsh} -s" <<'REMOTE'
 set -e -u
@@ -47,6 +47,11 @@ if [[ -f git-identity ]]; then
   git config --global user.name "$name"
   git config --global user.email "$email"
   echo "installed: git identity $name"
+fi
+
+if [[ -f home.tgz ]]; then
+  tar -xzf home.tgz -C "$HOME"
+  echo "installed: home files ($(tar -tzf home.tgz | grep -vc '/$'))"
 fi
 
 cd /

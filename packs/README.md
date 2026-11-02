@@ -32,6 +32,7 @@ files 600), assembled by `host/make-pack.zsh`.
 |---|---|---|
 | `env.extra` | `export` lines: `LITELLM_BASE_URL`, `LITELLM_API_KEY` (pi), `ANTHROPIC_BASE_URL`, `ANTHROPIC_AUTH_TOKEN` (Claude Code), `GH_TOKEN` | guest `~/.config/zsh/secrets.zsh` (sourced by shells; `gh` CLI and both agent providers read these natively) |
 | `git-identity` | optional `Name <email>` | git global config |
+| `home.tgz` | files for the clone's home folder, built by `host/pack-home.zsh` from the pack's `home/` folder: sign-in files an agent keeps on disk (the Antigravity CLI's `.gemini/antigravity-cli/antigravity-oauth-token`), and settings that name the gateway (DeepSeek Harness's `.dsh/profiles/<profile>/cordis.patch.yml`) | unpacked into the guest's `$HOME` |
 
 Historical lane packs (lane-a, lane-b: `pi-auth.json`, `claude.env`,
 `gh-token`) are obsolete; their files are ignored by the injector except
@@ -46,3 +47,14 @@ host/new-clone.zsh x-research
 host/inject-credentials.zsh pilot-mac-x-research ~/.config/vm-credentials/vm-agents
 # or through machine-service: machctl acquire --purpose x-research --lane vm-agents
 ```
+
+An agent that keeps its sign-in in a file signs in once on the host that
+holds the pack; the pack carries a copy of that file to every clone:
+
+```
+host/pack-home.zsh vm-agents .gemini/antigravity-cli/antigravity-oauth-token
+host/sync-pack.zsh <other-vm-host> vm-agents   # every VM host serves its own copy
+```
+
+Run both again after signing in anew on the host. A file kept only in the
+pack (gateway settings) goes straight into `home/` and is packed on every run.

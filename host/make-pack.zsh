@@ -5,8 +5,9 @@
 # Gateway era (2026-09): packs carry environment variables only — LiteLLM
 # gateway credentials (for pi), Anthropic-compatible gateway credentials (for
 # Claude Code), and the GH_TOKEN passthrough. No subscription
-# identities, no OAuth tokens, no pi-auth.json: every model in a VM is reached
-# through the gateway, and the image-side pi profile already points pi at it.
+# identities and no pi-auth.json: every model in a VM is reached through the
+# gateway, and the image-side pi profile already points pi at it. An agent
+# that can only sign in with a file gets it from home.tgz (host/pack-home.zsh).
 #
 # One pack serves all VMs — gateway keys are not rate-limited identities, so
 # nothing serializes VM concurrency. The old "one subscription = one lane =
