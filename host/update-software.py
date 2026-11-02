@@ -3,6 +3,7 @@
 
     python3 host/update-software.py check [line ...]   # report, change nothing
     python3 host/update-software.py apply [line ...]   # rewrite the pins
+    python3 host/update-software.py apply --relay-agent 0.2.0-rc.3   # pin a named relay agent release
 
 Lines default to every macOS line with a line.conf. The pins it reads and writes:
 
@@ -21,6 +22,9 @@ Lines default to every macOS line with a line.conf. The pins it reads and writes
   relay-agent-<version>-<platform>.tar.gz for every platform the lock names.
   Each archive is fetched, hashed, checked against the release's asset digest
   and SHA256SUMS, and read by host/relay-agent-package.py, never run.
+  Pre-releases are never followed; `--relay-agent VERSION` pins the release
+  tagged v<VERSION> instead, a pre-release included, whether or not it is newer,
+  and then moves only this lock.
 
 Floating software (Homebrew, rustup, Codex, Pi, Claude Code, pnpm, the npx MCP
 servers) has no pin: a rebuild installs the newest release.
@@ -517,11 +521,21 @@ def relay_package():
     return module
 
 
-def relay_release(releases, platforms):
+def relay_key(version):
+    """Order relay agent versions: a release follows its own pre-releases (0.2.0-rc.3 < 0.2.0)."""
+    core, _, pre = version.partition('-')
+    return [int(p) for p in core.split('.')], not pre, vkey(pre)
+
+
+def relay_release(releases, platforms, version=None):
     """(version, {platform: asset}, SHA256SUMS asset or None) of the newest published release
-    that carries an archive for every platform, or (None, None, None)."""
-    published = sorted((r for r in releases if not r['draft'] and not r['prerelease'] and re.fullmatch(r'v\d+\.\d+\.\d+', r['tag_name'])),
-                       key=lambda r: r['published_at'] or '', reverse=True)
+    that carries an archive for every platform, or (None, None, None). With `version`, only the
+    release tagged v<version> is considered, a pre-release included."""
+    if version is None:
+        chosen = (r for r in releases if not r['draft'] and not r['prerelease'] and re.fullmatch(r'v\d+\.\d+\.\d+', r['tag_name']))
+    else:
+        chosen = (r for r in releases if not r['draft'] and r['tag_name'] == 'v' + version)
+    published = sorted(chosen, key=lambda r: r['published_at'] or '', reverse=True)
     for release in published:
         version = bare(release['tag_name'])
         assets = {a['name']: a for a in release['assets']}
@@ -555,7 +569,8 @@ def relay_pins(lock, version, assets, sums, fetch=None, package=None):
     return dict(lock, version=version, platforms=platforms)
 
 
-def update_relay_agent(apply_changes, releases_of=None):
+def update_relay_agent(apply_changes, releases_of=None, version=None):
+    """Move the relay agent lock on every line to the newest release, or to `version` when named."""
     paths = sorted((REPO / 'images').glob('*/' + RELAY_LOCK_NAME))
     if not paths:
         return []
@@ -564,10 +579,13 @@ def update_relay_agent(apply_changes, releases_of=None):
     name, have = 'relay agent (%s)' % lock['repository'], lock['version']
     try:
         releases = (releases_of or (lambda repository: gh('repos/%s/releases?per_page=100' % repository)))(lock['repository'])
-        version, assets, sums = relay_release(releases, sorted(lock['platforms']))
+        wanted = version
+        version, assets, sums = relay_release(releases, sorted(lock['platforms']), wanted)
+        if version is None and wanted is not None:
+            raise SystemExit('no published release v%s carries an archive for every platform' % wanted)
         if version is None:
             return [('all lines', name, have or 'unpinned', '', 'no feed: no release carries relay agent archives yet')]
-        if have is not None and not newer(version, have):
+        if have is not None and (version == have if wanted else relay_key(version) <= relay_key(have)):
             return [('all lines', name, have, version, 'current')]
         if apply_changes:
             text = pathlib.Path(download(sums['browser_download_url'])).read_text() if sums else ''
@@ -701,12 +719,23 @@ def macos_lines():
 def main(argv):
     if not argv or argv[0] not in ('check', 'apply'):
         raise SystemExit(__doc__)
+    argv, relay_version = list(argv), None
+    if '--relay-agent' in argv:
+        at = argv.index('--relay-agent')
+        if at + 1 >= len(argv):
+            raise SystemExit('--relay-agent needs a version, such as 0.2.0-rc.3')
+        relay_version = argv.pop(at + 1).removeprefix('v')
+        argv.pop(at)
     apply_changes, lines = argv[0] == 'apply', argv[1:] or macos_lines()
     today = datetime.datetime.now(datetime.timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')
-    rows = [row for line in lines for row in update_line(line, apply_changes, today)]
-    agent_rows, probes = update_lock(apply_changes)
-    rows += agent_rows
-    rows += update_relay_agent(apply_changes)
+    if relay_version is not None:
+        # A named relay agent release moves that one lock and nothing else.
+        rows, probes = update_relay_agent(apply_changes, version=relay_version), []
+    else:
+        rows = [row for line in lines for row in update_line(line, apply_changes, today)]
+        agent_rows, probes = update_lock(apply_changes)
+        rows += agent_rows
+        rows += update_relay_agent(apply_changes)
     width = [max(len(str(r[i])) for r in rows) for i in range(4)]
     for row in rows:
         print('  '.join(str(c).ljust(w) for c, w in zip(row, width)) + '  ' + row[4])

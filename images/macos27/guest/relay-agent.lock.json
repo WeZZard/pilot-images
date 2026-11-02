@@ -1,22 +1,22 @@
 {
  "schemaVersion": 1,
  "repository": "WeZZard/vm-service",
- "version": null,
+ "version": "0.2.0-rc.3",
  "platforms": {
   "darwin-arm64": {
-   "url": null,
-   "sha256": null,
-   "executableSha256": null
+   "url": "https://github.com/WeZZard/vm-service/releases/download/v0.2.0-rc.3/relay-agent-0.2.0-rc.3-darwin-arm64.tar.gz",
+   "sha256": "ee73e514b9b981636fef24f3ece7ce94fa72a28efe2dea8af7415485b967127f",
+   "executableSha256": "0cb0cfe91412e6852220d94d2bdfbf65993674ed1fed162467216dd5dad987c2"
   },
   "linux-arm64": {
-   "url": null,
-   "sha256": null,
-   "executableSha256": null
+   "url": "https://github.com/WeZZard/vm-service/releases/download/v0.2.0-rc.3/relay-agent-0.2.0-rc.3-linux-arm64.tar.gz",
+   "sha256": "60ae03401f95834d5f3f9d820f3133b328d62adb512a4807aafa750a98ccee48",
+   "executableSha256": "ba022792b560e3d7e3ff0c5ecc6b558c271df6e51b7b5284704a952b10123758"
   },
   "linux-x86_64": {
-   "url": null,
-   "sha256": null,
-   "executableSha256": null
+   "url": "https://github.com/WeZZard/vm-service/releases/download/v0.2.0-rc.3/relay-agent-0.2.0-rc.3-linux-x86_64.tar.gz",
+   "sha256": "103dbbe1bce3804c3d21062bfb37a48a4f6ac1d72615516cf366cea93cfa10f8",
+   "executableSha256": "e2d5f69ee7ec5441c8ed6b997f461c95f8c9741efd77569ff8abe453b1894ef8"
   }
  }
 }

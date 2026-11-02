@@ -48,6 +48,19 @@ def archive(members):
     return buffer.getvalue()
 
 
+def unpinned_lock():
+    """The lock before vm-service published a release: every pin null."""
+    return {'schemaVersion': 1, 'repository': 'WeZZard/vm-service', 'version': None,
+            'platforms': {p: {'url': None, 'sha256': None, 'executableSha256': None}
+                          for p in ('darwin-arm64', 'linux-arm64', 'linux-x86_64')}}
+
+
+def write_unpinned(directory):
+    path = Path(directory) / 'unpinned.lock.json'
+    path.write_text(json.dumps(unpinned_lock(), indent=1) + '\n')
+    return path
+
+
 def pinned_lock(version='0.2.0', digests=None, executables=None):
     package = load('relay_agent_package', 'host/relay-agent-package.py')
     digests, executables = digests or {}, executables or {}
@@ -83,13 +96,25 @@ class LockTests(unittest.TestCase):
             path.write_text(json.dumps(lock))
             return self.package.read_lock(path)
 
+    def test_the_committed_lock_pins_a_release_on_every_platform(self):
+        lock = self.package.read_lock(REPO / 'images/macos26' / LOCK)
+        self.assertIsNotNone(lock['version'], 'promote-base refuses every line while the lock is unpinned')
+        for platform, pin in lock['platforms'].items():
+            self.assertEqual(pin['url'], self.package.release_url(lock['repository'], lock['version'], platform))
+
+    def test_a_pre_release_version_reads(self):
+        self.assertEqual(self.check(pinned_lock('0.2.0-rc.3'))['version'], '0.2.0-rc.3')
+        for version in ('0.2.0-', '0.2.0-rc..3', 'v0.2.0', '0.2'):
+            with self.subTest(version=version), self.assertRaises(ValueError):
+                self.check(pinned_lock(version))
+
     def test_a_pinned_lock_names_the_release_assets(self):
         lock = pinned_lock()
         self.assertEqual(self.check(lock)['platforms']['linux-arm64']['url'],
                          'https://github.com/WeZZard/vm-service/releases/download/v0.2.0/relay-agent-0.2.0-linux-arm64.tar.gz')
 
     def test_malformed_locks_are_refused(self):
-        unpinned = json.loads((REPO / 'images/macos26' / LOCK).read_text())
+        unpinned = unpinned_lock()
         half = json.loads(json.dumps(unpinned)); half['platforms']['linux-arm64']['sha256'] = 'a' * 64
         moved = pinned_lock(); moved['platforms']['linux-arm64']['url'] = 'https://example.test/relay-agent.tar.gz'
         short = pinned_lock(); short['platforms']['darwin-arm64']['sha256'] = 'abc'
@@ -125,14 +150,14 @@ class PackageTests(unittest.TestCase):
 
     def test_an_unpinned_lock_takes_a_local_build_and_reports_it(self):
         data = archive([('relay-agent', executable('linux-arm64'), 0o755)])
-        result = self.package.fetch(REPO / 'images/ubuntu2404' / LOCK, 'linux-arm64', self.root / 'out.tgz', self.write('local.tgz', data))
+        result = self.package.fetch(write_unpinned(self.root), 'linux-arm64', self.root / 'out.tgz', self.write('local.tgz', data))
         self.assertEqual(result, {'version': None, 'platform': 'linux-arm64', 'sha256': hashlib.sha256(data).hexdigest(),
                                   'executableSha256': sha(executable('linux-arm64')), 'source': 'local'})
         self.assertEqual((self.root / 'out.tgz').read_bytes(), data)
 
     def test_an_unpinned_lock_without_a_local_build_names_the_override(self):
         with self.assertRaisesRegex(ValueError, 'RELAY_AGENT_ARCHIVE'):
-            self.package.fetch(REPO / 'images/macos26' / LOCK, 'darwin-arm64', self.root / 'out.tgz')
+            self.package.fetch(write_unpinned(self.root), 'darwin-arm64', self.root / 'out.tgz')
 
     def test_a_pinned_lock_accepts_only_the_pinned_bytes(self):
         data = archive([('relay-agent', executable('darwin-arm64'), 0o755)])
@@ -213,10 +238,35 @@ class UpdateSoftwareTests(unittest.TestCase):
         self.assertEqual(self.u.relay_release(releases[:1], self.platforms), (None, None, None))
 
     def test_a_release_without_archives_is_reported_not_failed(self):
+        have = self.package.read_lock(REPO / 'images/macos26' / LOCK)['version']
         rows = self.u.update_relay_agent(False, releases_of=lambda repository: [self.release('0.1.1', platforms=[])])
-        self.assertEqual(rows[0][2:], ('unpinned', '', 'no feed: no release carries relay agent archives yet'))
-        rows = self.u.update_relay_agent(False, releases_of=lambda repository: [self.release('0.2.0')])
-        self.assertEqual(rows[0][2:], ('unpinned', '0.2.0', 'update'))
+        self.assertEqual(rows[0][2:], (have, '', 'no feed: no release carries relay agent archives yet'))
+        rows = self.u.update_relay_agent(False, releases_of=lambda repository: [self.release('99.0.0')])
+        self.assertEqual(rows[0][2:], (have, '99.0.0', 'update'))
+
+    def test_a_release_follows_its_own_pre_releases(self):
+        key = self.u.relay_key
+        self.assertLess(key('0.2.0-rc.3'), key('0.2.0'))
+        self.assertLess(key('0.2.0-rc.2'), key('0.2.0-rc.3'))
+        self.assertLess(key('0.2.0-rc.9'), key('0.2.0-rc.10'))
+        self.assertLess(key('0.1.9'), key('0.2.0-rc.1'))
+
+    def test_a_named_release_is_pinned_even_as_a_pre_release(self):
+        releases = [self.release('0.2.0-rc.3', prerelease=True, published='2026-11-02T00:00:00Z'),
+                    self.release('0.2.0-rc.4', draft=True, published='2026-11-03T00:00:00Z'),
+                    self.release('0.1.1', published='2026-10-01T00:00:00Z')]
+        self.assertEqual(self.u.relay_release(releases, self.platforms)[0], '0.1.1')
+        version, assets, sums = self.u.relay_release(releases, self.platforms, '0.2.0-rc.3')
+        self.assertEqual((version, sorted(assets), sums['name']), ('0.2.0-rc.3', self.platforms, 'SHA256SUMS'))
+        self.assertEqual(self.u.relay_release(releases, self.platforms, '0.2.0-rc.4'), (None, None, None), 'drafts are never pinned')
+        have = self.package.read_lock(REPO / 'images/macos26' / LOCK)['version']
+        for named in ('0.1.1', '0.2.0-rc.3'):
+            with self.subTest(named=named):
+                rows = self.u.update_relay_agent(False, releases_of=lambda repository: releases, version=named)
+                self.assertEqual(rows[0][2:], (have, named, 'current' if have == named else 'update'),
+                                 'a named release is pinned even when it is older or a pre-release')
+        rows = self.u.update_relay_agent(False, releases_of=lambda repository: releases, version='0.2.0-rc.4')
+        self.assertTrue(rows[0][4].startswith('error: no published release v0.2.0-rc.4'))
 
     def test_pins_are_hashed_matched_and_read(self):
         with tempfile.TemporaryDirectory() as directory:
@@ -439,9 +489,15 @@ class GateTests(unittest.TestCase):
         evidence = self.package.gate(self.lock(), self.receipt(self.evidence()))
         self.assertEqual(evidence['archive']['version'], '0.2.0')
 
-    def test_the_committed_unpinned_lock_promotes_nothing(self):
+    def test_an_unpinned_lock_promotes_nothing(self):
         receipt = self.receipt(self.evidence(package=self.package_record(version=None, source='local')))
-        self.refused(REPO / 'images/macos26' / LOCK, receipt, 'pins no release, so no base can be promoted')
+        self.refused(write_unpinned(self.root), receipt, 'pins no release, so no base can be promoted')
+
+    def test_a_pinned_pre_release_passes(self):
+        lock = self.lock(version='0.2.0-rc.3')
+        evidence = self.package.gate(lock, self.receipt(self.evidence(package=self.package_record(version='0.2.0-rc.3'))))
+        self.assertEqual(evidence['archive']['version'], '0.2.0-rc.3')
+        self.refused(lock, self.receipt(self.evidence()), 'is not the release the lock pins, 0.2.0-rc.3')
 
     def test_a_local_build_or_another_release_is_refused(self):
         lock = self.lock()

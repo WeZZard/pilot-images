@@ -49,6 +49,8 @@ ELF_MACHINE = {'linux-arm64': 183, 'linux-x86_64': 62}
 MACHO_ARM64 = 0x0100000C
 PIN_FIELDS = {'url', 'sha256', 'executableSha256'}
 HEX64 = re.compile(r'[0-9a-f]{64}')
+# A release version, with an optional pre-release part: 0.2.0, 0.2.0-rc.3.
+VERSION = re.compile(r'\d+\.\d+\.\d+(?:-[0-9A-Za-z]+(?:\.[0-9A-Za-z]+)*)?')
 ASSET_HOSTS = ('github.com', 'release-assets.githubusercontent.com', 'objects.githubusercontent.com')
 
 
@@ -76,7 +78,7 @@ def read_lock(path):
         if any(v is not None for p in lock['platforms'].values() for v in p.values()):
             raise ValueError('an unpinned relay agent lock carries no url or sha256')
         return lock
-    if not re.fullmatch(r'\d+\.\d+\.\d+', lock['version']):
+    if not VERSION.fullmatch(lock['version']):
         raise ValueError('invalid relay agent version')
     for platform, pin in lock['platforms'].items():
         if pin['url'] != release_url(lock['repository'], lock['version'], platform):
@@ -170,7 +172,7 @@ def parse_package(text):
     if not (HEX64.fullmatch(package['sha256'] or '') and HEX64.fullmatch(package['executableSha256'] or '')):
         raise ValueError('invalid relay agent package SHA-256')
     if (package['version'] is None) != (package['source'] == 'local') or \
-            (package['version'] is not None and not re.fullmatch(r'\d+\.\d+\.\d+', package['version'])):
+            (package['version'] is not None and not VERSION.fullmatch(package['version'])):
         raise ValueError('a relay agent package is pinned with a version, or local without one')
     return package
 
