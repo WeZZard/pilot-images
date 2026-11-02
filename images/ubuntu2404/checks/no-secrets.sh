@@ -17,6 +17,11 @@ else
   echo "PASS  no credential material in pi settings"
 fi
 absent "$HOME/.config/zsh/secrets.zsh"
+# The relay agent's configuration holds the lease's agent credential and
+# arrives at lease time; its state holds a lease's execution records
+# (docs/relay-agent.md RA-I3).
+absent "$HOME/.config/relay-agent/config.json"
+absent "$HOME/.local/state/relay-agent"
 
 if find "$HOME/snap/firefox" -name logins.json 2>/dev/null | grep -q .; then
   echo "FAIL  firefox saved logins present"; FAIL=1

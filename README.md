@@ -147,7 +147,8 @@ host/promote-base.zsh macos27                    # after the manual doctrine che
 - `update-software.py` reads every pin: `line.conf` (Python, the newest patch
   of its minor that the newest pyenv can build; nvm), `seed.lock`,
   `guest/unity.lock`, and `guest/coding-agents.lock.json` (with its
-  `resolvedBefore`, the README table and each agent's `PLAN.md`). A new
+  `resolvedBefore`, the README table and each agent's `PLAN.md`), and
+  `guest/relay-agent.lock.json` on every line, ubuntu2404 included. A new
   Xcode or a new Node or Python major is reported, not applied.
 - An npm, PyPI or GitHub-release pin needs nothing more. Any other vendor
   download names its feed in the lock entry's `release` object; the script's
@@ -421,6 +422,17 @@ Unity in your own purpose clone; the base stays credential-free, and
 ## Relay agent
 
 Every image ships vm-service's relay agent and starts it in the desktop session, so actions run as the logged-in user instead of over SSH. See [docs/relay-agent.md](docs/relay-agent.md).
+
+- Guest phase 62 installs the build that `guest/relay-agent.lock.json` pins at `~/.local/libexec/relay-agent/relay-agent`, with a LaunchAgent (`com.wezzard.relay-agent`, Aqua only) on macOS and a systemd user unit wanted by `graphical-session.target` on ubuntu2404. Phase 65 grants it the Apple Events and data-class permissions that `sshd-keygen-wrapper` has, matched on its signing identifier.
+- Until vm-service publishes a relay agent release, the lock is unpinned and a build needs a local archive:
+
+  ```bash
+  # in a vm-service checkout: relay-agent-<version>-<platform>.tar.gz and SHA256SUMS
+  rust/scripts/build-relay-agent.sh /tmp/relay-agent
+  RELAY_AGENT_ARCHIVE=/tmp/relay-agent/relay-agent-0.1.1-darwin-arm64.tar.gz host/build-base.zsh macos26
+  ```
+
+  `host/update-software.py apply` pins the newest release once one carries the archives.
 
 ## Networking
 

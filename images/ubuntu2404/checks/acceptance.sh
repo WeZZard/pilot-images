@@ -223,6 +223,59 @@ EOF
   fi
 fi
 
+# --- relay agent (phase 62; docs/relay-agent.md RA-I2, RA-I6) ---
+# The user's systemd starts relay-agent.service when the desktop session
+# reaches graphical-session.target, and the agent waits there, idle, for the
+# configuration machine-service writes at lease time. A user service runs in
+# the user manager's cgroup, not in the session's scope, so logind maps its
+# process to no session. It belongs to the desktop session as logind's display
+# session of the user, the one graphical session polkit and the user manager
+# attribute such processes to, and it carries that session's display.
+RA_AGENT="$HOME/.local/libexec/relay-agent/relay-agent"
+RA_UNIT="$HOME/.config/systemd/user/relay-agent.service"
+export XDG_RUNTIME_DIR="/run/user/$(id -u)"
+if RA_VERSION="$("$RA_AGENT" --version 2>/dev/null)"; then ok "relay agent: $RA_VERSION"; else bad "relay agent missing or broken at $RA_AGENT"; fi
+if grep -qx 'WantedBy=graphical-session.target' "$RA_UNIT" 2>/dev/null \
+   && grep -qx 'ExecStart=%h/.local/libexec/relay-agent/relay-agent run' "$RA_UNIT" \
+   && [ "$(systemctl --user is-enabled relay-agent.service 2>/dev/null)" = enabled ]; then
+  ok "relay-agent.service enabled, wanted by graphical-session.target"
+else
+  bad "relay-agent.service not installed or not enabled for graphical-session.target"
+fi
+n=0
+while [ "$(systemctl --user is-active relay-agent.service 2>/dev/null)" != active ] && [ $n -lt 30 ]; do sleep 2; n=$((n + 1)); done
+RA_PID="$(systemctl --user show -p MainPID --value relay-agent.service 2>/dev/null)"
+if [ "$(systemctl --user is-active graphical-session.target 2>/dev/null)" = active ] \
+   && [ "$(systemctl --user is-active relay-agent.service 2>/dev/null)" = active ] && [ "${RA_PID:-0}" != 0 ]; then
+  ok "relay-agent.service active with graphical-session.target (pid $RA_PID)"
+else
+  bad "relay-agent.service not active in the desktop session ($(systemctl --user is-active relay-agent.service 2>/dev/null), graphical-session.target $(systemctl --user is-active graphical-session.target 2>/dev/null))"
+fi
+if [ "${RA_PID:-0}" != 0 ] && [ "$(readlink "/proc/$RA_PID/exe" 2>/dev/null)" = "$RA_AGENT" ] \
+   && [ "$(stat -c %u "/proc/$RA_PID" 2>/dev/null)" = "$(id -u)" ]; then
+  ok "relay agent process $RA_PID runs $RA_AGENT as $(id -un)"
+else
+  bad "relay agent process ${RA_PID:-none} is not $RA_AGENT run by $(id -un)"
+fi
+RA_USER_DISPLAY="$(loginctl show-user "$(id -u)" -p Display --value 2>/dev/null)"
+RA_ENV="$(tr '\0' '\n' < "/proc/${RA_PID:-0}/environ" 2>/dev/null)"
+RA_DISPLAY="$(printf '%s\n' "$RA_ENV" | sed -n 's/^DISPLAY=//p')"
+RA_WAYLAND="$(printf '%s\n' "$RA_ENV" | sed -n 's/^WAYLAND_DISPLAY=//p')"
+RA_SESSION_TYPE="$(loginctl show-session "${DESKTOP_SID:-none}" -p Type --value 2>/dev/null)"
+RA_SESSION_DISPLAY="$(loginctl show-session "${DESKTOP_SID:-none}" -p Display --value 2>/dev/null)"
+if [ -n "$DESKTOP_SID" ] && [ "$RA_USER_DISPLAY" = "$DESKTOP_SID" ] && [ -n "$RA_DISPLAY$RA_WAYLAND" ] \
+   && { [ "$RA_SESSION_TYPE" != x11 ] || [ -z "$RA_SESSION_DISPLAY" ] || [ "$RA_DISPLAY" = "$RA_SESSION_DISPLAY" ]; }; then
+  ok "relay agent in desktop session $DESKTOP_SID ($RA_SESSION_TYPE, display ${RA_DISPLAY:-$RA_WAYLAND})"
+else
+  bad "relay agent not in the desktop session (session ${DESKTOP_SID:-none} ${RA_SESSION_TYPE:-?} display '${RA_SESSION_DISPLAY}', user display session '${RA_USER_DISPLAY}', agent DISPLAY '${RA_DISPLAY}' WAYLAND_DISPLAY '${RA_WAYLAND}')"
+fi
+if [ ! -e "$HOME/.config/relay-agent/config.json" ] \
+   && journalctl --user -b -u relay-agent.service --no-pager 2>/dev/null | grep -q 'waiting for its configuration'; then
+  ok "relay agent idle: no configuration, waiting for it"
+else
+  bad "relay agent is not waiting for its configuration (journalctl --user -u relay-agent.service)"
+fi
+
 # --- desktop dconf ---
 db=/etc/dconf/db/local.d/00-pilot-desktop
 if grep -q 'scaling-factor=uint32 2' "$db" 2>/dev/null && [ "$(gsettings get org.gnome.desktop.interface scaling-factor 2>/dev/null)" = 'uint32 2' ]; then ok "HiDPI scale=2 (configured and effective)"; else bad "HiDPI scale=2"; fi

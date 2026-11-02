@@ -193,6 +193,63 @@ for _ae_probe in "System Events:get name of every process" "Finder:get name of s
     bad "osascript -> $_ae_app over SSH timed out or failed — the Automation consent modal would block clones"
   fi
 done
+# --- relay agent (phases 62 and 65; docs/relay-agent.md RA-I2, RA-I4, RA-I6) ---
+# launchd starts the agent in the Aqua session of the automatic login and keeps
+# it there, waiting idle for the configuration machine-service writes at lease
+# time. Its Apple Events and data-class rows are pinned to its signing
+# identifier, the job's label, which the installed build must carry.
+_ra_label=com.wezzard.relay-agent
+_ra_agent="$HOME/.local/libexec/relay-agent/relay-agent"
+_ra_plist="$HOME/Library/LaunchAgents/$_ra_label.plist"
+if _ra_version=$("$_ra_agent" --version 2>/dev/null); then ok "relay agent: $_ra_version"; else bad "relay agent missing or broken at $_ra_agent"; fi
+if codesign --verify --strict -R="identifier \"$_ra_label\"" "$_ra_agent" >/dev/null 2>&1; then
+  ok "relay agent signed with the identifier $_ra_label"
+else
+  bad "relay agent not signed with the identifier $_ra_label"
+fi
+_ra_keys="$(plutil -extract ProgramArguments.0 raw -o - "$_ra_plist" 2>/dev/null) $(plutil -extract ProgramArguments.1 raw -o - "$_ra_plist" 2>/dev/null) $(plutil -extract RunAtLoad raw -o - "$_ra_plist" 2>/dev/null) $(plutil -extract KeepAlive raw -o - "$_ra_plist" 2>/dev/null) $(plutil -extract LimitLoadToSessionType raw -o - "$_ra_plist" 2>/dev/null)"
+if [[ "$_ra_keys" == "$_ra_agent run true true Aqua" ]]; then
+  ok "relay agent LaunchAgent: run, RunAtLoad, KeepAlive, Aqua only"
+else
+  bad "relay agent LaunchAgent $_ra_plist wrong or missing (got: $_ra_keys)"
+fi
+_ra_job=""
+for _ in {1..30}; do
+  _ra_job=$(launchctl print "gui/$(id -u)/$_ra_label" 2>/dev/null)
+  [[ "$_ra_job" == *"state = running"* ]] && break
+  sleep 2
+done
+_ra_asid=$(print -r -- "$_ra_job" | awk '$1 == "asid" {print $3; exit}')
+_ra_pid=$(print -r -- "$_ra_job" | awk '$1 == "pid" {print $3; exit}')
+_ra_domain=$(launchctl print "gui/$(id -u)" 2>/dev/null)
+if [[ "$_ra_job" == *"state = running"* && -n "$_ra_pid" && -n "$_ra_asid" ]] \
+   && print -r -- "$_ra_domain" | grep -qx $'\tsession = Aqua' \
+   && print -r -- "$_ra_domain" | grep -qx $'\t\tasid = '"$_ra_asid"; then
+  ok "relay agent job running in gui/$(id -u), the Aqua session (asid $_ra_asid, pid $_ra_pid)"
+else
+  bad "relay agent job not running in the Aqua session of gui/$(id -u) ($(print -r -- "$_ra_job" | grep -E 'state =|pid =|asid =' | tr -s '\t\n' '  '))"
+fi
+if [[ -n "$_ra_pid" && "$(ps -o user= -p "$_ra_pid" 2>/dev/null | tr -d ' ')" == "$USER" && "$(ps -o comm= -p "$_ra_pid" 2>/dev/null)" == "$_ra_agent" ]]; then
+  ok "relay agent process $_ra_pid runs $_ra_agent as $USER"
+else
+  bad "relay agent process ${_ra_pid:-none} is not $_ra_agent run by $USER"
+fi
+if [[ ! -e "$HOME/.config/relay-agent/config.json" ]] && grep -q 'waiting for its configuration' "$HOME/Library/Logs/relay-agent.log" 2>/dev/null; then
+  ok "relay agent idle: no configuration, waiting for it"
+else
+  bad "relay agent is not waiting for its configuration (see ~/Library/Logs/relay-agent.log)"
+fi
+_ra_req=$(sqlite3 "$_ae_db" "SELECT DISTINCT hex(csreq) FROM access WHERE client='$_ra_agent' AND client_type=1 AND auth_value=2;" 2>/dev/null)
+_ra_rows=$(sqlite3 "$_ae_db" "SELECT count(*) FROM access WHERE service='kTCCServiceAppleEvents' AND client='$_ra_agent' AND client_type=1 AND auth_value=2;" 2>/dev/null)
+_ra_data=$(sqlite3 "$_ae_db" "SELECT count(*) FROM access WHERE client='$_ra_agent' AND client_type=1 AND auth_value=2 AND service IN ('kTCCServiceReminders','kTCCServiceAddressBook','kTCCServiceCalendar','kTCCServicePhotos','kTCCServiceMediaLibrary');" 2>/dev/null)
+_ra_blob=$(mktemp)
+_ra_want=$(csreq -r="identifier \"$_ra_label\"" -b "$_ra_blob" 2>/dev/null && xxd -p "$_ra_blob" | tr -d '\n' | tr a-f A-F)
+rm -f "$_ra_blob"
+if [[ "${_ra_rows:-0}" -gt 0 && "$_ra_rows" == "$_ae_rows" && "$_ra_data" == 5 && -n "$_ra_want" && "$_ra_req" == "$_ra_want" ]]; then
+  ok "relay agent Apple Events rows ($_ra_rows targets) and data-class rows (5), pinned to identifier $_ra_label"
+else
+  bad "relay agent TCC rows: Apple Events ${_ra_rows:-0} (sshd-keygen-wrapper ${_ae_rows:-0}), data-class ${_ra_data:-0}/5, requirement ${_ra_req:-none}"
+fi
 if pi list 2>/dev/null | grep -q "pi-web-access"; then ok "pi extensions synced"; else bad "pi extensions not synced"; fi
 if "$HOME/.local/bin/claude" mcp list 2>/dev/null | grep -q "cua-driver"; then ok "claude MCP registrations"; else bad "claude MCP registrations"; fi
 

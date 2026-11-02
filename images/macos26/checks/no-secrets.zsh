@@ -14,6 +14,12 @@ absent "$HOME/.config/zsh/secrets.zsh"
 absent "$HOME/.claude/.credentials.json"
 absent "$HOME/.config/gh/hosts.yml"
 
+# The relay agent's configuration holds the lease's agent credential and
+# arrives at lease time; its state holds a lease's execution records
+# (docs/relay-agent.md RA-I3).
+absent "$HOME/.config/relay-agent/config.json"
+absent "$HOME/.local/state/relay-agent"
+
 # A Unity license and a Unity or Epic sign-in are credentials too; they arrive
 # only in purpose clones (the Unity editor ships in the image, phase 80).
 absent "/Library/Application Support/Unity/Unity_lic.ulf"

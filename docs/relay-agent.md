@@ -22,12 +22,17 @@
 
 - The relay agent is built and released by vm-service. The image pins a release by version and SHA-256 in a lock file beside the line's other locks, and `host/update-software.py` updates the pin like any other.
 - The executable is installed under the guest user's home at `~/.local/libexec/relay-agent/relay-agent`, because machine-service replaces it at lease time when its hash differs from the build that machine-service holds.
+- The lock is `guest/relay-agent.lock.json`, one file that is identical on every line. It names vm-service's repository, the release version, and the URL and SHA-256 of each platform's archive: `darwin-arm64`, `linux-arm64` and `linux-x86_64`. A release archive is `relay-agent-<version>-<platform>.tar.gz` from the release tagged `v<version>`, and holds the one executable `relay-agent`.
+- `host/build-base.zsh` reads the guest's platform from `uname -sm`, and `host/relay-agent-package.py` fetches that platform's archive, checks its SHA-256 against the lock, and checks that it holds one executable for that platform, without running it. The guest checks the SHA-256 again before guest phase 62 installs it.
+- Until vm-service publishes a release with the archives, the lock's `version`, `url` and `sha256` fields are `null`, and a build needs `RELAY_AGENT_ARCHIVE` set to a local archive from vm-service's `rust/scripts/build-relay-agent.sh`. The build warns that the image carries an unpinned build. Once the lock is pinned, `RELAY_AGENT_ARCHIVE` is only an offline copy and must match the pin.
+- `host/update-software.py` moves the pin to vm-service's newest published release that carries an archive for every platform, after it checks each archive against the release's asset digest and `SHA256SUMS`.
 
 ## RA-I2: Starting in the desktop session
 
 - On macOS, the image installs `~/Library/LaunchAgents/com.wezzard.relay-agent.plist` with `RunAtLoad`, `KeepAlive` and `LimitLoadToSessionType` set to `Aqua`, so launchd starts the relay agent when the guest user logs in automatically and restarts it if it exits.
 - On Ubuntu, the image installs `~/.config/systemd/user/relay-agent.service`, wanted by `graphical-session.target`, so systemd starts the relay agent when the guest user's desktop session starts.
 - The relay agent waits for its configuration file and starts no session until that file exists.
+- Guest phase 62 installs the executable and the LaunchAgent or the unit. On macOS, the LaunchAgent runs `relay-agent run` and writes its output to `~/Library/Logs/relay-agent.log`. On Ubuntu, the unit is `PartOf` and `After` `graphical-session.target`, restarts the agent if it exits, and logs to the user's journal. The phase starts the build it installed at once, and the build's reboot after phase 62 starts it the way a clone meets it.
 
 ## RA-I3: Configuration arrives at lease time
 
@@ -39,6 +44,7 @@
 - macOS attributes the privacy permissions of an action to the relay agent's signed executable, because every action runs as the relay agent's child.
 - A guest phase grants the relay agent the Apple Events and data-class permissions that phase 65 grants to `sshd-keygen-wrapper` today, written to the user's TCC database the same way.
 - Phase 65's grants for `sshd-keygen-wrapper` stay while SSH remains a fallback link.
+- Phase 65 writes both clients' rows. The relay agent's rows name it by path, as `sshd-keygen-wrapper`'s do, and are pinned to the code requirement `identifier "com.wezzard.relay-agent"` rather than to its designated requirement. vm-service signs the macOS relay agent ad hoc with that identifier, the LaunchAgent's label; an ad hoc signature's designated requirement is its code hash, which changes with every build, so a grant pinned to it would end when machine-service replaces the executable. Phase 62 and phase 65 refuse an executable that does not meet the requirement.
 
 ## RA-I5: The Ubuntu desktop session
 
@@ -56,3 +62,6 @@
 - The acceptance checks of each line assert that the relay agent runs as the guest user, inside the desktop session, after a fresh boot.
 - On macOS, the check reads the relay agent's job from `launchctl print gui/<uid>/com.wezzard.relay-agent`.
 - On Ubuntu, the check reads the desktop session from `loginctl` and requires its type to be `x11` or `wayland`, and it requires the relay agent's process to belong to that session.
+- On macOS, the job must be `running` with a process ID, and its audit session (`asid`) must be the one of the `gui/<uid>` domain, whose session is `Aqua`. The process must be the installed executable, run by the image user; the LaunchAgent must carry `run`, `RunAtLoad`, `KeepAlive` and `LimitLoadToSessionType` `Aqua`; the executable must meet the identifier requirement; and the TCC store must hold the agent's Apple Events rows for as many targets as `sshd-keygen-wrapper`'s, and its five data-class rows, pinned to that requirement.
+- On Ubuntu, a systemd user service runs in the user manager's cgroup, not in the session's scope, so logind maps its process to no session. The check therefore requires the unit to be enabled for `graphical-session.target`, the target and the unit to be active, the process to be the installed executable run by the image user, the user's display session (`loginctl show-user -p Display`) to be the desktop session, and the process's `DISPLAY` to be that session's display. logind, polkit and the user manager attribute a user service to that display session.
+- On both, the agent must be idle: no configuration file, and its log says that it waits for its configuration. The no-secrets checks of every line fail when `~/.config/relay-agent/config.json` or the agent's state folder `~/.local/state/relay-agent` exists; an idle agent creates neither.

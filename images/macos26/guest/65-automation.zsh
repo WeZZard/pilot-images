@@ -1,5 +1,6 @@
 #!/bin/zsh
-# Phase 65 — Apple Events (Automation) grant for osascript run over SSH.
+# Phase 65 — Apple Events (Automation) grants for osascript run over SSH and
+# by the relay agent.
 #
 # macOS attributes Apple Events sent from an SSH session to the session's
 # responsible process, /usr/libexec/sshd-keygen-wrapper, and the first script
@@ -18,6 +19,15 @@
 # as private (Reminders, Contacts, Calendar, Photos, Music library) sit behind a
 # second, per-user data-class consent; the same client gets those five rows
 # too. Idempotent: reruns replace.
+#
+# The relay agent (phase 62) gets the same rows (docs/relay-agent.md RA-I4):
+# every action it runs is its child, so macOS attributes the action to it. Its
+# rows are pinned to the requirement `identifier "com.wezzard.relay-agent"`, not
+# to its designated requirement: an ad hoc signature's designated requirement
+# is its code hash, which every new build changes, and machine-service replaces
+# the build at lease time. vm-service signs every build with that identifier
+# (vm-service DC-1xx-REL-1). sshd-keygen-wrapper keeps its rows while SSH is a
+# fallback link.
 source "${0:A:h}/lib.zsh"
 
 if ! csrutil status 2>/dev/null | grep -qi 'disabled'; then
@@ -26,8 +36,11 @@ if ! csrutil status 2>/dev/null | grep -qi 'disabled'; then
 fi
 
 CLIENT=/usr/libexec/sshd-keygen-wrapper
+AGENT="$HOME/.local/libexec/relay-agent/relay-agent"
+AGENT_ID=com.wezzard.relay-agent
 DB="$HOME/Library/Application Support/com.apple.TCC/TCC.db"
 [[ -x "$CLIENT" ]] || { glog "missing Apple Events client $CLIENT"; exit 1 }
+[[ -x "$AGENT" ]] || { glog "missing Apple Events client $AGENT (phase 62)"; exit 1 }
 [[ -f "$DB" ]] || { glog "no user TCC database at $DB"; exit 1 }
 
 # --- schema gate --------------------------------------------------------------
@@ -66,13 +79,19 @@ for app in "/System/Library/CoreServices/System Events.app" \
 done
 (( ${#TARGETS} > 0 )) || { glog "no target app bundles found"; exit 1 }
 
-CLIENT_REQ=$(csreq_hex "$CLIENT") || { glog "cannot compute the designated requirement of $CLIENT"; exit 1 }
+typeset -a CLIENTS
+typeset -A CLIENT_REQ
+CLIENTS=("$CLIENT" "$AGENT")
+CLIENT_REQ[$CLIENT]=$(csreq_hex "$CLIENT") || { glog "cannot compute the designated requirement of $CLIENT"; exit 1 }
+codesign --verify --strict -R="identifier \"$AGENT_ID\"" "$AGENT" \
+  || { glog "$AGENT is not signed with the identifier $AGENT_ID"; exit 1 }
+CLIENT_REQ[$AGENT]=$(identifier_req_hex "$AGENT_ID") || { glog "cannot compile the requirement for $AGENT_ID"; exit 1 }
 
 # --- rows ---------------------------------------------------------------------
 # service           kTCCServiceAppleEvents            (Automation)
-# client            path, client_type 1               (sshd-keygen-wrapper)
+# client            path, client_type 1               (sshd-keygen-wrapper, relay agent)
 # auth_value 2      allowed; auth_reason 2 user consent; auth_version 1
-# csreq             client's designated requirement
+# csreq             client's requirement (designated; identifier for the agent)
 # indirect object   target bundle id (type 0) + target's designated requirement
 SQL=$(mktemp)
 print -r -- 'BEGIN;' > "$SQL"
@@ -90,7 +109,9 @@ for app in "${TARGETS[@]}"; do
     SKIPPED=$(( SKIPPED + 1 ))
     continue
   fi
-  print -r -- "INSERT OR REPLACE INTO access (service,client,client_type,auth_value,auth_reason,auth_version,csreq,indirect_object_identifier_type,indirect_object_identifier,indirect_object_code_identity,flags,last_modified) VALUES ('kTCCServiceAppleEvents','$CLIENT',1,2,2,1,X'$CLIENT_REQ',0,'$bid',X'$req',0,strftime('%s','now'));" >> "$SQL"
+  for c in "${CLIENTS[@]}"; do
+    print -r -- "INSERT OR REPLACE INTO access (service,client,client_type,auth_value,auth_reason,auth_version,csreq,indirect_object_identifier_type,indirect_object_identifier,indirect_object_code_identity,flags,last_modified) VALUES ('kTCCServiceAppleEvents','$c',1,2,2,1,X'${CLIENT_REQ[$c]}',0,'$bid',X'$req',0,strftime('%s','now'));" >> "$SQL"
+  done
   GRANTED=$(( GRANTED + 1 ))
 done
 # --- data-class rows for the same client ---------------------------------------
@@ -105,8 +126,10 @@ done
 typeset -a DATA_SERVICES
 DATA_SERVICES=(kTCCServiceReminders kTCCServiceAddressBook kTCCServiceCalendar
                kTCCServicePhotos kTCCServiceMediaLibrary)
-for svc in "${DATA_SERVICES[@]}"; do
-  print -r -- "INSERT OR REPLACE INTO access (service,client,client_type,auth_value,auth_reason,auth_version,csreq,indirect_object_identifier_type,flags,last_modified) VALUES ('$svc','$CLIENT',1,2,2,1,X'$CLIENT_REQ',0,0,strftime('%s','now'));" >> "$SQL"
+for c in "${CLIENTS[@]}"; do
+  for svc in "${DATA_SERVICES[@]}"; do
+    print -r -- "INSERT OR REPLACE INTO access (service,client,client_type,auth_value,auth_reason,auth_version,csreq,indirect_object_identifier_type,flags,last_modified) VALUES ('$svc','$c',1,2,2,1,X'${CLIENT_REQ[$c]}',0,0,strftime('%s','now'));" >> "$SQL"
+  done
 done
 print -r -- 'COMMIT;' >> "$SQL"
 (( GRANTED > 0 )) || { glog "no target could be granted"; exit 1 }
@@ -115,13 +138,15 @@ rm -f "$SQL"
 # The user tccd caches decisions; restart it so the rows apply to this session.
 launchctl kickstart -k "gui/$(id -u)/com.apple.tccd" 2>/dev/null || killall tccd 2>/dev/null || true
 sleep 2
-glog "Apple Events rows written for $CLIENT: $GRANTED targets, $SKIPPED skipped; data-class rows: ${#DATA_SERVICES}"
+glog "Apple Events rows written for ${(j:, :)CLIENTS}: $GRANTED targets each, $SKIPPED skipped; data-class rows: ${#DATA_SERVICES} each"
 
 # --- verify from this SSH session: its responsible process IS the client ------
-ROWS=$(sqlite3 "$DB" "SELECT count(*) FROM access WHERE service='kTCCServiceAppleEvents' AND client='$CLIENT' AND client_type=1 AND auth_value=2;")
-(( ROWS >= GRANTED )) || { glog "expected at least $GRANTED Apple Events rows, found $ROWS"; exit 1 }
-DATA_ROWS=$(sqlite3 "$DB" "SELECT count(*) FROM access WHERE client='$CLIENT' AND client_type=1 AND auth_value=2 AND service IN ('${(j:',':)DATA_SERVICES}');")
-(( DATA_ROWS == ${#DATA_SERVICES} )) || { glog "expected ${#DATA_SERVICES} data-class rows, found $DATA_ROWS"; exit 1 }
+for c in "${CLIENTS[@]}"; do
+  ROWS=$(sqlite3 "$DB" "SELECT count(*) FROM access WHERE service='kTCCServiceAppleEvents' AND client='$c' AND client_type=1 AND auth_value=2 AND hex(csreq)=upper('${CLIENT_REQ[$c]}');")
+  (( ROWS >= GRANTED )) || { glog "expected at least $GRANTED Apple Events rows for $c, found $ROWS"; exit 1 }
+  DATA_ROWS=$(sqlite3 "$DB" "SELECT count(*) FROM access WHERE client='$c' AND client_type=1 AND auth_value=2 AND hex(csreq)=upper('${CLIENT_REQ[$c]}') AND service IN ('${(j:',':)DATA_SERVICES}');")
+  (( DATA_ROWS == ${#DATA_SERVICES} )) || { glog "expected ${#DATA_SERVICES} data-class rows for $c, found $DATA_ROWS"; exit 1 }
+done
 for probe in 'tell application "System Events" to get name of every process' \
              'tell application "Finder" to get name of startup disk'; do
   if ! perl -e 'alarm 20; exec @ARGV' osascript -e "$probe" >/dev/null; then

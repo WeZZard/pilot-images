@@ -16,6 +16,11 @@ Lines default to every macOS line with a line.conf. The pins it reads and writes
   agent's version, and for vendor downloads its URL, sha256, bundle version and
   probe output, then `resolvedBefore`, the README table row and the agent's
   applications/<id>/PLAN.md.
+- guest/relay-agent.lock.json (one file, identical on every line, ubuntu2404
+  included): vm-service's newest published release that carries a
+  relay-agent-<version>-<platform>.tar.gz for every platform the lock names.
+  Each archive is fetched, hashed, checked against the release's asset digest
+  and SHA256SUMS, and read by host/relay-agent-package.py, never run.
 
 Floating software (Homebrew, rustup, Codex, Pi, Claude Code, pnpm, the npx MCP
 servers) has no pin: a rebuild installs the newest release.
@@ -46,6 +51,7 @@ rebuild": phase 85's verify prints the real output.
 """
 import datetime
 import hashlib
+import importlib.util
 import json
 import os
 import pathlib
@@ -63,6 +69,7 @@ from concurrent.futures import ThreadPoolExecutor
 
 REPO = pathlib.Path(__file__).resolve().parents[1]
 LOCK_NAME = 'guest/coding-agents.lock.json'
+RELAY_LOCK_NAME = 'guest/relay-agent.lock.json'
 CACHE = pathlib.Path(os.environ.get('XDG_CACHE_HOME', pathlib.Path.home() / '.cache')) / 'pilot-images/downloads'
 UA = {'User-Agent': 'pilot-images-update-software'}
 
@@ -501,6 +508,77 @@ def write_agent_docs(old, new):
         plan.write_text(plan.read_text().replace(old['version'], new['version']))
 
 
+# --- the relay agent lock -------------------------------------------------------------
+
+def relay_package():
+    spec = importlib.util.spec_from_file_location('relay_agent_package', REPO / 'host/relay-agent-package.py')
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+def relay_release(releases, platforms):
+    """(version, {platform: asset}, SHA256SUMS asset or None) of the newest published release
+    that carries an archive for every platform, or (None, None, None)."""
+    published = sorted((r for r in releases if not r['draft'] and not r['prerelease'] and re.fullmatch(r'v\d+\.\d+\.\d+', r['tag_name'])),
+                       key=lambda r: r['published_at'] or '', reverse=True)
+    for release in published:
+        version = bare(release['tag_name'])
+        assets = {a['name']: a for a in release['assets']}
+        names = {p: 'relay-agent-%s-%s.tar.gz' % (version, p) for p in platforms}
+        if all(name in assets for name in names.values()):
+            return version, {p: assets[name] for p, name in names.items()}, assets.get('SHA256SUMS')
+    return None, None, None
+
+
+def relay_pins(lock, version, assets, sums, fetch=None, package=None):
+    """The lock moved to `version`: each archive downloaded, hashed, matched and read."""
+    package = package or relay_package()
+    fetch = fetch or download
+    listed = {}
+    for line in (sums or '').splitlines():
+        if len(line.split()) == 2:
+            digest, name = line.split()
+            listed[name.lstrip('*')] = digest
+    platforms = {}
+    for platform, asset in assets.items():
+        url = package.release_url(lock['repository'], version, platform)
+        if asset['browser_download_url'] != url:
+            raise SystemExit('relay agent %s: the release asset is at %s, not %s' % (platform, asset['browser_download_url'], url))
+        path = fetch(url)
+        digest = sha256_of(path)
+        for source, expected in (('asset digest', (asset.get('digest') or '').removeprefix('sha256:')), ('SHA256SUMS', listed.get(asset['name'], ''))):
+            if expected and expected != digest:
+                raise SystemExit('relay agent %s: %s hashes to %s, the %s says %s' % (platform, url, digest, source, expected))
+        package.inspect_archive(pathlib.Path(path).read_bytes(), platform)
+        platforms[platform] = {'url': url, 'sha256': digest}
+    return dict(lock, version=version, platforms=platforms)
+
+
+def update_relay_agent(apply_changes, releases_of=None):
+    paths = sorted((REPO / 'images').glob('*/' + RELAY_LOCK_NAME))
+    if not paths:
+        return []
+    package = relay_package()
+    lock = package.read_lock(paths[0])
+    name, have = 'relay agent (%s)' % lock['repository'], lock['version']
+    try:
+        releases = (releases_of or (lambda repository: gh('repos/%s/releases?per_page=100' % repository)))(lock['repository'])
+        version, assets, sums = relay_release(releases, sorted(lock['platforms']))
+        if version is None:
+            return [('all lines', name, have or 'unpinned', '', 'no feed: no release carries relay agent archives yet')]
+        if have is not None and not newer(version, have):
+            return [('all lines', name, have, version, 'current')]
+        if apply_changes:
+            text = pathlib.Path(download(sums['browser_download_url'])).read_text() if sums else ''
+            moved = json.dumps(relay_pins(lock, version, assets, text, package=package), indent=1) + '\n'
+            for path in paths:
+                path.write_text(moved)
+    except (Exception, SystemExit) as error:
+        return [('all lines', name, have or 'unpinned', '', 'error: %s' % error)]
+    return [('all lines', name, have or 'unpinned', version, 'update')]
+
+
 # --- line pins -----------------------------------------------------------------------
 
 def conf_value(text, key):
@@ -628,6 +706,7 @@ def main(argv):
     rows = [row for line in lines for row in update_line(line, apply_changes, today)]
     agent_rows, probes = update_lock(apply_changes)
     rows += agent_rows
+    rows += update_relay_agent(apply_changes)
     width = [max(len(str(r[i])) for r in rows) for i in range(4)]
     for row in rows:
         print('  '.join(str(c).ljust(w) for c, w in zip(row, width)) + '  ' + row[4])

@@ -14,6 +14,12 @@ absent "$HOME/.config/zsh/secrets.zsh"
 absent "$HOME/.claude/.credentials.json"
 absent "$HOME/.config/gh/hosts.yml"
 
+# The relay agent's configuration holds the lease's agent credential and
+# arrives at lease time; its state holds a lease's execution records
+# (docs/relay-agent.md RA-I3).
+absent "$HOME/.config/relay-agent/config.json"
+absent "$HOME/.local/state/relay-agent"
+
 # The coding agents (phase 85) keep their sign-ins in their own folders. None
 # may hold one in the image: no auth, credential, token or OAuth file, and no
 # Cursor CLI account in its config.

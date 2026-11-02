@@ -219,6 +219,25 @@ if [[ "$LINE_KIND" == linux && ( "$ONLY_PHASE" == 45 || ( -z "$ONLY_PHASE" && ( 
   vscp_retry "$IP" "$SCRIPT_DIR/capture-package.py" /tmp/payload/capture-package.py || die "capture verifier staging failed"
 fi
 
+# The relay agent (phase 62): the archive guest/relay-agent.lock.json pins for
+# the guest's platform, or RELAY_AGENT_ARCHIVE, a local build that must match
+# the pin once one exists (docs/relay-agent.md RA-I1). The guest checks the
+# staged SHA-256 again before it installs anything.
+if [[ -f "$LINE_DIR/guest/relay-agent.lock.json" ]] && [[ "$ONLY_PHASE" == 62 || ( -z "$ONLY_PHASE" && ( -z "$FROM_PHASE" || 10#$FROM_PHASE -le 62 ) ) ]]; then
+  typeset -a relay_args
+  GUEST_UNAME=$(vssh_retry "$IP" 'uname -sm') || die "relay agent staging: cannot read the guest platform"
+  relay_args=(fetch --lock "$LINE_DIR/guest/relay-agent.lock.json" --uname "$GUEST_UNAME" --output "$LOG_DIR/relay-agent.tar.gz")
+  [[ -z "${RELAY_AGENT_ARCHIVE:-}" ]] || relay_args+=(--archive "$RELAY_AGENT_ARCHIVE")
+  python3 "$SCRIPT_DIR/relay-agent-package.py" "${relay_args[@]}" > "$LOG_DIR/relay-agent-package.json" || die "relay agent package verification failed"
+  RELAY_AGENT_SHA256=$(python3 -c 'import json,sys; r=json.load(open(sys.argv[1])); print(r["sha256"])' "$LOG_DIR/relay-agent-package.json")
+  if grep -q '"source": "local"' "$LOG_DIR/relay-agent-package.json"; then
+    warn "relay agent: unpinned local build $RELAY_AGENT_SHA256 from RELAY_AGENT_ARCHIVE; pin a release before promoting"
+  fi
+  print -r -- "$RELAY_AGENT_SHA256" > "$LOG_DIR/relay-agent.sha256"
+  vscp_retry "$IP" "$LOG_DIR/relay-agent.tar.gz" /tmp/payload/relay-agent.tar.gz || die "relay agent archive staging failed"
+  vscp_retry "$IP" "$LOG_DIR/relay-agent.sha256" /tmp/payload/relay-agent.sha256 || die "relay agent SHA-256 staging failed"
+fi
+
 # ---- phases ------------------------------------------------------------------
 # Phases are discovered from the staged guest scripts (NN-*), so each line runs
 # exactly the phases it ships — no fixed macOS-only list.
@@ -272,9 +291,10 @@ for ph in "${PHASES[@]}"; do
 done
 
 # A new desktop session must inherit image-level capture startup settings, and
-# the headless TCC grants (phases 60 and 65) are checked the way a clone meets
-# them: after a fresh boot and login, not in the session that wrote them.
-if [[ -z "$ONLY_PHASE" || "$ONLY_PHASE" == 45 || "$ONLY_PHASE" == 60 || "$ONLY_PHASE" == 65 ]]; then
+# the headless TCC grants (phases 60 and 65) and the relay agent's start in the
+# desktop session (phase 62) are checked the way a clone meets them: after a
+# fresh boot and login, not in the session that wrote them.
+if [[ -z "$ONLY_PHASE" || "$ONLY_PHASE" == 45 || "$ONLY_PHASE" == 60 || "$ONLY_PHASE" == 62 || "$ONLY_PHASE" == 65 ]]; then
   vssh "$IP" 'sudo reboot' || true
   sleep 20
   IP=$(wait_ip "$WORK_VM") || die "no IP after capture configuration reboot"
