@@ -18,7 +18,7 @@ absent "$HOME/.config/gh/hosts.yml"
 # may hold one in the image: no auth, credential, token or OAuth file, and no
 # Cursor CLI account in its config.
 typeset -a _agent_dirs
-_agent_dirs=(~/.gemini ~/.qwen ~/.qoder ~/.qoder-cn ~/.cursor ~/.factory ~/.config/devin ~/.config/amp ~/.config/kilo
+_agent_dirs=(~/.gemini ~/.dsh ~/.qwen ~/.qoder ~/.qoder-cn ~/.cursor ~/.factory ~/.config/devin ~/.config/amp ~/.config/kilo
   ~/.config/opencode ~/.local/share/opencode ~/.augment ~/.autohand ~/.bob ~/.cline ~/.dexto ~/.kimi ~/.kimi-code ~/.jazz
   ~/.kode ~/.mcpjam ~/.codebuddy ~/.commandcode ~/.continue ~/.copilot ~/.reasonix ~/.terramind ~/.neovate ~/.pochi
   ~/.openhands ~/.deepagents ~/.vibe ~/.hermes ~/.astrbot ~/.forge ~/.fx ~/.inferencesh ~/.belt ~/.junie ~/.config/kimchi

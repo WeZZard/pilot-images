@@ -318,3 +318,18 @@ Owner decisions that shape the images in this repo. Newest first.
   the destination's home but read it from inside the checkout, so every copy
   ended without its inventory associated. The adopt step now reads it from the
   home staging folder.
+
+## 2026-11-02 — Sign-in files travel in the pack, not the image
+
+- **Decision (WeZZard):** VMs use the Antigravity CLI with the sign-in of the
+  host that holds the pack, not an API key, and DeepSeek Harness with a
+  gateway key.
+- **How (agent):** a pack may carry `home.tgz`, unpacked into the clone's home
+  folder by machine-service and `host/inject-credentials.zsh`.
+  `host/pack-home.zsh` builds it from the pack's `home/` folder, refreshing
+  named files (the Antigravity token) from the host's home;
+  `host/sync-pack.zsh` copies a pack to another VM host. Copying only the
+  Antigravity token file into a fresh clone signed it in, and the host's own
+  sign-in kept working. Bases stay credential-free: `no-secrets.zsh` now also
+  scans `~/.dsh`.
+
