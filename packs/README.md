@@ -30,7 +30,7 @@ files 600), assembled by `host/make-pack.zsh`.
 
 | File | Content | Consumed by |
 |---|---|---|
-| `env.extra` | `export` lines: `LITELLM_BASE_URL`, `LITELLM_API_KEY` (pi), `ANTHROPIC_BASE_URL`, `ANTHROPIC_AUTH_TOKEN` (Claude Code), `GH_TOKEN` | guest `~/.config/zsh/secrets.zsh` (sourced by shells; `gh` CLI and both agent providers read these natively) |
+| `env.extra` | `export` lines: `LITELLM_BASE_URL`, `LITELLM_API_KEY` (pi), `ANTHROPIC_BASE_URL`, `ANTHROPIC_AUTH_TOKEN` (Claude Code), `GH_TOKEN` | guest `~/.config/zsh/secrets.zsh` (sourced by every zsh through `~/.zshenv`; `gh` CLI and both agent providers read these natively) |
 | `git-identity` | optional `Name <email>` | git global config |
 | `home.tgz` | files for the clone's home folder, built by `host/pack-home.zsh` from the pack's `home/` folder: sign-in files an agent keeps on disk (the Antigravity CLI's `.gemini/antigravity-cli/antigravity-oauth-token`), and settings that name the gateway (DeepSeek Harness's `.dsh/profiles/<profile>/cordis.patch.yml`) | unpacked into the guest's `$HOME` |
 
