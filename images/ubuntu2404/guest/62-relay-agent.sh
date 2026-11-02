@@ -9,26 +9,32 @@
 # graphical-session.target, so the user's systemd starts `relay-agent run` when
 # the automatic login's desktop session starts and stops it with the session.
 # The agent waits, idle, for ~/.config/relay-agent/config.json, which
-# machine-service writes at lease time and no image holds.
+# machine-service writes at lease time and no image holds. Beside the agent it
+# keeps package.json, the record of the archive it came from (RA-I7).
 source "$(dirname "$0")/lib.sh"
 
 ARCHIVE=/tmp/payload/relay-agent.tar.gz
 SUM=/tmp/payload/relay-agent.sha256
+PACKAGE=/tmp/payload/relay-agent-package.json
 DEST="$HOME/.local/libexec/relay-agent"
 AGENT="$DEST/relay-agent"
 UNIT="$HOME/.config/systemd/user/relay-agent.service"
 
-[ -f "$ARCHIVE" ] && [ -f "$SUM" ] || { glog 'relay agent archive or its SHA-256 not staged'; exit 1; }
+[ -f "$ARCHIVE" ] && [ -f "$SUM" ] && [ -f "$PACKAGE" ] || { glog 'relay agent archive, its SHA-256 or its package record not staged'; exit 1; }
 want=$(cat "$SUM")
 got=$(sha256sum "$ARCHIVE" | awk '{print $1}')
 [ "$got" = "$want" ] || { glog "relay agent archive hashes to $got, staged as $want"; exit 1; }
+grep -Fq "\"sha256\": \"$got\"" "$PACKAGE" || { glog "the relay agent package record names another archive than $got"; exit 1; }
 
 unpacked=$(mktemp -d)
 tar -xzf "$ARCHIVE" -C "$unpacked" relay-agent
 mkdir -p "$DEST"
 install -m 755 "$unpacked/relay-agent" "$AGENT.new"
 mv -f "$AGENT.new" "$AGENT"
-rm -rf "$unpacked" "$ARCHIVE" "$SUM"
+# Which archive this is: the image's extraction reads it as evidence, and
+# promotion holds it against the lock (docs/relay-agent.md RA-I7).
+install -m 644 "$PACKAGE" "$DEST/package.json"
+rm -rf "$unpacked" "$ARCHIVE" "$SUM" "$PACKAGE"
 glog "installed $("$AGENT" --version) ($got)"
 
 mkdir -p "$(dirname "$UNIT")"

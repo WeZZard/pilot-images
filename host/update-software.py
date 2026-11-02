@@ -550,8 +550,8 @@ def relay_pins(lock, version, assets, sums, fetch=None, package=None):
         for source, expected in (('asset digest', (asset.get('digest') or '').removeprefix('sha256:')), ('SHA256SUMS', listed.get(asset['name'], ''))):
             if expected and expected != digest:
                 raise SystemExit('relay agent %s: %s hashes to %s, the %s says %s' % (platform, url, digest, source, expected))
-        package.inspect_archive(pathlib.Path(path).read_bytes(), platform)
-        platforms[platform] = {'url': url, 'sha256': digest}
+        executable = package.inspect_archive(pathlib.Path(path).read_bytes(), platform)
+        platforms[platform] = {'url': url, 'sha256': digest, 'executableSha256': executable}
     return dict(lock, version=version, platforms=platforms)
 
 

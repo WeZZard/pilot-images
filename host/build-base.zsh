@@ -236,6 +236,9 @@ if [[ -f "$LINE_DIR/guest/relay-agent.lock.json" ]] && [[ "$ONLY_PHASE" == 62 ||
   print -r -- "$RELAY_AGENT_SHA256" > "$LOG_DIR/relay-agent.sha256"
   vscp_retry "$IP" "$LOG_DIR/relay-agent.tar.gz" /tmp/payload/relay-agent.tar.gz || die "relay agent archive staging failed"
   vscp_retry "$IP" "$LOG_DIR/relay-agent.sha256" /tmp/payload/relay-agent.sha256 || die "relay agent SHA-256 staging failed"
+  # Phase 62 keeps this record beside the agent, so the image's extraction can
+  # tell which archive it installed (docs/relay-agent.md RA-I7).
+  vscp_retry "$IP" "$LOG_DIR/relay-agent-package.json" /tmp/payload/relay-agent-package.json || die "relay agent package record staging failed"
 fi
 
 # ---- phases ------------------------------------------------------------------

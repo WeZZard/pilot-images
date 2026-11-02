@@ -48,12 +48,17 @@ def archive(members):
     return buffer.getvalue()
 
 
-def pinned_lock(version='0.2.0', digests=None):
+def pinned_lock(version='0.2.0', digests=None, executables=None):
     package = load('relay_agent_package', 'host/relay-agent-package.py')
-    digests = digests or {}
+    digests, executables = digests or {}, executables or {}
     return {'schemaVersion': 1, 'repository': 'WeZZard/vm-service', 'version': version,
-            'platforms': {p: {'url': package.release_url('WeZZard/vm-service', version, p), 'sha256': digests.get(p, 'a' * 64)}
+            'platforms': {p: {'url': package.release_url('WeZZard/vm-service', version, p), 'sha256': digests.get(p, 'a' * 64),
+                              'executableSha256': executables.get(p, 'b' * 64)}
                           for p in package.PLATFORMS}}
+
+
+def sha(data):
+    return hashlib.sha256(data).hexdigest()
 
 
 class LockTests(unittest.TestCase):
@@ -88,10 +93,13 @@ class LockTests(unittest.TestCase):
         half = json.loads(json.dumps(unpinned)); half['platforms']['linux-arm64']['sha256'] = 'a' * 64
         moved = pinned_lock(); moved['platforms']['linux-arm64']['url'] = 'https://example.test/relay-agent.tar.gz'
         short = pinned_lock(); short['platforms']['darwin-arm64']['sha256'] = 'abc'
+        unpinned_executable = pinned_lock(); unpinned_executable['platforms']['linux-arm64']['executableSha256'] = None
+        no_executable = pinned_lock(); del no_executable['platforms']['linux-arm64']['executableSha256']
         missing = pinned_lock(); del missing['platforms']['linux-x86_64']
         extra = dict(pinned_lock(), note='x')
         for name, lock in (('half-pinned', half), ('foreign URL', moved), ('short digest', short),
-                           ('missing platform', missing), ('extra field', extra), ('bad version', pinned_lock('latest'))):
+                           ('missing platform', missing), ('extra field', extra), ('bad version', pinned_lock('latest')),
+                           ('no executable pin', unpinned_executable), ('no executable field', no_executable)):
             with self.subTest(name=name), self.assertRaises(ValueError):
                 self.check(lock)
 
@@ -118,7 +126,8 @@ class PackageTests(unittest.TestCase):
     def test_an_unpinned_lock_takes_a_local_build_and_reports_it(self):
         data = archive([('relay-agent', executable('linux-arm64'), 0o755)])
         result = self.package.fetch(REPO / 'images/ubuntu2404' / LOCK, 'linux-arm64', self.root / 'out.tgz', self.write('local.tgz', data))
-        self.assertEqual(result, {'version': None, 'platform': 'linux-arm64', 'sha256': hashlib.sha256(data).hexdigest(), 'source': 'local'})
+        self.assertEqual(result, {'version': None, 'platform': 'linux-arm64', 'sha256': hashlib.sha256(data).hexdigest(),
+                                  'executableSha256': sha(executable('linux-arm64')), 'source': 'local'})
         self.assertEqual((self.root / 'out.tgz').read_bytes(), data)
 
     def test_an_unpinned_lock_without_a_local_build_names_the_override(self):
@@ -127,9 +136,11 @@ class PackageTests(unittest.TestCase):
 
     def test_a_pinned_lock_accepts_only_the_pinned_bytes(self):
         data = archive([('relay-agent', executable('darwin-arm64'), 0o755)])
-        lock = self.write('lock.json', json.dumps(pinned_lock(digests={'darwin-arm64': hashlib.sha256(data).hexdigest()})))
+        lock = self.write('lock.json', json.dumps(pinned_lock(digests={'darwin-arm64': hashlib.sha256(data).hexdigest()},
+                                                              executables={'darwin-arm64': sha(executable('darwin-arm64'))})))
         result = self.package.fetch(lock, 'darwin-arm64', self.root / 'out.tgz', self.write('copy.tgz', data))
         self.assertEqual((result['source'], result['version']), ('pinned', '0.2.0'))
+        self.assertEqual(result['executableSha256'], sha(executable('darwin-arm64')))
         other = archive([('relay-agent', executable('darwin-arm64') + b'changed', 0o755)])
         with self.assertRaisesRegex(ValueError, 'the lock pins'):
             self.package.fetch(lock, 'darwin-arm64', self.root / 'out2.tgz', self.write('other.tgz', other))
@@ -137,7 +148,8 @@ class PackageTests(unittest.TestCase):
 
     def test_a_pinned_download_must_stay_on_the_release_asset_hosts(self):
         data = archive([('relay-agent', executable('linux-arm64'), 0o755)])
-        lock = self.write('lock.json', json.dumps(pinned_lock(digests={'linux-arm64': hashlib.sha256(data).hexdigest()})))
+        lock = self.write('lock.json', json.dumps(pinned_lock(digests={'linux-arm64': hashlib.sha256(data).hexdigest()},
+                                                              executables={'linux-arm64': sha(executable('linux-arm64'))})))
 
         class Response(io.BytesIO):
             def __init__(self, url):
@@ -165,7 +177,15 @@ class PackageTests(unittest.TestCase):
             with self.subTest(name=name), self.assertRaises(ValueError):
                 self.package.inspect_archive(archive(members), platform)
         for platform in self.package.PLATFORMS:
-            self.package.inspect_archive(archive([('relay-agent', executable(platform), 0o755)]), platform)
+            self.assertEqual(self.package.inspect_archive(archive([('relay-agent', executable(platform), 0o755)]), platform),
+                             sha(executable(platform)))
+
+    def test_a_pinned_archive_whose_executable_is_not_the_pin_is_refused(self):
+        data = archive([('relay-agent', executable('linux-arm64'), 0o755)])
+        lock = self.write('lock.json', json.dumps(pinned_lock(digests={'linux-arm64': sha(data)})))
+        with self.assertRaisesRegex(ValueError, 'executable hashes to'):
+            self.package.fetch(lock, 'linux-arm64', self.root / 'out.tgz', self.write('copy.tgz', data))
+        self.assertFalse((self.root / 'out.tgz').exists())
 
 
 class UpdateSoftwareTests(unittest.TestCase):
@@ -211,6 +231,8 @@ class UpdateSoftwareTests(unittest.TestCase):
             lock = json.loads((REPO / 'images/macos26' / LOCK).read_text())
             moved = self.u.relay_pins(lock, '0.2.0', assets, '\n'.join(sums), fetch=files.get, package=self.package)
             self.assertEqual(moved['version'], '0.2.0')
+            for platform in self.platforms:
+                self.assertEqual(moved['platforms'][platform]['executableSha256'], sha(executable(platform)))
             with tempfile.NamedTemporaryFile('w', suffix='.json') as written:
                 written.write(json.dumps(moved)); written.flush()
                 self.assertEqual(self.package.read_lock(written.name)['platforms'], moved['platforms'])
@@ -239,6 +261,8 @@ class MacPhaseTests(unittest.TestCase):
         self.assertLess(source.index('codesign --verify'), source.index('launchctl bootstrap'))
         self.assertIn('LABEL=com.wezzard.relay-agent', source)
         self.assertIn('PLIST="$HOME/Library/LaunchAgents/$LABEL.plist"', source)
+        self.assertLess(source.index('grep -Fq'), source.index('tar -xzf'))
+        self.assertIn('install -m 644 "$PACKAGE" "$DEST/package.json"', source)
 
     def test_the_launch_agent_runs_the_agent_in_the_aqua_session_and_keeps_it_alive(self):
         source = (REPO / 'images/macos26' / self.PHASE).read_text()
@@ -258,6 +282,7 @@ class MacPhaseTests(unittest.TestCase):
         self.assertIn('RELAY_AGENT_ARCHIVE', build)
         self.assertIn("--uname \"$GUEST_UNAME\"", build)
         self.assertIn('/tmp/payload/relay-agent.sha256', build)
+        self.assertIn('/tmp/payload/relay-agent-package.json', build)
         self.assertIn('"$ONLY_PHASE" == 62 ||', build)
         self.assertIn('"$ONLY_PHASE" == 62 || "$ONLY_PHASE" == 65', build)
 
@@ -290,7 +315,7 @@ class MacGrantTests(unittest.TestCase):
 
 
 class UbuntuPhaseTests(unittest.TestCase):
-    def run_phase(self, manager_running):
+    def run_phase(self, manager_running, package_sha=None, succeed=True):
         temporary = tempfile.TemporaryDirectory()
         self.addCleanup(temporary.cleanup)
         root = Path(temporary.name).resolve()
@@ -303,6 +328,9 @@ class UbuntuPhaseTests(unittest.TestCase):
         data = archive([('relay-agent', b'#!/bin/sh\necho relay-agent 0.1.1\n', 0o755)])
         (payload / 'relay-agent.tar.gz').write_bytes(data)
         (payload / 'relay-agent.sha256').write_text(hashlib.sha256(data).hexdigest() + '\n')
+        named = (package_sha or hashlib.sha256(data).hexdigest())
+        (payload / 'relay-agent-package.json').write_text(json.dumps(
+            {'version': None, 'platform': 'linux-arm64', 'sha256': named, 'executableSha256': 'c' * 64, 'source': 'local'}) + '\n')
         systemctl = ('echo "$*" >> "$FIXTURE_LOG"\n'
                      'case "$*" in "--user daemon-reload") exit %d ;; "--user enable relay-agent.service")\n'
                      '  mkdir -p "$HOME/.config/systemd/user/graphical-session.target.wants"\n'
@@ -312,7 +340,7 @@ class UbuntuPhaseTests(unittest.TestCase):
         (bin_dir / 'systemctl').chmod(0o755)
         env = {**os.environ, 'PATH': str(bin_dir) + os.pathsep + os.environ['PATH'], 'HOME': str(home), 'FIXTURE_LOG': str(root / 'calls')}
         result = subprocess.run(['/bin/bash', str(script)], env=env, capture_output=True, text=True)
-        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertEqual(result.returncode == 0, succeed, result.stdout + result.stderr)
         return root, home
 
     def test_phase_installs_the_agent_and_enables_its_user_unit(self):
@@ -330,10 +358,131 @@ class UbuntuPhaseTests(unittest.TestCase):
                 self.assertEqual(Path(os.readlink(wants)), home / '.config/systemd/user/relay-agent.service')
                 self.assertEqual('--user enable relay-agent.service' in (root / 'calls').read_text(), running)
                 self.assertFalse((root / 'payload/relay-agent.tar.gz').exists())
+                kept = json.loads((home / '.local/libexec/relay-agent/package.json').read_text())
+                self.assertEqual((kept['source'], kept['platform']), ('local', 'linux-arm64'))
+                self.assertFalse((root / 'payload/relay-agent-package.json').exists())
+
+    def test_phase_refuses_a_package_record_of_another_archive(self):
+        root, home = self.run_phase(True, package_sha='d' * 64, succeed=False)
+        self.assertFalse((home / '.local/libexec/relay-agent/relay-agent').exists())
 
     def test_phase_refuses_bytes_that_do_not_match_the_staged_sum(self):
         source = (REPO / 'images/ubuntu2404/guest/62-relay-agent.sh').read_text()
         self.assertLess(source.index('sha256sum "$ARCHIVE"'), source.index('tar -xzf'))
+
+
+class GateTests(unittest.TestCase):
+    """RA-I7: the evidence of the installed agent, and promotion only of the pinned release."""
+
+    def setUp(self):
+        self.package = load('relay_agent_package', 'host/relay-agent-package.py')
+        temporary = tempfile.TemporaryDirectory()
+        self.addCleanup(temporary.cleanup)
+        self.root = Path(temporary.name)
+        self.exe = sha(executable('darwin-arm64'))
+        self.archive = sha(b'archive')
+        self.count = 0
+
+    def package_record(self, **changes):
+        value = {'version': '0.2.0', 'platform': 'darwin-arm64', 'sha256': self.archive,
+                 'executableSha256': self.exe, 'source': 'pinned'}
+        value.update(changes)
+        return json.dumps(value)
+
+    def evidence(self, uname='Darwin arm64', package=None, installed=None):
+        self.count += 1
+        folder = self.root / ('attempt-%d' % self.count)
+        folder.mkdir()
+        observed = folder / 'relay-agent.observed'
+        observed.write_text('%s\n%s\n%s\n' % (uname, package or self.package_record(), installed or self.exe))
+        output = folder / 'relay-agent.json'
+        self.package.record(observed, output)
+        return output
+
+    def receipt(self, evidence):
+        path = evidence.parent / 'receipt.json'
+        path.write_text(json.dumps({'relayAgent': {'path': str(evidence), 'sha256': sha(evidence.read_bytes())}}))
+        return path
+
+    def lock(self, **kwargs):
+        path = self.root / 'lock.json'
+        kwargs.setdefault('digests', {'darwin-arm64': self.archive})
+        kwargs.setdefault('executables', {'darwin-arm64': self.exe})
+        path.write_text(json.dumps(pinned_lock(**kwargs)))
+        return path
+
+    def refused(self, lock, receipt, pattern):
+        with self.assertRaisesRegex(ValueError, pattern):
+            self.package.gate(lock, receipt)
+
+    def test_the_evidence_names_the_archive_and_the_installed_executable(self):
+        value = json.loads(self.evidence().read_text())
+        self.assertEqual(value, {'schemaVersion': 1, 'platform': 'darwin-arm64',
+                                 'archive': {'version': '0.2.0', 'source': 'pinned', 'sha256': self.archive},
+                                 'archiveExecutableSha256': self.exe, 'installedSha256': self.exe})
+        local = json.loads(self.evidence(package=self.package_record(version=None, source='local')).read_text())
+        self.assertEqual(local['archive'], {'version': None, 'source': 'local', 'sha256': self.archive})
+
+    def test_evidence_that_does_not_add_up_is_refused_and_never_rewritten(self):
+        cases = {'other platform': dict(uname='Linux aarch64'), 'unknown platform': dict(uname='Darwin x86_64'),
+                 'no installed hash': dict(installed='missing'),
+                 'pinned without a version': dict(package=self.package_record(version=None)),
+                 'extra field': dict(package=self.package_record(note='x'))}
+        for name, case in cases.items():
+            with self.subTest(name=name), self.assertRaises(ValueError):
+                self.evidence(**case)
+        output = self.evidence()
+        with self.assertRaises(FileExistsError):
+            self.package.record(output.parent / 'relay-agent.observed', output)
+
+    def test_the_pinned_release_passes(self):
+        evidence = self.package.gate(self.lock(), self.receipt(self.evidence()))
+        self.assertEqual(evidence['archive']['version'], '0.2.0')
+
+    def test_the_committed_unpinned_lock_promotes_nothing(self):
+        receipt = self.receipt(self.evidence(package=self.package_record(version=None, source='local')))
+        self.refused(REPO / 'images/macos26' / LOCK, receipt, 'pins no release, so no base can be promoted')
+
+    def test_a_local_build_or_another_release_is_refused(self):
+        lock = self.lock()
+        for name, package in (('local', self.package_record(version=None, source='local')),
+                              ('older', self.package_record(version='0.1.9')),
+                              ('other archive', self.package_record(sha256='e' * 64))):
+            with self.subTest(name=name):
+                self.refused(lock, self.receipt(self.evidence(package=package)), 'is not the release the lock pins, 0.2.0')
+
+    def test_an_installed_executable_that_is_not_the_pin_is_refused(self):
+        receipt = self.receipt(self.evidence(installed='f' * 64))
+        self.refused(self.lock(), receipt, 'installed relay agent executable hashes to f{64}, the lock pins')
+
+    def test_missing_or_changed_evidence_is_refused(self):
+        lock = self.lock()
+        bare = self.root / 'bare.json'
+        bare.write_text(json.dumps({'schemaVersion': 1}))
+        self.refused(lock, bare, 'no relay agent evidence; extract it again')
+        evidence = self.evidence()
+        receipt = self.receipt(evidence)
+        evidence.write_text(evidence.read_text().replace('"installedSha256"', '"installedSha256" '))
+        self.refused(lock, receipt, 'changed after it was bound')
+
+    def test_the_command_line_says_why(self):
+        receipt = self.receipt(self.evidence(package=self.package_record(version=None, source='local')))
+        result = subprocess.run(['python3', str(REPO / 'host/relay-agent-package.py'), 'gate',
+                                 '--lock', str(REPO / 'images/macos26' / LOCK), '--receipt', str(receipt)],
+                                capture_output=True, text=True)
+        self.assertEqual(result.returncode, 1)
+        self.assertIn('relay agent: relay agent local build (darwin-arm64', result.stderr)
+        result = subprocess.run(['python3', str(REPO / 'host/relay-agent-package.py'), 'gate',
+                                 '--lock', str(self.lock()), '--receipt', str(self.receipt(self.evidence()))],
+                                capture_output=True, text=True)
+        self.assertEqual(result.returncode, 0, result.stderr)
+
+    def test_promotion_gates_on_the_work_receipt_before_any_rename(self):
+        promote = (REPO / 'host/promote-base.zsh').read_text()
+        self.assertIn('relay-agent-package.py" gate --lock "$RELAY_LOCK" --receipt "$WORK_ACCEPTANCE"', promote)
+        self.assertLess(promote.index('inventory_verify_work'), promote.index(' gate --lock'))
+        self.assertLess(promote.index(' gate --lock'), promote.index('tart rename "$WORK_VM"'))
+        self.assertLess(promote.index(' gate --lock'), promote.index('invalidate --output "$BASE_INVENTORY"'))
 
 
 class CheckTests(unittest.TestCase):

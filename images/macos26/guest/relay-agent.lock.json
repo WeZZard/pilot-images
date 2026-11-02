@@ -5,15 +5,18 @@
  "platforms": {
   "darwin-arm64": {
    "url": null,
-   "sha256": null
+   "sha256": null,
+   "executableSha256": null
   },
   "linux-arm64": {
    "url": null,
-   "sha256": null
+   "sha256": null,
+   "executableSha256": null
   },
   "linux-x86_64": {
    "url": null,
-   "sha256": null
+   "sha256": null,
+   "executableSha256": null
   }
  }
 }
