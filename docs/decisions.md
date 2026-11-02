@@ -333,3 +333,9 @@ Owner decisions that shape the images in this repo. Newest first.
   sign-in kept working. Bases stay credential-free: `no-secrets.zsh` now also
   scans `~/.dsh`.
 
+
+## 2026-11-02 — The images ship the relay agent and start it in the desktop session
+
+- **Decision (WeZZard):** actions reach guests through vm-service's relay agent, a daemon in the desktop session, instead of SSH; SSH stays for bootstrap, rescue and fallback. The images ship the relay agent on the macOS lines and on ubuntu2404 ([relay agent in the images](relay-agent.md)).
+- **How (agent):** each line pins a relay agent release by version and SHA-256 and starts it in the desktop session: a LaunchAgent limited to the `Aqua` session on macOS, and a systemd user service wanted by `graphical-session.target` on Ubuntu. No image holds the relay agent's configuration or credential, which machine-service writes at lease time.
+- **Found while designing (agent):** a fresh ubuntu2404 lease has gdm set to log `admin` in automatically but no desktop session, and its keyring daemon is not running. The line has to fix that before the relay agent can run there.
