@@ -418,6 +418,10 @@ own Apple ID download, so no vendor software is redistributed. Sign in to
 Unity in your own purpose clone; the base stays credential-free, and
 `checks/no-secrets.zsh` enforces it.
 
+## Relay agent
+
+Every image ships vm-service's relay agent and starts it in the desktop session, so actions run as the logged-in user instead of over SSH. See [docs/relay-agent.md](docs/relay-agent.md).
+
 ## Networking
 
 The Wi-Fi enforces a **MAC address whitelist** — that single fact sets the
