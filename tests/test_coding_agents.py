@@ -3,8 +3,11 @@
 Fixture-only: nothing here downloads, installs, or runs an agent.
 """
 import isolation  # first: the tests keep nothing of the shell's environment
+import contextlib
 import importlib.util
+import io
 import json
+import os
 import pathlib
 import re
 import tempfile
@@ -180,8 +183,13 @@ class LineParityTests(unittest.TestCase):
                     text = self.block((REPO / 'images' / line / 'checks' / script).read_text(), start, end)
                     self.assertEqual(text, reference.replace('images/macos26/', 'images/%s/' % line))
                     if script == 'acceptance.zsh':
-                        self.assertIn('kern.hv_vmm_present', text)
+                        # VM-gated on the script's one reading of the VM, which fails closed.
+                        self.assertIn('if [[ "$VMM" == 1 ]]; then', text)
                         self.assertIn('coding-agents.py" verify', text)
+                        self.assertIn('|| bad "coding-agents.py verify failed (exit $?)"', text)
+                        whole = (REPO / 'images' / line / 'checks' / script).read_text()
+                        self.assertIn('VMM=$(sysctl -n kern.hv_vmm_present 2>/dev/null)', whole)
+                        self.assertIn('*) bad "cannot tell whether this is a VM', whole)
 
     def test_selections_plan_every_agent_from_phase_85(self):
         for line in LINES:
@@ -280,6 +288,85 @@ class HelperTests(unittest.TestCase):
             self.assertEqual(self.helper.main(), 0)
         install.assert_not_called()
         updates.assert_called_once()
+
+
+class VerifyFailsClosedTests(unittest.TestCase):
+    """`verify`, which acceptance runs, fails closed (2026-11-03): a check that
+    cannot look is a FAIL with its reason, and the report goes on."""
+
+    def setUp(self):
+        self.helper = load_helper()
+        temporary = tempfile.TemporaryDirectory()
+        self.addCleanup(temporary.cleanup)
+        self.root = pathlib.Path(temporary.name)
+        self.bin = self.root / 'bin'
+        self.bin.mkdir()
+
+    def stub(self, name, body):
+        path = self.bin / name
+        path.write_text('#!/bin/sh\n' + body + '\n')
+        path.chmod(0o755)
+
+    def verify(self, lock):
+        out = io.StringIO()
+        with mock.patch.dict(os.environ, {'PATH': str(self.bin)}), \
+                mock.patch.object(self.helper, 'ZSHENV', self.root / '.zshenv'), \
+                contextlib.redirect_stdout(out):
+            failures = self.helper.verify(lock, {})
+        return failures, out.getvalue().splitlines()
+
+    def test_quarantine_is_absent_only_when_xattr_says_so(self):
+        app = self.root / 'Fixture.app'
+        cases = [('echo "xattr: $3: No such xattr: com.apple.quarantine" >&2; exit 1', 'absent'),
+                 ('echo "0081;fixture"', 'present'),
+                 ('echo "xattr: No such file: $3" >&2; exit 1', 'xattr -p exited 1'),
+                 ('echo "xattr: [Errno 13] Permission denied: $3" >&2; exit 1', 'xattr -p exited 1'),
+                 ('exit 2', 'xattr -p exited 2')]
+        for body, expected in cases:
+            with self.subTest(body=body):
+                self.stub('xattr', body)
+                with mock.patch.dict(os.environ, {'PATH': str(self.bin)}):
+                    self.assertTrue(self.helper.quarantine(app).startswith(expected), self.helper.quarantine(app))
+        (self.bin / 'xattr').unlink()
+        with mock.patch.dict(os.environ, {'PATH': str(self.bin)}):
+            self.assertTrue(self.helper.quarantine(app).startswith('xattr -p exited 127'))
+
+    def test_an_app_whose_quarantine_cannot_be_read_fails(self):
+        agent = next(a for a in LOCK['agents'] if a['method'] == 'app')
+        label = '%s %s' % (agent['name'], agent['version'])
+        # No xattr, PlistBuddy or anything else: before, "not quarantined" passed.
+        failures, lines = self.verify({**LOCK, 'agents': [agent]})
+        self.assertGreater(failures, 0)
+        self.assertNotIn('PASS  %s not quarantined' % label, lines)
+        self.assertTrue(any(l.startswith('FAIL  cannot check (%s not quarantined): xattr -p exited 127' % label) for l in lines), lines)
+        self.stub('xattr', 'echo "xattr: No such file: $3" >&2; exit 1')
+        failures, lines = self.verify({**LOCK, 'agents': [agent]})
+        self.assertNotIn('PASS  %s not quarantined' % label, lines)
+        self.assertTrue(any(l.startswith('FAIL  cannot check (%s not quarantined): xattr -p exited 1: xattr: No such file' % label) for l in lines), lines)
+
+    def test_a_check_that_cannot_run_is_a_fail_and_the_report_goes_on(self):
+        npm = next(a for a in LOCK['agents'] if a['method'] == 'npm')
+        uv = next(a for a in LOCK['agents'] if a['method'] == 'uv')
+        # No npm on PATH: run() raises, which used to end the report with a traceback.
+        failures, lines = self.verify({**LOCK, 'agents': [npm, uv]})
+        self.assertTrue(any(l.startswith('FAIL  cannot check (%s %s): FileNotFoundError' % (npm['name'], npm['version'])) for l in lines), lines)
+        self.assertTrue(any('%s %s' % (uv['name'], uv['version']) in l for l in lines), 'the next agent is still reported')
+        self.assertGreaterEqual(failures, 2)
+
+    def test_a_lock_with_no_agent_verifies_nothing_and_fails(self):
+        failures, lines = self.verify({**LOCK, 'agents': []})
+        self.assertEqual(failures, 1)
+        self.assertEqual(lines, ['FAIL  the lock names no agent to verify'])
+
+    def test_only_an_agent_the_lock_names(self):
+        lock_path = self.root / 'lock.json'
+        lock_path.write_text(json.dumps(LOCK))
+        out = io.StringIO()
+        with mock.patch('sys.argv', ['coding-agents.py', 'verify', '--lock', str(lock_path), '--only', 'no-such-agent']), \
+                mock.patch.object(self.helper, 'verify') as verify, contextlib.redirect_stdout(out):
+            self.assertEqual(self.helper.main(), 1)
+        verify.assert_not_called()
+        self.assertIn('FAIL  --only names no agent in the lock: no-such-agent', out.getvalue())
 
 
 if __name__ == '__main__':

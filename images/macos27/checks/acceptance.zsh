@@ -101,6 +101,15 @@ running() {
 }
 # --- end fail closed ---
 
+# Whether this is a VM decides which rows run: the VM-only rows are skipped on
+# metal. A sysctl that cannot tell is a FAIL, never a silent skip of those rows
+# (the checks fail closed, 2026-11-03).
+VMM=$(sysctl -n kern.hv_vmm_present 2>/dev/null)
+case "$VMM" in
+  0|1) ;;
+  *) bad "cannot tell whether this is a VM: sysctl -n kern.hv_vmm_present gave '$VMM'" ;;
+esac
+
 # --- always-on unlocked session (doctrine) ---
 if [[ "$(defaults read /Library/Preferences/com.apple.loginwindow autoLoginUser 2>/dev/null)" == "$USER" ]]; then
   ok "auto-login -> $USER"
@@ -130,7 +139,7 @@ rm -f /tmp/dispchk /tmp/dispchk.swift
 # --- disk: the system APFS container fills the virtual disk (phase 00) ---
 # Judged by what no partition covers, not by a resize's exit status: on an
 # ASIF disk Tart has already grown the container and the guest resize fails.
-if [[ "$(sysctl -n kern.hv_vmm_present 2>/dev/null)" == 1 ]]; then
+if [[ "$VMM" == 1 ]]; then
   _store=$(diskutil info -plist / | plutil -extract APFSPhysicalStores.0.APFSPhysicalStore raw -o - - 2>/dev/null)
   _whole=$(diskutil info -plist "$_store" 2>/dev/null | plutil -extract ParentWholeDisk raw -o - - 2>/dev/null)
   _plist=$(diskutil list -plist "$_whole" 2>/dev/null)
@@ -365,7 +374,7 @@ none "claude playwright bare (host parity)" "claude playwright unexpectedly pinn
   matching executable-path "$HOME/.local/bin/claude" mcp get playwright
 
 # --- updates: a VM never updates itself; a physical Mac refreshes nightly ---
-if [[ "$(sysctl -n kern.hv_vmm_present 2>/dev/null)" == 1 ]]; then
+if [[ "$VMM" == 1 ]]; then
   # crontab -l exits 1 and says so when there is none; any other failure is a FAIL.
   crontab_entries() {
     local out rc
@@ -400,13 +409,14 @@ fi
 # helper prints one PASS/FAIL line per assertion: the pinned version is the one
 # installed, its command is on PATH, it prints its version with stdin closed
 # (a sign-in prompt is a timeout), and its updater switch is in place.
-if [[ "$(sysctl -n kern.hv_vmm_present 2>/dev/null)" == 1 ]]; then
+if [[ "$VMM" == 1 ]]; then
   _cal=""
   for _c in "${0:A:h}/../guest" /tmp/payload/guest /tmp/payload/images/macos27/guest; do
     if [[ -f "$_c/coding-agents.lock.json" && -f "$_c/coding-agents.py" ]]; then _cal="$_c"; break; fi
   done
   if [[ -n "$_cal" ]]; then
-    /usr/bin/python3 -I "$_cal/coding-agents.py" verify --lock "$_cal/coding-agents.lock.json" || FAIL=1
+    /usr/bin/python3 -I "$_cal/coding-agents.py" verify --lock "$_cal/coding-agents.lock.json" \
+      || bad "coding-agents.py verify failed (exit $?)"
   else
     bad "coding-agents.lock.json not staged"
   fi

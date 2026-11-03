@@ -281,6 +281,31 @@ class AcceptanceTests(unittest.TestCase):
                         self.assertIn(f'cannot check ({check}):', out)
                     self.assertNotEqual(result.returncode, 0)
 
+    def test_macos_vm_rows_are_not_skipped_when_sysctl_cannot_tell(self):
+        # The VM-only rows (the coding agents' verify among them) ran only
+        # when sysctl said 1; a sysctl that failed skipped them silently.
+        for line in MACOS_LINES:
+            box = self.macos(line)
+            for change in (dict(drop='sysctl'), dict(stubs={'sysctl': 'exit 1'}), dict(stubs={'sysctl': 'echo maybe'})):
+                with self.subTest(line=line, change=change):
+                    result = box.run({**self.MACOS_STUBS, **change.get('stubs', {})}, self.MACOS_TOOLS, change.get('drop'))
+                    self.assertTrue(any(f.startswith('cannot tell whether this is a VM') for f in fails(result.stdout)), result.stdout)
+                    self.assertNotEqual(result.returncode, 0)
+            with self.subTest(line=line, sysctl='answers'):
+                for answer in ('0', '1'):
+                    out = box.run({**self.MACOS_STUBS, 'sysctl': f'echo {answer}'}, self.MACOS_TOOLS).stdout
+                    self.assertFalse(any(f.startswith('cannot tell whether this is a VM') for f in fails(out)), out)
+
+    def test_macos_coding_agents_verify_that_fails_silently_is_a_fail(self):
+        # A helper that exits nonzero without printing a FAIL row is a FAIL row.
+        for line in MACOS_LINES:
+            with self.subTest(line=line):
+                box = self.macos(line)
+                box.write('/guest/coding-agents.lock.json', '{"agents": []}')
+                box.write('/guest/coding-agents.py', 'import sys\nsys.exit(3)\n')
+                out = box.run(self.MACOS_STUBS, self.MACOS_TOOLS).stdout
+                self.assertIn('coding-agents.py verify failed (exit 3)', fails(out), out)
+
     def test_macos_absence_checks_fail_when_their_tool_fails(self):
         for line in MACOS_LINES:
             box = self.macos(line)

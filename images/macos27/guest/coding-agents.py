@@ -54,6 +54,30 @@ def run(argv, env=None, check=True, timeout=1800):
     return result
 
 
+def look(argv, timeout=60):
+    """(status, output) of a command a check reads: a missing tool is status 127
+    and a timeout status None, never an exception that ends the report."""
+    try:
+        result = run(argv, check=False, timeout=timeout)
+    except FileNotFoundError as error:
+        return 127, str(error)
+    except (OSError, subprocess.TimeoutExpired) as error:
+        return None, str(error)
+    return result.returncode, result.stdout
+
+
+def quarantine(path):
+    """'absent', 'present', or why nobody can tell (the checks fail closed,
+    2026-11-03). xattr's 1 means absent only with "No such xattr"; a missing
+    file, a missing xattr or any other status is not an answer."""
+    code, output = look(['xattr', '-p', 'com.apple.quarantine', str(path)])
+    if code == 0:
+        return 'present'
+    if code == 1 and 'No such xattr' in output:
+        return 'absent'
+    return 'xattr -p exited %s: %s' % (code, ' '.join(output.split())[-160:])
+
+
 def agent_env(lock):
     """Every agent's updater switch that is an environment variable."""
     result = {}
@@ -583,32 +607,47 @@ def version_probe(agent, env):
 
 
 def verify(lock, env):
+    """One PASS/FAIL line per assertion. A check that cannot look is a FAIL that
+    says why, and the report goes on to the next agent; a lock with no agent
+    verifies nothing and fails (the checks fail closed, 2026-11-03)."""
     failures = 0
-    zshenv = ZSHENV.read_text() if ZSHENV.exists() else ''
 
     def report(ok, text):
         nonlocal failures
         print(('PASS  ' if ok else 'FAIL  ') + text, flush=True)
         failures += 0 if ok else 1
 
+    try:
+        zshenv = ZSHENV.read_text() if ZSHENV.exists() else ''
+    except OSError as error:
+        report(False, 'cannot read ~/.zshenv: %s' % error)
+        zshenv = ''
+    if not lock['agents']:
+        report(False, 'the lock names no agent to verify')
     for agent in lock['agents']:
         label = '%s %s' % (agent['name'], agent['version'])
-        have = installed_version(agent)
-        report(have == expected_installed(agent), '%s installed (%s: %s)' % (label, agent['method'], have))
-        if agent['method'] == 'app':
-            app = pathlib.Path('/Applications') / agent['app']
-            report(plist_value(app, 'CFBundleIdentifier') == agent['bundleId'], '%s bundle id %s' % (label, agent['bundleId']))
-            quarantined = run(['xattr', '-p', 'com.apple.quarantine', str(app)], check=False).returncode == 0
-            report(not quarantined, '%s not quarantined' % label)
-        for name in sorted(set(list(agent.get('links', {})) + ([agent['bin']] if agent['method'] in ('npm', 'uv', 'npm-node', 'script') else []))):
-            report(shutil.which(name) is not None, '%s command %s on PATH' % (label, name))
-        probe = version_probe(agent, env)
-        if probe is not None:
-            ok, code, output = probe
-            tail = ' '.join(output.split())[-160:]
-            report(ok, '%s prints its version without a prompt (%s -> %s: %s)' % (label, ' '.join(agent['check']), code, tail))
-        for ok, text in check_updates(agent, zshenv):
-            report(ok, '%s updater off: %s' % (label, text))
+        try:
+            have = installed_version(agent)
+            report(have == expected_installed(agent), '%s installed (%s: %s)' % (label, agent['method'], have))
+            if agent['method'] == 'app':
+                app = pathlib.Path('/Applications') / agent['app']
+                report(plist_value(app, 'CFBundleIdentifier') == agent['bundleId'], '%s bundle id %s' % (label, agent['bundleId']))
+                state = quarantine(app)
+                if state in ('absent', 'present'):
+                    report(state == 'absent', '%s not quarantined' % label)
+                else:
+                    report(False, 'cannot check (%s not quarantined): %s' % (label, state))
+            for name in sorted(set(list(agent.get('links', {})) + ([agent['bin']] if agent['method'] in ('npm', 'uv', 'npm-node', 'script') else []))):
+                report(shutil.which(name) is not None, '%s command %s on PATH' % (label, name))
+            probe = version_probe(agent, env)
+            if probe is not None:
+                ok, code, output = probe
+                tail = ' '.join(output.split())[-160:]
+                report(ok, '%s prints its version without a prompt (%s -> %s: %s)' % (label, ' '.join(agent['check']), code, tail))
+            for ok, text in check_updates(agent, zshenv):
+                report(ok, '%s updater off: %s' % (label, text))
+        except Exception as error:  # a check that cannot run is a FAIL, never the end of the report
+            report(False, 'cannot check (%s): %s: %s' % (label, type(error).__name__, error))
     return failures
 
 
@@ -620,6 +659,10 @@ def main():
     args = parser.parse_args()
     lock = json.loads(pathlib.Path(args.lock).read_text())
     if args.only:
+        unknown = sorted(set(args.only) - {a['id'] for a in lock['agents']})
+        if unknown:
+            print('FAIL  --only names no agent in the lock: ' + ', '.join(unknown), flush=True)
+            return 1
         lock = {**lock, 'agents': [a for a in lock['agents'] if a['id'] in args.only]}
     env = agent_env(json.loads(pathlib.Path(args.lock).read_text()))
     if args.command == 'list':
