@@ -1,4 +1,5 @@
 """Guest configuration fixtures with no sudo, package manager, or VM effects."""
+import isolation  # first: the tests keep nothing of the shell's environment
 import json
 import os
 from pathlib import Path
@@ -8,20 +9,21 @@ import tempfile
 import unittest
 
 REPO=Path(__file__).resolve().parents[1]
+#: The system tools a guest script run here may use; any other tool is a stub or fails.
+GUEST_TOOLS=('dirname','mkdir','tee','grep','python3','awk','sort','id','chmod','find','ls')
 
 
 class ConfigurationTests(unittest.TestCase):
     def run_phase(self, name, prepare=None):
         temporary=tempfile.TemporaryDirectory(); self.addCleanup(temporary.cleanup)
-        root=Path(temporary.name).resolve(); bin_dir=root/'bin';bin_dir.mkdir()
+        root=Path(temporary.name).resolve()
         source=REPO/'images/ubuntu2404/guest'/name
         script=root/name; script.write_text(source.read_text().replace('/etc/',str(root/'etc')+'/'))
         (root/'lib.sh').write_text('set -euo pipefail\nglog(){ :; }\napt_q(){ :; }\n')
-        for tool,text in {'sudo':'exec "$@"','systemctl':'exit 0','snap':'exit 0','dconf':'printf "dconf %s\\n" "$*" >> "$FIXTURE_LOG"','sync':'printf "sync\\n" >> "$FIXTURE_LOG"'}.items():
-            p=bin_dir/tool;p.write_text('#!/bin/sh\n'+text+'\n');p.chmod(0o755)
         profile=root/'etc/dconf/profile/user';profile.parent.mkdir(parents=True);profile.touch()
         if prepare: prepare(root)
-        env={**os.environ,'PATH':str(bin_dir)+os.pathsep+os.environ['PATH'],'FIXTURE_LOG':str(root/'calls'),'HOME':str(root/'home')}
+        stubs={'sudo':'exec "$@"','systemctl':'exit 0','snap':'exit 0','dconf':'printf "dconf %s\\n" "$*" >> "$FIXTURE_LOG"','sync':'printf "sync\\n" >> "$FIXTURE_LOG"'}
+        env=isolation.guest_environment(root,stubs,GUEST_TOOLS,FIXTURE_LOG=root/'calls')
         result=subprocess.run(['/bin/bash',str(script)],env=env,capture_output=True,text=True)
         self.assertEqual(result.returncode,0,result.stdout+result.stderr)
         return root
@@ -58,7 +60,7 @@ class ConfigurationTests(unittest.TestCase):
     def test_desktop_session_selects_local_active_graphical_session_of_the_user(self):
         source=(REPO/'images/ubuntu2404/checks/acceptance.sh').read_text()
         function=re.search(r'^desktop_session\(\) \{.*?^\}',source,re.M|re.S).group(0)
-        user=subprocess.check_output(['id','-un'],text=True).strip()
+        user=subprocess.check_output(['/usr/bin/id','-un'],text=True,env=isolation.environment()).strip()
         def session(sid,**changes):
             props=dict(Name=user,Type='x11',Remote='no',Active='yes',Class='user'); props.update(changes)
             return sid,props
@@ -70,14 +72,12 @@ class ConfigurationTests(unittest.TestCase):
                ([session('3',Class='greeter')],''),([],''))
         for sessions,expected in cases:
             with self.subTest(sessions=sessions), tempfile.TemporaryDirectory() as directory:
-                bin_dir=Path(directory)
                 table={sid:'\n'.join(f'{k}={v}' for k,v in props.items()) for sid,props in sessions}
                 listing=''.join(f'{sid} 1000 {props["Name"]} - - active no -\n' for sid,props in sessions)
                 script=['#!/bin/sh','if [ "$1" = list-sessions ]; then printf %s "$LISTING"; exit 0; fi','case "$2" in']
                 script+=[f"  {sid}) printf '%s\\n' '{text}' ;;" for sid,text in table.items()]
                 script+=['esac']
-                (bin_dir/'loginctl').write_text('\n'.join(script)+'\n'); (bin_dir/'loginctl').chmod(0o755)
-                env={**os.environ,'PATH':str(bin_dir)+os.pathsep+os.environ['PATH'],'LISTING':listing}
+                env=isolation.guest_environment(directory,{'loginctl':'\n'.join(script[1:])},GUEST_TOOLS,LISTING=listing)
                 out=subprocess.check_output(['/bin/bash','-c',function+'; desktop_session'],env=env,text=True)
                 self.assertEqual(out.strip(),expected)
 
@@ -89,7 +89,7 @@ class ConfigurationTests(unittest.TestCase):
                 keyrings=Path(directory)/'.local/share/keyrings'; keyrings.mkdir(parents=True)
                 (keyrings/'login.keyring').write_text(header+body); (keyrings/'default').write_text('login')
                 if extra: (keyrings/extra).write_text('x')
-                result=subprocess.run(['/bin/bash',str(script)],env={**os.environ,'HOME':directory},capture_output=True,text=True)
+                result=subprocess.run(['/bin/bash',str(script)],env=isolation.guest_environment(directory,{},GUEST_TOOLS,HOME=directory),capture_output=True,text=True)
                 self.assertEqual(result.returncode!=0,failed,result.stdout)
                 self.assertEqual('FAIL  login keyring holds items' in result.stdout,bool(body))
 
@@ -102,11 +102,11 @@ class ConfigurationTests(unittest.TestCase):
     def test_browser_cache_check_ignores_runtime_state_but_detects_new_revision(self):
         source=(REPO/'images/ubuntu2404/checks/acceptance.sh').read_text()
         function=re.search(r'  cache_listing\(\) \{.*?\}',source).group(0)
-        with tempfile.TemporaryDirectory() as directory:
+        with tempfile.TemporaryDirectory() as directory, tempfile.TemporaryDirectory() as scratch:
             root=Path(directory)
             for name in ('chromium-1243','firefox-1542','ffmpeg-1011'): (root/name).mkdir()
             def listing():
-                return subprocess.check_output(['/bin/bash','-c',function+'; cache_listing'],env={**os.environ,'PW_CACHE':str(root)},text=True)
+                return subprocess.check_output(['/bin/bash','-c',function+'; cache_listing'],env=isolation.guest_environment(scratch,{},GUEST_TOOLS,PW_CACHE=root),text=True)
             before=listing();(root/'b').mkdir();(root/'daemon').mkdir();(root/'cli-update-check.json').write_text('{}')
             self.assertEqual(listing(),before)
             (root/'chromium-9999').mkdir();self.assertNotEqual(listing(),before)

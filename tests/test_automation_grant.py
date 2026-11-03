@@ -3,6 +3,7 @@
 Text-level contracts only: the live TCC row format is verified in-guest by the
 phase itself and by acceptance, both over SSH so the client is the real one.
 """
+import isolation  # first: the tests keep nothing of the shell's environment
 from pathlib import Path
 import re
 import unittest

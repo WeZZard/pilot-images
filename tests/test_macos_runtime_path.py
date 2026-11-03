@@ -1,3 +1,4 @@
+import isolation  # first: the tests keep nothing of the shell's environment
 from pathlib import Path
 import unittest
 

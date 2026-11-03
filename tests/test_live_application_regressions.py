@@ -1,4 +1,5 @@
 """Regressions from live readiness checks; no VM or real package manager calls."""
+import isolation  # first: the tests keep nothing of the shell's environment
 import importlib.util
 import json
 import os
@@ -18,7 +19,7 @@ class LiveRegressionTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             root=Path(tmp); executable=root/'dpkg-query'
             executable.write_text('#!'+sys.executable+'\nprint("/fixture/path\\n"*2000)\n');executable.chmod(0o755)
-            with patch.dict(os.environ,PATH=str(root)+os.pathsep+os.environ['PATH']):
+            with patch.dict(os.environ,PATH=isolation.path(root)):
                 result=checks.command(['dpkg-query','-L','fixture'],5)
             self.assertEqual(result['status'],'pass')
             self.assertFalse(result['stdoutTruncated'])

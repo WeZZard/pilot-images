@@ -1,4 +1,5 @@
 """Fixture-only host publication tests: no collection, SSH, Tart or real images."""
+import isolation  # first: the tests keep nothing of the shell's environment
 import importlib.util
 import json
 import os

@@ -1,4 +1,5 @@
 """Host-only regression boundaries: no real guest, Tart, or machine-service calls."""
+import isolation  # first: the tests keep nothing of the shell's environment
 import importlib.util
 import json
 import hashlib
@@ -109,7 +110,7 @@ class AcceptanceIntegrityTests(unittest.TestCase):
                         if target.name == 'inventory.json':
                             target.write_text(json.dumps(self.data))
                         else:
-                            report = json.loads(subprocess.check_output(['python3', str(self.root / 'make-report.py'), str(evidence / 'inventory.json')]))
+                            report = json.loads(subprocess.check_output(['python3', str(self.root / 'make-report.py'), str(evidence / 'inventory.json')], env=isolation.environment()))
                             if failure == 'malformed':
                                 report = dict(status='pass')
                             elif failure in ('buildId', 'inventorySha256', 'planSha256', 'image'):

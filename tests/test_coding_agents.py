@@ -2,6 +2,7 @@
 
 Fixture-only: nothing here downloads, installs, or runs an agent.
 """
+import isolation  # first: the tests keep nothing of the shell's environment
 import importlib.util
 import json
 import pathlib

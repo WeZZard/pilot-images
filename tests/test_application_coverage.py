@@ -1,4 +1,5 @@
 """Native-source baseline fixtures. No package managers, GUI, network or VMs."""
+import isolation  # first: the tests keep nothing of the shell's environment
 import copy
 import hashlib
 import importlib.util

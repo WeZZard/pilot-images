@@ -21,6 +21,21 @@ import inventory
 REPO = Path(__file__).resolve().parents[1]
 
 
+def tool(name):
+    """machctl or tart: the executable the caller names in MACHCTL or TART.
+
+    Unnamed, it is the one on PATH, except under a selected environment, which
+    names both. Tests always name their stubs, so a real tool on the shell's
+    PATH is never what a test reaches.
+    """
+    variable = name.upper()
+    if os.environ.get(variable):
+        return os.environ[variable]
+    if os.environ.get('VM_ENVIRONMENT_FILE'):
+        raise RuntimeError(f'a selected environment names {variable}; it is not set')
+    return name
+
+
 def acceptance_module():
     spec = importlib.util.spec_from_file_location('application_acceptance', REPO / 'host/application-acceptance.py')
     module = importlib.util.module_from_spec(spec)
@@ -58,7 +73,7 @@ def check_clone(image, evidence, invoke=subprocess.run, *, source='base', work=N
         options = {}
         if source == 'work' and os.environ.get('PILOT_MAINTENANCE_FD'):
             options['pass_fds'] = (int(os.environ['PILOT_MAINTENANCE_FD']),)
-        argv = [os.environ['MACHCTL'] if os.environ.get('VM_ENVIRONMENT_FILE') else 'machctl', *map(str, args)]
+        argv = [tool('machctl'), *map(str, args)]
         if command_timeout is not None:
             if args[0] != 'exec':
                 raise ValueError('command timeout applies only to exec')
@@ -153,7 +168,7 @@ def main():
         vm, kind = config.stdout.splitlines()
         inventory.key(vm)
         def stopped():
-            listing = subprocess.run([os.environ['TART'] if os.environ.get('VM_ENVIRONMENT_FILE') else 'tart', 'list'], check=True, text=True, capture_output=True)
+            listing = subprocess.run([tool('tart'), 'list'], check=True, text=True, capture_output=True)
             states = [row.split()[-1] for row in listing.stdout.splitlines()
                 if len(row.split()) >= 3 and row.split()[1] == vm]
             if states != ['stopped']:

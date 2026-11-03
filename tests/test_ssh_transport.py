@@ -1,4 +1,5 @@
 """Password bootstrap transport reuse fixtures; never connects to a guest."""
+import isolation  # first: the tests keep nothing of the shell's environment
 import json
 import os
 from pathlib import Path
@@ -28,8 +29,7 @@ with open(os.environ['FIXTURE_LOG'],'a') as f:f.write(json.dumps(dict(tool=Path(
             for name in ('ssh', 'scp'):
                 (bin_dir / name).write_text(fake)
             for path in bin_dir.iterdir(): path.chmod(0o755)
-            env = {k:v for k,v in os.environ.items() if not k.startswith('VM_ENVIRONMENT')}
-            env.update(PATH=str(bin_dir)+os.pathsep+os.environ['PATH'], FIXTURE_LOG=str(log))
+            env = isolation.environment(PATH=isolation.path(bin_dir), FIXTURE_LOG=log)
             command='source "$1"; GUEST_USER=fixture; GUEST_PASS=factory; vssh 127.0.0.2 true; vssh 127.0.0.2 command; vscp 127.0.0.2 /fixture/source /fixture/dest'
             result=subprocess.run(['/bin/zsh','-c',command,'fixture',str(REPO/'host/lib/common.zsh')],env=env,text=True,capture_output=True)
             self.assertEqual(result.returncode,0,result.stderr)
@@ -48,7 +48,7 @@ with open(os.environ['FIXTURE_LOG'],'a') as f:f.write(json.dumps(dict(tool=Path(
             (app/'Contents/link').symlink_to('file')
             staging=root/'staging'; staging.mkdir(); (staging/'Xcode.app').symlink_to(app)
             archive=root/'xcode.tgz'
-            subprocess.run(['/usr/bin/tar','-H','-C',str(staging),'-czf',str(archive),'Xcode.app'],check=True)
+            subprocess.run(['/usr/bin/tar','-H','-C',str(staging),'-czf',str(archive),'Xcode.app'],check=True,env=isolation.environment())
             with tarfile.open(archive) as tar:
                 self.assertTrue(tar.getmember('Xcode.app').isdir())
                 self.assertTrue(tar.getmember('Xcode.app/Contents/link').issym())

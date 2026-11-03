@@ -4,6 +4,7 @@ The version/query arguments below produced identifying output and exit 0 on
 2026-09-16. These tests check policy, not current guest health. They never launch
 real commands. Service and hardware readiness must still use actual exit status.
 """
+import isolation  # first: the tests keep nothing of the shell's environment
 import importlib.util
 from pathlib import Path
 import tempfile

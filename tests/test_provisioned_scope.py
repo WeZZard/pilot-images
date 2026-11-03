@@ -1,4 +1,5 @@
 """Catalog contents do not automatically expand provisioned application acceptance."""
+import isolation  # first: the tests keep nothing of the shell's environment
 import copy
 import importlib.util
 import json

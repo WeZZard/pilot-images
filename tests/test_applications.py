@@ -1,4 +1,5 @@
 """Fixture-only application plans, evidence gates, and machctl orchestration."""
+import isolation  # first: the tests keep nothing of the shell's environment
 import copy
 import hashlib
 import importlib.util

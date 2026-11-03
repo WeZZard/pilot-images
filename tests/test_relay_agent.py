@@ -3,6 +3,7 @@ phase 65 grants and the checks (docs/relay-agent.md).
 
 Fixture-only: nothing here reaches the network, a VM, launchd or systemd.
 """
+import isolation  # first: the tests keep nothing of the shell's environment
 import hashlib
 import importlib.util
 import io
@@ -17,6 +18,10 @@ import tempfile
 import unittest
 
 REPO = Path(__file__).resolve().parents[1]
+#: The system tools a guest phase or check run here may use; any other tool is a stub or fails.
+GUEST_TOOLS = ('awk', 'cat', 'dirname', 'find', 'grep', 'id', 'install', 'ln', 'mkdir', 'mktemp', 'mv', 'rm', 'sha256sum', 'tar')
+#: What requirement_hex in the macOS guest library runs.
+REQUIREMENT_TOOLS = ('csreq', 'xxd', 'tr', 'rm', 'mktemp')
 LINES = ('macos26', 'macos27', 'ubuntu2404')
 MACOS = ('macos26', 'macos27')
 LOCK = 'guest/relay-agent.lock.json'
@@ -270,7 +275,7 @@ class SignatureTests(unittest.TestCase):
             path = Path(directory) / 'relay-agent'
             path.write_bytes(Path('/usr/bin/true').read_bytes())
             subprocess.run(['/usr/bin/codesign', '--force', '--sign', '-', '--identifier', 'com.wezzard.relay-agent', str(path)],
-                           check=True, capture_output=True)
+                           check=True, capture_output=True, env=isolation.environment())
             self.assertEqual(self.package.signing_of(self.package.read_designated(path.read_bytes()))['kind'], 'adhoc')
 
     @unittest.skipUnless(Path('/usr/bin/csreq').exists(), 'needs macOS csreq')
@@ -278,7 +283,8 @@ class SignatureTests(unittest.TestCase):
         lib = REPO / 'images/macos26/guest/lib.zsh'
         quoted = self.package.developer_id_requirement(TEAM)
         bare = quoted.replace('"%s"' % TEAM, TEAM)
-        blobs = [subprocess.check_output(['/bin/zsh', '-c', 'source "$1"; requirement_hex "$2"', 'zsh', str(lib), text], text=True)
+        env = isolation.guest_environment(self.root / 'sandbox', {}, REQUIREMENT_TOOLS)
+        blobs = [subprocess.check_output(['/bin/zsh', '-c', 'source "$1"; requirement_hex "$2"', 'zsh', str(lib), text], text=True, env=env)
                  for text in (quoted, bare)]
         self.assertEqual(blobs[0], blobs[1])
         self.assertTrue(blobs[0].startswith('fade0c00'))
@@ -289,8 +295,9 @@ class SignatureTests(unittest.TestCase):
         record.write_text(json.dumps({'signing': {'kind': 'developer-id', 'team': TEAM,
                                                   'requirement': self.package.developer_id_requirement(TEAM)}}))
         lib = REPO / 'images/macos26/guest/lib.zsh'
+        env = isolation.guest_environment(self.root / 'sandbox', {}, ('plutil',))
         read = lambda field: subprocess.check_output(['/bin/zsh', '-c', 'source "$1"; relay_agent_signing "$2" "$3"', 'zsh',
-                                                      str(lib), str(record), field], text=True).rstrip('\n')
+                                                      str(lib), str(record), field], text=True, env=env).rstrip('\n')
         self.assertEqual(read('kind'), 'developer-id')
         self.assertEqual(read('requirement'), self.package.developer_id_requirement(TEAM))
 
@@ -444,7 +451,8 @@ class MacGrantTests(unittest.TestCase):
     @unittest.skipUnless(Path('/usr/bin/csreq').exists(), 'needs macOS csreq')
     def test_the_requirement_compiles_to_the_blob_tcc_stores(self):
         script = 'source %s; identifier_req_hex com.wezzard.relay-agent' % (REPO / 'images/macos26/guest/lib.zsh')
-        blob = subprocess.check_output(['/bin/zsh', '-c', script], text=True)
+        with tempfile.TemporaryDirectory() as sandbox:
+            blob = subprocess.check_output(['/bin/zsh', '-c', script], text=True, env=isolation.guest_environment(sandbox, {}, REQUIREMENT_TOOLS))
         self.assertEqual(blob, 'fade0c000000002c000000010000000200000017636f6d2e77657a7a6172642e72656c61792d6167656e7400')
 
 
@@ -471,9 +479,7 @@ class UbuntuPhaseTests(unittest.TestCase):
                      '  mkdir -p "$HOME/.config/systemd/user/graphical-session.target.wants"\n'
                      '  ln -sf "$HOME/.config/systemd/user/relay-agent.service" "$HOME/.config/systemd/user/graphical-session.target.wants/relay-agent.service" ;;\n'
                      '  "--user is-active --quiet graphical-session.target") exit 1 ;; esac\n') % (0 if manager_running else 1)
-        (bin_dir / 'systemctl').write_text('#!/bin/sh\n' + systemctl)
-        (bin_dir / 'systemctl').chmod(0o755)
-        env = {**os.environ, 'PATH': str(bin_dir) + os.pathsep + os.environ['PATH'], 'HOME': str(home), 'FIXTURE_LOG': str(root / 'calls')}
+        env = isolation.guest_environment(root, {'systemctl': systemctl}, GUEST_TOOLS, HOME=home, FIXTURE_LOG=root / 'calls')
         result = subprocess.run(['/bin/bash', str(script)], env=env, capture_output=True, text=True)
         self.assertEqual(result.returncode == 0, succeed, result.stdout + result.stderr)
         return root, home
@@ -615,12 +621,12 @@ class GateTests(unittest.TestCase):
         receipt = self.receipt(self.evidence(package=self.package_record(version=None, source='local')))
         result = subprocess.run(['python3', str(REPO / 'host/relay-agent-package.py'), 'gate',
                                  '--lock', str(REPO / 'images/macos26' / LOCK), '--receipt', str(receipt)],
-                                capture_output=True, text=True)
+                                capture_output=True, text=True, env=isolation.environment())
         self.assertEqual(result.returncode, 1)
         self.assertIn('relay agent: relay agent local build (darwin-arm64', result.stderr)
         result = subprocess.run(['python3', str(REPO / 'host/relay-agent-package.py'), 'gate',
                                  '--lock', str(self.lock()), '--receipt', str(self.receipt(self.evidence()))],
-                                capture_output=True, text=True)
+                                capture_output=True, text=True, env=isolation.environment())
         self.assertEqual(result.returncode, 0, result.stderr)
 
     def test_promotion_gates_on_the_work_receipt_before_any_rename(self):
@@ -646,7 +652,7 @@ class CheckTests(unittest.TestCase):
                 if relative:
                     (Path(home) / relative).parent.mkdir(parents=True)
                     (Path(home) / relative).write_text('{}')
-                result = subprocess.run(['/bin/bash', str(script)], env={**os.environ, 'HOME': home}, capture_output=True, text=True)
+                result = subprocess.run(['/bin/bash', str(script)], env=isolation.guest_environment(home, {}, GUEST_TOOLS, HOME=home), capture_output=True, text=True)
                 self.assertEqual(result.returncode != 0, failed, result.stdout)
 
     def block(self, path, start, end):

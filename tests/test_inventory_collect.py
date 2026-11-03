@@ -1,4 +1,5 @@
 """Fixture-only tests: all command execution and discovery are injected."""
+import isolation  # first: the tests keep nothing of the shell's environment
 import datetime
 import importlib.util
 import json

@@ -1,4 +1,5 @@
 """Fixture-only GUI session discovery, runner isolation and progress contract."""
+import isolation  # first: the tests keep nothing of the shell's environment
 import copy
 import importlib.util
 import io

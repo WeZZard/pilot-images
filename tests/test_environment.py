@@ -1,4 +1,5 @@
 """Offline selected-profile composition with fake executables and config output."""
+import isolation  # first: the tests keep nothing of the shell's environment
 import copy
 import hashlib
 import importlib.util
@@ -89,9 +90,8 @@ elif sys.argv[1]=='ip': print('192.0.2.1')
             relayStateDir=str(self.root / 'relay'), machctlPath=str(self.machctl), tartPath=str(self.tart))
         self.selector = self.root / 'profile.json'
         self.save()
-        self.env = dict(os.environ, VM_ENVIRONMENT_FILE=str(self.selector),
-            TEST_EVENTS=str(self.events), PATH=str(trap) + os.pathsep + os.environ['PATH'],
-            PYTHONDONTWRITEBYTECODE='1')
+        self.env = isolation.environment(VM_ENVIRONMENT_FILE=self.selector,
+            TEST_EVENTS=self.events, PATH=isolation.path(trap))
         for key in bootstrap.EXPORTS:
             self.env[key] = str(self.root / 'hostile' / key)
         self.env.update(MACHINE_SERVICE_HOST='wrong', MACHINE_SERVICE_PORT='1',

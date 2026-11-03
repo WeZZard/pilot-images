@@ -1,3 +1,4 @@
+import isolation  # first: the tests keep nothing of the shell's environment
 import os
 from pathlib import Path
 import re
@@ -15,7 +16,7 @@ class EmptyStoreTests(unittest.TestCase):
             for data in (b'{}',b'{}\n',b'{"fixture":"nonsecret"}',b'{}\nextra'):
                 with tempfile.TemporaryDirectory() as directory:
                     path=Path(directory)/'.pi/agent/auth.json';path.parent.mkdir(parents=True);path.write_bytes(data)
-                    r=subprocess.run([sys.executable,'-c',script],env={**os.environ,'HOME':directory},capture_output=True,text=True)
+                    r=subprocess.run([sys.executable,'-c',script],env=isolation.guest_environment(directory,HOME=directory),capture_output=True,text=True)
                     if data in (b'{}',b'{}\n'):
                         self.assertEqual(r.returncode,0,r.stderr);self.assertFalse(path.exists())
                     else:

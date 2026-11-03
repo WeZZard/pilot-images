@@ -1,4 +1,5 @@
 """Exact, read-only Ubuntu CLI plans; these fixtures do not contact a VM."""
+import isolation  # first: the tests keep nothing of the shell's environment
 import importlib.util
 import json
 from pathlib import Path

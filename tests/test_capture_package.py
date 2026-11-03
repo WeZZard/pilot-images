@@ -1,4 +1,5 @@
 """Offline validation of pinned archive acquisition and safe extraction."""
+import isolation  # first: the tests keep nothing of the shell's environment
 import hashlib
 import importlib.util
 import io
@@ -64,7 +65,7 @@ class CapturePackageTests(unittest.TestCase):
         lock, source = self.fixture(archive())
         helper = self.root / 'capture-package.py'
         helper.write_bytes((ROOT / 'host/capture-package.py').read_bytes())
-        env = {k: v for k, v in os.environ.items() if not k.startswith('VM_ENVIRONMENT')}
+        env = isolation.environment()
         result = subprocess.run([sys.executable, str(helper), 'extract', '--lock', str(lock), '--archive', str(source), '--output', str(self.root / 'guest-files')], env=env, capture_output=True, text=True)
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertTrue((self.root / 'guest-files/cua-driver').exists())

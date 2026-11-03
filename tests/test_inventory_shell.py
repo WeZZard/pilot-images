@@ -1,6 +1,7 @@
 """Execute real lifecycle scripts/library/writer in a disposable fake Tart tree.
 Only common.zsh's external boundary is replaced. No guest/collector is executed.
 """
+import isolation  # first: the tests keep nothing of the shell's environment
 import json
 import hashlib
 import importlib.util
@@ -124,8 +125,8 @@ print(json.dumps(dict(schemaVersion=1,image='fixture',os=observed['os'],architec
                          collectedAt='2026-09-01T00:00:00Z',
                          sources=[dict(id='bundles', status='available', roots=['/Applications'])],
                          applications=[])
-        self.env = dict(os.environ, TART_HOME=str(self.root / 'tart'),
-                        FIXTURE_JSON=json.dumps(self.data), HOME=str(self.root))
+        self.env = isolation.environment(TART_HOME=self.root / 'tart',
+                        FIXTURE_JSON=json.dumps(self.data), HOME=self.root)
         self.env['PILOT_IMAGES_STATE_DIR'] = str(self.root / 'state-dir')
         # A stand-in bundle: macOS builds pack the host's CuaDriver.app.
         cua = self.root / 'host-apps' / 'CuaDriver.app'
@@ -174,7 +175,9 @@ elif args[0] not in ('exec','push'): raise RuntimeError(args)
 ''')
         for executable in bin_dir.iterdir():
             executable.chmod(0o755)
-        self.env['PATH'] = str(bin_dir) + os.pathsep + self.env['PATH']
+        # The scripts reach the stubs only as the caller names them; the stubs
+        # are not on PATH, so a tool resolved by name would fail, not run.
+        self.env.update(MACHCTL=bin_dir / 'machctl', TART=bin_dir / 'tart')
 
     def certify(self, fail='', success=True):
         result = subprocess.run(['python3', str(self.root / 'host/check-clone.py'), 'fixture', '--source', 'work'],

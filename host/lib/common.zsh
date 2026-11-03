@@ -18,6 +18,10 @@ fi
 if (( ${+_PILOT_ENVIRONMENT_BOUND} )); then
   # The selected executable/store cannot drift after sourcing an image config.
   tart() { command /usr/bin/env "TART_HOME=$_PILOT_TART_HOME" "$_PILOT_TART_EXECUTABLE" "$@"; }
+elif [[ -n "${TART:-}" ]]; then
+  # The caller names its Tart (tests name their stub); PATH is not consulted.
+  typeset -g _PILOT_TART_EXECUTABLE="$TART"
+  tart() { command "$_PILOT_TART_EXECUTABLE" "$@"; }
 else
   # A non-login SSH shell lacks Homebrew's prefix; without Tart on PATH every
   # VM check would quietly answer "absent".
@@ -28,7 +32,7 @@ fi
 # kill its VM through a shared process group. Retain only the maintenance lock.
 tart_background() {
   local executable=tart
-  if (( ${+_PILOT_ENVIRONMENT_BOUND} )); then executable="$_PILOT_TART_EXECUTABLE"; fi
+  if (( ${+_PILOT_TART_EXECUTABLE} )); then executable="$_PILOT_TART_EXECUTABLE"; fi
   python3 -c 'import os,subprocess,sys
 fd=os.environ.get("PILOT_MAINTENANCE_FD")
 keep=() if fd is None else (int(fd),)

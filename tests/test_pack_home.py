@@ -1,4 +1,5 @@
 """host/pack-home.zsh builds a pack's home.tgz from its home/ folder; no VM, SSH or Tart."""
+import isolation  # first: the tests keep nothing of the shell's environment
 import os
 from pathlib import Path
 import subprocess
@@ -22,7 +23,7 @@ class PackHomeTests(unittest.TestCase):
         token.write_text('token-1')
 
     def run_script(self, *args):
-        return subprocess.run(['zsh', str(SCRIPT), 'lane', *args], env=dict(os.environ, HOME=str(self.home)),
+        return subprocess.run(['zsh', str(SCRIPT), 'lane', *args], env=isolation.environment(HOME=self.home),
                               capture_output=True, text=True)
 
     def members(self):
