@@ -4,6 +4,97 @@ FAIL=0
 ok()  { echo "PASS  $1"; }
 bad() { echo "FAIL  $1"; FAIL=1; }
 
+# --- fail closed (2026-11-03): this block opens every check, on every line ---
+# A check that something is absent passes only after a complete, successful
+# look. A tool that is missing or fails, or a directory that cannot be
+# searched, is a FAIL that says so, never a PASS. Written once for bash and
+# zsh; ok and bad are each script's own.
+#
+# missing PATH: 0 when PATH is certainly absent, 1 when it is there, 2 when a
+# directory above it cannot be searched, so nobody can tell.
+missing() {
+  { [ -e "$1" ] || [ -L "$1" ]; } && return 1
+  local dir="$1"
+  while [ -n "$dir" ] && [ ! -e "$dir" ] && [ ! -L "$dir" ]; do
+    case "$dir" in */*) dir="${dir%/*}" ;; *) dir=. ;; esac
+  done
+  [ -z "$dir" ] || [ ! -d "$dir" ] || [ -x "$dir" ] || return 2
+}
+# absent PATH: PASS only when PATH is certainly absent.
+absent() {
+  missing "$1"
+  case $? in
+    0) ok "absent: $1" ;;
+    1) bad "present: $1" ;;
+    *) bad "cannot tell whether $1 is present: a directory above it cannot be searched" ;;
+  esac
+}
+# require TOOL...: a FAIL for each TOOL that is not on PATH.
+require() {
+  local tool
+  for tool in "$@"; do command -v "$tool" >/dev/null 2>&1 || bad "required tool missing: $tool"; done
+}
+# none PASS FAIL COMMAND...: PASS only when COMMAND exits 0 and prints
+# nothing. What it prints is the FAIL's evidence; when it fails, or a tool it
+# needs is missing, the FAIL says so.
+none() {
+  local pass="$1" fail="$2" out rc line
+  shift 2
+  out=$("$@")
+  rc=$?
+  if [ "$rc" = 127 ]; then bad "cannot check ($pass): a tool that $1 needs is missing"
+  elif [ "$rc" != 0 ]; then bad "cannot check ($pass): $1 $2 exited $rc"
+  elif [ -n "$out" ]; then
+    bad "$fail:"
+    printf '%s\n' "$out" | while IFS= read -r line; do printf '        %s\n' "$line"; done
+  else ok "$pass"
+  fi
+}
+# files ROOT FIND-EXPRESSION...: what find selects under ROOT; nothing when
+# ROOT is certainly absent.
+files() {
+  local root="$1"
+  shift
+  missing "$root"
+  case $? in
+    0) return 0 ;;
+    2) printf 'cannot search above %s\n' "$root" >&2; return 2 ;;
+  esac
+  find "$root" "$@"
+}
+# lines FILE GREP-ARGUMENTS...: what grep selects in FILE (no match is no
+# error); nothing when FILE is certainly absent.
+lines() {
+  local file="$1" rc
+  shift
+  missing "$file"
+  case $? in
+    0) return 0 ;;
+    2) printf 'cannot search above %s\n' "$file" >&2; return 2 ;;
+  esac
+  grep "$@" "$file"
+  rc=$?
+  [ "$rc" -le 1 ] || return "$rc"
+}
+# matching TEXT COMMAND...: the lines COMMAND prints that hold TEXT; COMMAND
+# failing is an error.
+matching() {
+  local text="$1" out line
+  shift
+  out=$("$@") || return
+  printf '%s\n' "$out" | while IFS= read -r line; do
+    case "$line" in *"$text"*) printf '%s\n' "$line" ;; esac
+  done
+}
+# running PGREP-ARGUMENTS...: the processes pgrep selects (none is no error).
+running() {
+  local rc
+  pgrep "$@"
+  rc=$?
+  [ "$rc" -le 1 ] || return "$rc"
+}
+# --- end fail closed ---
+
 # --- mandatory fonts (snapshot then match; avoids the pipefail/SIGPIPE trap) ---
 FONTS="$(fc-list : family)"
 for fam in "Noto Sans CJK SC" "Noto Sans CJK TC" "Noto Color Emoji"; do
@@ -133,13 +224,20 @@ rm -rf "$SHIM_PROBE_DIR"
 # AND the absence of the wizard process. Acceptance runs after the first
 # GUI auto-login (post-phase reboot), so a live wizard is observable here.
 if [ -f "$HOME/.config/gnome-initial-setup-done" ]; then ok "gnome-initial-setup marker present"; else bad "gnome-initial-setup marker missing (~/.config/gnome-initial-setup-done)"; fi
-if pgrep -f gnome-initial-setup >/dev/null 2>&1; then bad "gnome-initial-setup process running"; else ok "no gnome-initial-setup process"; fi
+none "no gnome-initial-setup process" "gnome-initial-setup process running" running -f gnome-initial-setup
 
 # --- always-on unlocked (OS layer) ---
 if grep -q '^AutomaticLoginEnable=true' /etc/gdm3/custom.conf 2>/dev/null; then ok "gdm autologin"; else bad "gdm autologin"; fi
 if [ "$(systemctl is-enabled sleep.target 2>/dev/null)" = masked ]; then ok "sleep.target masked"; else bad "sleep.target masked"; fi
 
-if [ "$(systemctl is-enabled systemd-networkd-wait-online.service 2>/dev/null)" = enabled ]; then bad "systemd-networkd-wait-online enabled (gates boot by 120 s)"; else ok "boot not gated by systemd-networkd-wait-online"; fi
+# A unit that is not installed gates nothing, but only systemctl can say so.
+wait_online_enabled() {
+  local state
+  command -v systemctl >/dev/null 2>&1 || return 127
+  state="$(systemctl is-enabled systemd-networkd-wait-online.service 2>/dev/null)"
+  case "$state" in enabled|enabled-runtime) echo "systemd-networkd-wait-online.service: $state" ;; esac
+}
+none "boot not gated by systemd-networkd-wait-online" "systemd-networkd-wait-online enabled (gates boot by 120 s)" wait_online_enabled
 
 # --- desktop session + login keyring (phase 30; relay agent RA-I5) ---
 # After a boot, gdm's automatic login must give the image user a local, active
@@ -407,11 +505,8 @@ if command -v playwright-cli >/dev/null 2>&1; then
   ( cd "$SMOKE_DIR" && playwright-cli -s=accept screenshot --filename="$SMOKE_DIR/accept.png" >/dev/null 2>&1 )
   if [ -s "$SMOKE_DIR/accept.png" ]; then ok "cli smoke: screenshot written"; else bad "cli smoke: no screenshot written"; fi
   ( cd "$SMOKE_DIR" && playwright-cli -s=accept close >/dev/null 2>&1 )
-  if ( cd "$SMOKE_DIR" && playwright-cli list 2>/dev/null | grep -q accept ); then
-    bad "cli smoke: session still listed after close"
-  else
-    ok "cli smoke: session closed"
-  fi
+  cli_sessions() { cd "$SMOKE_DIR" && playwright-cli list 2>/dev/null; }
+  none "cli smoke: session closed" "cli smoke: session still listed after close" matching accept cli_sessions
   CACHE_AFTER="$(cache_listing)"
   if [ "$CACHE_BEFORE" = "$CACHE_AFTER" ]; then
     ok "cli smoke: browser cache unchanged (no download at run time)"
@@ -420,8 +515,8 @@ if command -v playwright-cli >/dev/null 2>&1; then
   fi
   rm -rf "$SMOKE_DIR" "$PW_CACHE/cli-update-check.json"
   # The smoke's own daemon directory holds only its error log once the session
-  # is closed; drop it unless some other session is live there.
-  if [ -d "$PW_CACHE/daemon" ] && ! find "$PW_CACHE/daemon" -name '*.session' 2>/dev/null | grep -q .; then
+  # is closed; drop it only after a complete look finds no other live session.
+  if [ -d "$PW_CACHE/daemon" ] && LIVE_SESSIONS="$(files "$PW_CACHE/daemon" -name '*.session')" && [ -z "$LIVE_SESSIONS" ]; then
     rm -rf "$PW_CACHE/daemon"
   fi
 else

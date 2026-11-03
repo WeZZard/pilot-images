@@ -10,6 +10,97 @@ ok()  { print -- "PASS  $1" }
 bad() { print -- "FAIL  $1"; FAIL=1 }
 check() { local desc="$1"; shift; if "$@" >/dev/null 2>&1; then ok "$desc"; else bad "$desc"; fi }
 
+# --- fail closed (2026-11-03): this block opens every check, on every line ---
+# A check that something is absent passes only after a complete, successful
+# look. A tool that is missing or fails, or a directory that cannot be
+# searched, is a FAIL that says so, never a PASS. Written once for bash and
+# zsh; ok and bad are each script's own.
+#
+# missing PATH: 0 when PATH is certainly absent, 1 when it is there, 2 when a
+# directory above it cannot be searched, so nobody can tell.
+missing() {
+  { [ -e "$1" ] || [ -L "$1" ]; } && return 1
+  local dir="$1"
+  while [ -n "$dir" ] && [ ! -e "$dir" ] && [ ! -L "$dir" ]; do
+    case "$dir" in */*) dir="${dir%/*}" ;; *) dir=. ;; esac
+  done
+  [ -z "$dir" ] || [ ! -d "$dir" ] || [ -x "$dir" ] || return 2
+}
+# absent PATH: PASS only when PATH is certainly absent.
+absent() {
+  missing "$1"
+  case $? in
+    0) ok "absent: $1" ;;
+    1) bad "present: $1" ;;
+    *) bad "cannot tell whether $1 is present: a directory above it cannot be searched" ;;
+  esac
+}
+# require TOOL...: a FAIL for each TOOL that is not on PATH.
+require() {
+  local tool
+  for tool in "$@"; do command -v "$tool" >/dev/null 2>&1 || bad "required tool missing: $tool"; done
+}
+# none PASS FAIL COMMAND...: PASS only when COMMAND exits 0 and prints
+# nothing. What it prints is the FAIL's evidence; when it fails, or a tool it
+# needs is missing, the FAIL says so.
+none() {
+  local pass="$1" fail="$2" out rc line
+  shift 2
+  out=$("$@")
+  rc=$?
+  if [ "$rc" = 127 ]; then bad "cannot check ($pass): a tool that $1 needs is missing"
+  elif [ "$rc" != 0 ]; then bad "cannot check ($pass): $1 $2 exited $rc"
+  elif [ -n "$out" ]; then
+    bad "$fail:"
+    printf '%s\n' "$out" | while IFS= read -r line; do printf '        %s\n' "$line"; done
+  else ok "$pass"
+  fi
+}
+# files ROOT FIND-EXPRESSION...: what find selects under ROOT; nothing when
+# ROOT is certainly absent.
+files() {
+  local root="$1"
+  shift
+  missing "$root"
+  case $? in
+    0) return 0 ;;
+    2) printf 'cannot search above %s\n' "$root" >&2; return 2 ;;
+  esac
+  find "$root" "$@"
+}
+# lines FILE GREP-ARGUMENTS...: what grep selects in FILE (no match is no
+# error); nothing when FILE is certainly absent.
+lines() {
+  local file="$1" rc
+  shift
+  missing "$file"
+  case $? in
+    0) return 0 ;;
+    2) printf 'cannot search above %s\n' "$file" >&2; return 2 ;;
+  esac
+  grep "$@" "$file"
+  rc=$?
+  [ "$rc" -le 1 ] || return "$rc"
+}
+# matching TEXT COMMAND...: the lines COMMAND prints that hold TEXT; COMMAND
+# failing is an error.
+matching() {
+  local text="$1" out line
+  shift
+  out=$("$@") || return
+  printf '%s\n' "$out" | while IFS= read -r line; do
+    case "$line" in *"$text"*) printf '%s\n' "$line" ;; esac
+  done
+}
+# running PGREP-ARGUMENTS...: the processes pgrep selects (none is no error).
+running() {
+  local rc
+  pgrep "$@"
+  rc=$?
+  [ "$rc" -le 1 ] || return "$rc"
+}
+# --- end fail closed ---
+
 # --- always-on unlocked session (doctrine) ---
 if [[ "$(defaults read /Library/Preferences/com.apple.loginwindow autoLoginUser 2>/dev/null)" == "$USER" ]]; then
   ok "auto-login -> $USER"
@@ -56,18 +147,16 @@ if [[ "$(sysctl -n kern.hv_vmm_present 2>/dev/null)" == 1 ]]; then
 fi
 
 # --- first-launch dialogs (nothing headless can answer a modal) ---
-typeset -a QUARANTINED
-QUARANTINED=()
-setopt null_glob
-for app in /Applications/*.app; do
-  if xattr -p com.apple.quarantine "$app" >/dev/null 2>&1; then QUARANTINED+=("${app:t}"); fi
-done
-unsetopt null_glob
-if (( ${#QUARANTINED} == 0 )); then
-  ok "no quarantined app bundles in /Applications"
-else
-  bad "quarantined bundles would prompt Gatekeeper on first launch: ${QUARANTINED[*]}"
-fi
+# A bundle whose attributes cannot be listed is a FAIL, not a clean bundle.
+quarantined_apps() {
+  local app attributes
+  setopt local_options null_glob
+  for app in /Applications/*.app; do
+    attributes=$(xattr "$app") || return
+    [[ $'\n'"$attributes"$'\n' != *$'\ncom.apple.quarantine\n'* ]] || print -r -- "${app:t}"
+  done
+}
+none "no quarantined app bundles in /Applications" "quarantined bundles would prompt Gatekeeper on first launch" quarantined_apps
 _sa_unseen=0
 for k in DidSeeCloudSetup DidSeeSiriSetup DidSeePrivacy DidSeeAppearanceSetup DidSeeTouchIDSetup DidSeeScreenTime; do
   if [[ "$(defaults read com.apple.SetupAssistant "$k" 2>/dev/null)" != 1 ]]; then
@@ -93,11 +182,8 @@ done
 # The direct assertion. Every indirect signal (auto-login, console session,
 # Dock, Finder) reported healthy on 2026-09-12 while Setup Assistant sat on
 # top of the desktop with a Continue button, so check the process itself.
-if pgrep -f "Setup Assistant.app/Contents/MacOS" >/dev/null 2>&1; then
-  bad "Setup Assistant (MiniBuddy) is running — a modal is covering the desktop"
-else
-  ok "no Setup Assistant/MiniBuddy modal running"
-fi
+none "no Setup Assistant/MiniBuddy modal running" "Setup Assistant (MiniBuddy) is running — a modal is covering the desktop" \
+  running -f "Setup Assistant.app/Contents/MacOS"
 
 # --- macOS updates: assert what is enforceable, report what is not ------
 # AutomaticCheckEnabled is deliberately NOT asserted. macOS 26 DELETES that key
@@ -275,12 +361,23 @@ fi
 if ls "$HOME/Library/Caches/ms-playwright/chromium-"*/chrome-mac-arm64/*.app >/dev/null 2>&1; then ok "playwright Chrome for Testing present"; else bad "playwright Chrome for Testing missing"; fi
 if ls "$HOME/.cache/puppeteer/chrome/mac_arm-"*/chrome-mac-arm64/*.app >/dev/null 2>&1; then ok "puppeteer Chrome for Testing present"; else bad "puppeteer Chrome for Testing missing"; fi
 # Claude Code MCP stays bare (matches host); the browser pinning is Codex-only.
-if "$HOME/.local/bin/claude" mcp get playwright 2>/dev/null | grep -q 'executable-path'; then bad "claude playwright unexpectedly pinned (host parity: should be bare)"; else ok "claude playwright bare (host parity)"; fi
+none "claude playwright bare (host parity)" "claude playwright unexpectedly pinned (host parity: should be bare)" \
+  matching executable-path "$HOME/.local/bin/claude" mcp get playwright
 
 # --- updates: a VM never updates itself; a physical Mac refreshes nightly ---
 if [[ "$(sysctl -n kern.hv_vmm_present 2>/dev/null)" == 1 ]]; then
-  if crontab -l >/dev/null 2>&1; then bad "VM has a crontab (no self-update)"; else ok "VM has no crontab"; fi
-  if [[ -e "$HOME/.crontab.d" ]]; then bad "VM still has ~/.crontab.d"; else ok "VM has no ~/.crontab.d"; fi
+  # crontab -l exits 1 and says so when there is none; any other failure is a FAIL.
+  crontab_entries() {
+    local out rc
+    out=$(crontab -l 2>&1)
+    rc=$?
+    if (( rc == 0 )); then print -r -- "${out:-(an empty crontab)}"
+    elif (( rc == 1 )) && [[ "$out" == *"no crontab for"* ]]; then return 0
+    else print -ru2 -- "$out"; return $rc
+    fi
+  }
+  none "VM has no crontab" "VM has a crontab (no self-update)" crontab_entries
+  if missing "$HOME/.crontab.d"; then ok "VM has no ~/.crontab.d"; else bad "VM still has ~/.crontab.d"; fi
   if [[ -x "$HOME/.refresh.d/com.wezzard.crontab.dev/cua_driver_update" ]]; then ok "maintenance refresh scripts (~/.refresh.d)"; else bad "maintenance refresh scripts missing"; fi
   if [[ "$(defaults read /Library/Preferences/com.apple.commerce AutoUpdate 2>/dev/null)" == 0 ]]; then ok "App Store auto-update off"; else bad "App Store auto-update not off"; fi
   if zsh -c 'source ~/.zshenv; [[ "${HOMEBREW_NO_AUTO_UPDATE:-}" == 1 && "${PI_SKIP_VERSION_CHECK:-}" == 1 ]]'; then ok "Homebrew auto-update and pi version check off"; else bad "Homebrew auto-update or pi version check not off"; fi
@@ -288,11 +385,12 @@ if [[ "$(sysctl -n kern.hv_vmm_present 2>/dev/null)" == 1 ]]; then
   if grep -qx 'check_for_update_on_startup = false' "$HOME/.codex/config.toml" 2>/dev/null; then ok "Codex update check off"; else bad "Codex update check not off"; fi
   if grep -qx 'auto-update = off' "$HOME/.config/ghostty/config" 2>/dev/null; then ok "Ghostty auto-update off"; else bad "Ghostty auto-update not off"; fi
   if [[ "$(/usr/libexec/PlistBuddy -c 'Print :updatePolicies:global:UpdateDefault' '/Library/Managed Preferences/com.google.Keystone.plist' 2>/dev/null)" == 3 ]]; then ok "Chrome updates never applied"; else bad "Chrome update policy missing"; fi
-  if grep -q '@latest' "$HOME/.codex/config.toml" 2>/dev/null || "$HOME/.local/bin/claude" mcp get playwright 2>/dev/null | grep -q '@latest' || "$HOME/.local/bin/claude" mcp get chrome-devtools 2>/dev/null | grep -q '@latest'; then
-    bad "an npx MCP server still resolves @latest"
-  else
-    ok "npx MCP servers pinned"
-  fi
+  latest_servers() {
+    lines "$HOME/.codex/config.toml" -l '@latest' \
+      && matching '@latest' "$HOME/.local/bin/claude" mcp get playwright \
+      && matching '@latest' "$HOME/.local/bin/claude" mcp get chrome-devtools
+  }
+  none "npx MCP servers pinned" "an npx MCP server still resolves @latest" latest_servers
 else
   if crontab -l 2>/dev/null | grep -q "crontab.d"; then ok "update crontab installed (metal)"; else bad "update crontab missing (metal)"; fi
 fi

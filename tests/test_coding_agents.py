@@ -173,7 +173,7 @@ class LineParityTests(unittest.TestCase):
 
     def test_checks_carry_the_same_rows_on_every_macos_line(self):
         for script, start, end in (('acceptance.zsh', '# --- coding agents (phase 85;', '# --- Xcode (reports SKIP'),
-                                   ('no-secrets.zsh', '# The coding agents (phase 85)', 'if gh auth status')):
+                                   ('no-secrets.zsh', '# The coding agents (phase 85)', '# --- accounts outside the coding agents ---')):
             reference = self.block((REPO / 'images/macos26/checks' / script).read_text(), start, end)
             for line in LINES:
                 with self.subTest(line=line, script=script):
