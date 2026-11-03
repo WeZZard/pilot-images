@@ -18,9 +18,13 @@ Lines default to every macOS line with a line.conf. The pins it reads and writes
   applications/<id>/PLAN.md.
 - guest/relay-agent.lock.json (one file, identical on every line, ubuntu2404
   included): vm-service's newest published release that carries a
-  relay-agent-<version>-<platform>.tar.gz for every platform the lock names.
-  Each archive is fetched, hashed, checked against the release's asset digest
-  and SHA256SUMS, and read by host/relay-agent-package.py, never run.
+  relay-agent-<version>-<platform>.tar.gz for every platform the lock names
+  and SIGNING.json. Each archive is fetched, hashed, checked against the
+  release's asset digest and SHA256SUMS, and read by
+  host/relay-agent-package.py, never run. The lock's `signing` is the one
+  SIGNING.json records, after the darwin executable's own designated
+  requirement (`codesign -dr -`) agrees with it; a release signed ad hoc is
+  refused (vm-service DC-224).
 
 Floating software (Homebrew, rustup, Codex, Pi, Claude Code, pnpm, the npx MCP
 servers) has no pin: a rebuild installs the newest release.
@@ -519,22 +523,42 @@ def relay_package():
 
 def relay_release(releases, platforms):
     """(version, {platform: asset}, SHA256SUMS asset or None) of the newest published release
-    that carries an archive for every platform, or (None, None, None)."""
+    that carries an archive for every platform and SIGNING.json, or (None, None, None). A draft
+    awaits the owner's signature (vm-service sign-release.sh) and is never pinned."""
     published = sorted((r for r in releases if not r['draft'] and not r['prerelease'] and re.fullmatch(r'v\d+\.\d+\.\d+', r['tag_name'])),
                        key=lambda r: r['published_at'] or '', reverse=True)
     for release in published:
         version = bare(release['tag_name'])
         assets = {a['name']: a for a in release['assets']}
         names = {p: 'relay-agent-%s-%s.tar.gz' % (version, p) for p in platforms}
-        if all(name in assets for name in names.values()):
+        if all(name in assets for name in names.values()) and 'SIGNING.json' in assets:
             return version, {p: assets[name] for p, name in names.items()}, assets.get('SHA256SUMS')
     return None, None, None
 
 
-def relay_pins(lock, version, assets, sums, fetch=None, package=None):
-    """The lock moved to `version`: each archive downloaded, hashed, matched and read."""
+def relay_signing(record_text, version, designated, package):
+    """The lock's `signing` from the release's SIGNING.json, which must agree with the darwin
+    executable's own designated requirement (`designated`, `codesign -dr -` output)."""
+    record = json.loads(record_text)
+    if record.get('version') != version or record.get('identifier') != package.IDENTIFIER:
+        raise SystemExit('relay agent: SIGNING.json is not for %s %s' % (package.IDENTIFIER, version))
+    if record.get('awaitsSigning') or record.get('signature') not in package.SIGNINGS:
+        raise SystemExit('relay agent %s: SIGNING.json says it is not signed for release' % version)
+    if record['signature'] == 'adhoc' and '-' not in version:
+        raise SystemExit('relay agent %s: a release signed ad hoc is never pinned (vm-service DC-224)' % version)
+    kind, identifier, team = package.parse_designated(designated)
+    if kind != record['signature'] or (kind == 'developer-id' and (identifier, team) != (package.IDENTIFIER, record.get('team'))):
+        raise SystemExit('relay agent %s: the darwin executable is signed %s, SIGNING.json says %s' % (version, kind, record['signature']))
+    return kind
+
+
+def relay_pins(lock, version, assets, sums, fetch=None, package=None, record=None, designated=None):
+    """The lock moved to `version`: each archive downloaded, hashed, matched and read, and its
+    signing taken from SIGNING.json (`record`) once the darwin executable agrees with it."""
     package = package or relay_package()
     fetch = fetch or download
+    designated = designated or package.read_designated
+    signing = None
     listed = {}
     for line in (sums or '').splitlines():
         if len(line.split()) == 2:
@@ -550,9 +574,11 @@ def relay_pins(lock, version, assets, sums, fetch=None, package=None):
         for source, expected in (('asset digest', (asset.get('digest') or '').removeprefix('sha256:')), ('SHA256SUMS', listed.get(asset['name'], ''))):
             if expected and expected != digest:
                 raise SystemExit('relay agent %s: %s hashes to %s, the %s says %s' % (platform, url, digest, source, expected))
-        executable = package.inspect_archive(pathlib.Path(path).read_bytes(), platform)
+        executable, content = package.inspect_archive(pathlib.Path(path).read_bytes(), platform, content=True)
         platforms[platform] = {'url': url, 'sha256': digest, 'executableSha256': executable}
-    return dict(lock, version=version, platforms=platforms)
+        if platform == 'darwin-arm64':
+            signing = relay_signing(record or '{}', version, designated(content), package)
+    return dict(lock, version=version, signing=signing, platforms=platforms)
 
 
 def update_relay_agent(apply_changes, releases_of=None):
@@ -565,13 +591,16 @@ def update_relay_agent(apply_changes, releases_of=None):
     try:
         releases = (releases_of or (lambda repository: gh('repos/%s/releases?per_page=100' % repository)))(lock['repository'])
         version, assets, sums = relay_release(releases, sorted(lock['platforms']))
+        signing_asset = next((a for r in releases if r['tag_name'] == 'v%s' % version for a in r['assets']
+                              if a['name'] == 'SIGNING.json'), None) if version else None
         if version is None:
             return [('all lines', name, have or 'unpinned', '', 'no feed: no release carries relay agent archives yet')]
         if have is not None and not newer(version, have):
             return [('all lines', name, have, version, 'current')]
         if apply_changes:
             text = pathlib.Path(download(sums['browser_download_url'])).read_text() if sums else ''
-            moved = json.dumps(relay_pins(lock, version, assets, text, package=package), indent=1) + '\n'
+            record = pathlib.Path(download(signing_asset['browser_download_url'])).read_text()
+            moved = json.dumps(relay_pins(lock, version, assets, text, package=package, record=record), indent=1) + '\n'
             for path in paths:
                 path.write_text(moved)
     except (Exception, SystemExit) as error:

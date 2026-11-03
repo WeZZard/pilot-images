@@ -200,8 +200,9 @@ done
 # --- relay agent (phases 62 and 65; docs/relay-agent.md RA-I2, RA-I4, RA-I6) ---
 # launchd starts the agent in the Aqua session of the automatic login and keeps
 # it there, waiting idle for the configuration machine-service writes at lease
-# time. Its Apple Events and data-class rows are pinned to its signing
-# identifier, the job's label, which the installed build must carry.
+# time. Its Apple Events and data-class rows are pinned to the requirement its
+# package record names: the full designated requirement of a Developer ID
+# build, the identifier alone for an ad hoc one (vm-service DC-224).
 _ra_label=com.wezzard.relay-agent
 _ra_agent="$HOME/.local/libexec/relay-agent/relay-agent"
 _ra_plist="$HOME/Library/LaunchAgents/$_ra_label.plist"
@@ -246,11 +247,18 @@ fi
 _ra_req=$(sqlite3 "$_ae_db" "SELECT DISTINCT hex(csreq) FROM access WHERE client='$_ra_agent' AND client_type=1 AND auth_value=2;" 2>/dev/null)
 _ra_rows=$(sqlite3 "$_ae_db" "SELECT count(*) FROM access WHERE service='kTCCServiceAppleEvents' AND client='$_ra_agent' AND client_type=1 AND auth_value=2;" 2>/dev/null)
 _ra_data=$(sqlite3 "$_ae_db" "SELECT count(*) FROM access WHERE client='$_ra_agent' AND client_type=1 AND auth_value=2 AND service IN ('kTCCServiceReminders','kTCCServiceAddressBook','kTCCServiceCalendar','kTCCServicePhotos','kTCCServiceMediaLibrary');" 2>/dev/null)
+_ra_kind=$(plutil -extract signing.kind raw -o - "${_ra_agent:h}/package.json" 2>/dev/null)
+_ra_text=$(plutil -extract signing.requirement raw -o - "${_ra_agent:h}/package.json" 2>/dev/null)
 _ra_blob=$(mktemp)
-_ra_want=$(csreq -r="identifier \"$_ra_label\"" -b "$_ra_blob" 2>/dev/null && xxd -p "$_ra_blob" | tr -d '\n' | tr a-f A-F)
+_ra_want=$([[ -n "$_ra_text" ]] && csreq -r="$_ra_text" -b "$_ra_blob" 2>/dev/null && xxd -p "$_ra_blob" | tr -d '\n' | tr a-f A-F)
 rm -f "$_ra_blob"
+if [[ -n "$_ra_text" ]] && codesign --verify --strict -R="$_ra_text" "$_ra_agent" >/dev/null 2>&1; then
+  ok "relay agent meets its package's requirement (${_ra_kind:-unknown})"
+else
+  bad "relay agent does not meet its package's requirement (${_ra_kind:-none})"
+fi
 if [[ "${_ra_rows:-0}" -gt 0 && "$_ra_rows" == "$_ae_rows" && "$_ra_data" == 5 && -n "$_ra_want" && "$_ra_req" == "$_ra_want" ]]; then
-  ok "relay agent Apple Events rows ($_ra_rows targets) and data-class rows (5), pinned to identifier $_ra_label"
+  ok "relay agent Apple Events rows ($_ra_rows targets) and data-class rows (5), pinned to its ${_ra_kind:-} requirement"
 else
   bad "relay agent TCC rows: Apple Events ${_ra_rows:-0} (sshd-keygen-wrapper ${_ae_rows:-0}), data-class ${_ra_data:-0}/5, requirement ${_ra_req:-none}"
 fi

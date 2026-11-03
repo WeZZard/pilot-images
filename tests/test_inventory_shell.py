@@ -320,12 +320,14 @@ elif args[0] not in ('exec','push'): raise RuntimeError(args)
         package = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(package)
         lock = dict(schemaVersion=1, repository='WeZZard/vm-service', version='0.2.0' if pinned else None,
+                    signing='developer-id' if pinned else None,
                     platforms={p: dict(url=package.release_url('WeZZard/vm-service', '0.2.0', p) if pinned else None,
                                        sha256=archive if pinned else None, executableSha256=exe if pinned else None)
                                for p in package.PLATFORMS})
         (self.root / 'images/fixture/guest/relay-agent.lock.json').write_text(json.dumps(lock))
         record = dict(version='0.2.0' if pinned else None, platform='darwin-arm64', sha256=archive,
-                      executableSha256=exe, source='pinned' if pinned else 'local')
+                      executableSha256=exe, source='pinned' if pinned else 'local',
+                      signing=dict(kind='developer-id', team='EXAMPLE123', requirement=package.developer_id_requirement('EXAMPLE123')))
         self.env['FIXTURE_RELAY'] = 'Darwin arm64\n%s\n%s' % (json.dumps(record), installed or exe)
 
     def promote(self):

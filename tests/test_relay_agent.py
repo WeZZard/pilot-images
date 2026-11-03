@@ -48,10 +48,24 @@ def archive(members):
     return buffer.getvalue()
 
 
-def pinned_lock(version='0.2.0', digests=None, executables=None):
+FIXTURES = REPO / 'tests/fixtures/codesign'
+TEAM = 'EXAMPLE123'  # a made-up team ID, as in every fixture
+
+
+def codesign_output(name):
+    """`codesign -dr -` output recorded on macOS, reduced to placeholders (tests/fixtures/codesign)."""
+    return (FIXTURES / name).read_text()
+
+
+def designated_as(name):
+    """A stand-in for package.read_designated that answers the fixture `name`."""
+    return lambda executable: codesign_output(name)
+
+
+def pinned_lock(version='0.2.0', digests=None, executables=None, signing='developer-id'):
     package = load('relay_agent_package', 'host/relay-agent-package.py')
     digests, executables = digests or {}, executables or {}
-    return {'schemaVersion': 1, 'repository': 'WeZZard/vm-service', 'version': version,
+    return {'schemaVersion': 1, 'repository': 'WeZZard/vm-service', 'version': version, 'signing': signing,
             'platforms': {p: {'url': package.release_url('WeZZard/vm-service', version, p), 'sha256': digests.get(p, 'a' * 64),
                               'executableSha256': executables.get(p, 'b' * 64)}
                           for p in package.PLATFORMS}}
@@ -97,11 +111,23 @@ class LockTests(unittest.TestCase):
         no_executable = pinned_lock(); del no_executable['platforms']['linux-arm64']['executableSha256']
         missing = pinned_lock(); del missing['platforms']['linux-x86_64']
         extra = dict(pinned_lock(), note='x')
+        unsigned = pinned_lock(signing=None)
+        no_signing = pinned_lock(); del no_signing['signing']
+        signed_unpinned = dict(unpinned, signing='developer-id')
         for name, lock in (('half-pinned', half), ('foreign URL', moved), ('short digest', short),
                            ('missing platform', missing), ('extra field', extra), ('bad version', pinned_lock('latest')),
-                           ('no executable pin', unpinned_executable), ('no executable field', no_executable)):
+                           ('no executable pin', unpinned_executable), ('no executable field', no_executable),
+                           ('pinned without signing', unsigned), ('no signing field', no_signing),
+                           ('unpinned with signing', signed_unpinned), ('a release signed ad hoc', pinned_lock(signing='adhoc')),
+                           ('unknown signing', pinned_lock(signing='notarized'))):
             with self.subTest(name=name), self.assertRaises(ValueError):
                 self.check(lock)
+
+    def test_only_a_pre_release_may_be_pinned_ad_hoc(self):
+        self.assertEqual(self.check(pinned_lock('0.3.0-rc.1', signing='adhoc'))['signing'], 'adhoc')
+        self.assertEqual(self.check(pinned_lock('0.3.0-rc.1'))['signing'], 'developer-id')
+        with self.assertRaisesRegex(ValueError, 'must be signed with Developer ID'):
+            self.check(pinned_lock('0.3.0', signing='adhoc'))
 
     def test_a_guest_uname_names_its_platform(self):
         self.assertEqual(self.package.platform_of('Darwin arm64'), 'darwin-arm64')
@@ -127,7 +153,7 @@ class PackageTests(unittest.TestCase):
         data = archive([('relay-agent', executable('linux-arm64'), 0o755)])
         result = self.package.fetch(REPO / 'images/ubuntu2404' / LOCK, 'linux-arm64', self.root / 'out.tgz', self.write('local.tgz', data))
         self.assertEqual(result, {'version': None, 'platform': 'linux-arm64', 'sha256': hashlib.sha256(data).hexdigest(),
-                                  'executableSha256': sha(executable('linux-arm64')), 'source': 'local'})
+                                  'executableSha256': sha(executable('linux-arm64')), 'source': 'local', 'signing': None})
         self.assertEqual((self.root / 'out.tgz').read_bytes(), data)
 
     def test_an_unpinned_lock_without_a_local_build_names_the_override(self):
@@ -138,12 +164,15 @@ class PackageTests(unittest.TestCase):
         data = archive([('relay-agent', executable('darwin-arm64'), 0o755)])
         lock = self.write('lock.json', json.dumps(pinned_lock(digests={'darwin-arm64': hashlib.sha256(data).hexdigest()},
                                                               executables={'darwin-arm64': sha(executable('darwin-arm64'))})))
-        result = self.package.fetch(lock, 'darwin-arm64', self.root / 'out.tgz', self.write('copy.tgz', data))
+        signed = designated_as('developer-id.txt')
+        result = self.package.fetch(lock, 'darwin-arm64', self.root / 'out.tgz', self.write('copy.tgz', data), designated=signed)
         self.assertEqual((result['source'], result['version']), ('pinned', '0.2.0'))
         self.assertEqual(result['executableSha256'], sha(executable('darwin-arm64')))
+        self.assertEqual(result['signing'], {'kind': 'developer-id', 'team': TEAM,
+                                             'requirement': self.package.developer_id_requirement(TEAM)})
         other = archive([('relay-agent', executable('darwin-arm64') + b'changed', 0o755)])
         with self.assertRaisesRegex(ValueError, 'the lock pins'):
-            self.package.fetch(lock, 'darwin-arm64', self.root / 'out2.tgz', self.write('other.tgz', other))
+            self.package.fetch(lock, 'darwin-arm64', self.root / 'out2.tgz', self.write('other.tgz', other), designated=signed)
         self.assertFalse((self.root / 'out2.tgz').exists())
 
     def test_a_pinned_download_must_stay_on_the_release_asset_hosts(self):
@@ -188,6 +217,84 @@ class PackageTests(unittest.TestCase):
         self.assertFalse((self.root / 'out.tgz').exists())
 
 
+class SignatureTests(unittest.TestCase):
+    """The macOS executable's signature, read from recorded `codesign -dr -` output (vm-service DC-224)."""
+
+    def setUp(self):
+        self.package = load('relay_agent_package', 'host/relay-agent-package.py')
+        temporary = tempfile.TemporaryDirectory()
+        self.addCleanup(temporary.cleanup)
+        self.root = Path(temporary.name)
+
+    def test_recorded_requirements_parse(self):
+        parse = self.package.parse_designated
+        self.assertEqual(parse(codesign_output('adhoc.txt')), ('adhoc', None, None))
+        self.assertEqual(parse(codesign_output('developer-id.txt')), ('developer-id', 'com.wezzard.relay-agent', TEAM))
+        self.assertEqual(parse(codesign_output('developer-id-quoted-team.txt')), ('developer-id', 'com.wezzard.relay-agent', '9EXAMPLE12'))
+        self.assertEqual(parse(codesign_output('developer-id-other-identifier.txt'))[1], 'com.example.other')
+        for text in (codesign_output('other-form.txt'), 'Executable=/tmp/x\n', 'designated => identifier "x" and anchor apple'):
+            with self.subTest(text=text), self.assertRaises(ValueError):
+                parse(text)
+
+    def test_the_assembled_requirement_is_the_one_codesign_prints(self):
+        printed = codesign_output('developer-id.txt').splitlines()[1].removeprefix('designated => ')
+        self.assertEqual(self.package.developer_id_requirement(TEAM).replace('"%s"' % TEAM, TEAM), printed)
+        self.assertEqual(self.package.requirement('adhoc', None), 'identifier "com.wezzard.relay-agent"')
+
+    def test_the_signing_names_the_requirement_the_grants_are_pinned_to(self):
+        signing_of = self.package.signing_of
+        self.assertEqual(signing_of(codesign_output('adhoc.txt')),
+                         {'kind': 'adhoc', 'team': None, 'requirement': 'identifier "com.wezzard.relay-agent"'})
+        self.assertEqual(signing_of(codesign_output('developer-id.txt'), TEAM)['team'], TEAM)
+        with self.assertRaisesRegex(ValueError, 'another team'):
+            signing_of(codesign_output('developer-id.txt'), 'OTHER45678')
+        with self.assertRaisesRegex(ValueError, 'com.example.other'):
+            signing_of(codesign_output('developer-id-other-identifier.txt'))
+
+    def test_a_pinned_lock_refuses_another_signing(self):
+        data = archive([('relay-agent', executable('darwin-arm64'), 0o755)])
+        lock = self.root / 'lock.json'
+        lock.write_text(json.dumps(pinned_lock(digests={'darwin-arm64': sha(data)}, executables={'darwin-arm64': sha(executable('darwin-arm64'))})))
+        copy = self.root / 'copy.tgz'
+        copy.write_bytes(data)
+        with self.assertRaisesRegex(ValueError, 'is signed adhoc, the lock pins developer-id'):
+            self.package.fetch(lock, 'darwin-arm64', self.root / 'out.tgz', copy, designated=designated_as('adhoc.txt'))
+        self.assertFalse((self.root / 'out.tgz').exists())
+        local = self.package.fetch(REPO / 'images/macos26' / LOCK, 'darwin-arm64', self.root / 'local.tgz', copy,
+                                   designated=designated_as('adhoc.txt'))
+        self.assertEqual(local['signing']['kind'], 'adhoc')
+
+    @unittest.skipUnless(Path('/usr/bin/codesign').exists(), 'needs macOS codesign')
+    def test_codesign_reads_an_ad_hoc_build(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / 'relay-agent'
+            path.write_bytes(Path('/usr/bin/true').read_bytes())
+            subprocess.run(['/usr/bin/codesign', '--force', '--sign', '-', '--identifier', 'com.wezzard.relay-agent', str(path)],
+                           check=True, capture_output=True)
+            self.assertEqual(self.package.signing_of(self.package.read_designated(path.read_bytes()))['kind'], 'adhoc')
+
+    @unittest.skipUnless(Path('/usr/bin/csreq').exists(), 'needs macOS csreq')
+    def test_a_bare_and_a_quoted_team_compile_to_the_same_blob(self):
+        lib = REPO / 'images/macos26/guest/lib.zsh'
+        quoted = self.package.developer_id_requirement(TEAM)
+        bare = quoted.replace('"%s"' % TEAM, TEAM)
+        blobs = [subprocess.check_output(['/bin/zsh', '-c', 'source "$1"; requirement_hex "$2"', 'zsh', str(lib), text], text=True)
+                 for text in (quoted, bare)]
+        self.assertEqual(blobs[0], blobs[1])
+        self.assertTrue(blobs[0].startswith('fade0c00'))
+
+    @unittest.skipUnless(Path('/usr/bin/plutil').exists(), 'needs macOS plutil')
+    def test_the_guest_reads_the_signing_from_the_package_record(self):
+        record = self.root / 'package.json'
+        record.write_text(json.dumps({'signing': {'kind': 'developer-id', 'team': TEAM,
+                                                  'requirement': self.package.developer_id_requirement(TEAM)}}))
+        lib = REPO / 'images/macos26/guest/lib.zsh'
+        read = lambda field: subprocess.check_output(['/bin/zsh', '-c', 'source "$1"; relay_agent_signing "$2" "$3"', 'zsh',
+                                                      str(lib), str(record), field], text=True).rstrip('\n')
+        self.assertEqual(read('kind'), 'developer-id')
+        self.assertEqual(read('requirement'), self.package.developer_id_requirement(TEAM))
+
+
 class UpdateSoftwareTests(unittest.TestCase):
     def setUp(self):
         self.u = load('update_software', 'host/update-software.py')
@@ -197,7 +304,7 @@ class UpdateSoftwareTests(unittest.TestCase):
     def release(self, version, platforms=None, draft=False, prerelease=False, published='2026-11-01T00:00:00Z'):
         names = ['relay-agent-%s-%s.tar.gz' % (version, p) for p in (self.platforms if platforms is None else platforms)]
         assets = [{'name': n, 'browser_download_url': 'https://github.com/WeZZard/vm-service/releases/download/v%s/%s' % (version, n)}
-                  for n in names + ['SHA256SUMS']]
+                  for n in names + ['SHA256SUMS', 'SIGNING.json']]
         return {'tag_name': 'v' + version, 'draft': draft, 'prerelease': prerelease, 'published_at': published, 'assets': assets}
 
     def test_the_newest_complete_published_release_wins(self):
@@ -229,8 +336,15 @@ class UpdateSoftwareTests(unittest.TestCase):
                 sums.append('%s  %s' % (hashlib.sha256(data).hexdigest(), name))
             _, assets, _ = self.u.relay_release([self.release('0.2.0')], self.platforms)
             lock = json.loads((REPO / 'images/macos26' / LOCK).read_text())
-            moved = self.u.relay_pins(lock, '0.2.0', assets, '\n'.join(sums), fetch=files.get, package=self.package)
+            record = json.dumps({'version': '0.2.0', 'identifier': 'com.wezzard.relay-agent', 'signature': 'developer-id',
+                                 'awaitsSigning': False, 'team': TEAM})
+            pins = lambda sums, record=record, designated='developer-id.txt': self.u.relay_pins(
+                lock, '0.2.0', assets, '\n'.join(sums), fetch=files.get, package=self.package, record=record,
+                designated=designated_as(designated))
+            moved = pins(sums)
             self.assertEqual(moved['version'], '0.2.0')
+            self.assertEqual(moved['signing'], 'developer-id')
+            self.assertEqual(list(moved), list(lock), 'the lock keeps its field order')
             for platform in self.platforms:
                 self.assertEqual(moved['platforms'][platform]['executableSha256'], sha(executable(platform)))
             with tempfile.NamedTemporaryFile('w', suffix='.json') as written:
@@ -238,7 +352,21 @@ class UpdateSoftwareTests(unittest.TestCase):
                 self.assertEqual(self.package.read_lock(written.name)['platforms'], moved['platforms'])
             wrong = sums[:1] + ['%s  %s' % ('0' * 64, sums[1].split()[1])] + sums[2:]
             with self.assertRaises(SystemExit):
-                self.u.relay_pins(lock, '0.2.0', assets, '\n'.join(wrong), fetch=files.get, package=self.package)
+                pins(wrong)
+            awaiting = json.dumps(dict(json.loads(record), signature='adhoc', awaitsSigning=True, team=None))
+            ad_hoc = json.dumps(dict(json.loads(record), signature='adhoc', team=None))
+            for name, case in (('a draft awaiting its signature', dict(record=awaiting, designated='adhoc.txt')),
+                               ('a release signed ad hoc', dict(record=ad_hoc, designated='adhoc.txt')),
+                               ('a record the executable contradicts', dict(designated='adhoc.txt')),
+                               ('another team', dict(designated='developer-id-quoted-team.txt')),
+                               ('no record', dict(record=None))):
+                with self.subTest(name=name), self.assertRaises(SystemExit):
+                    pins(sums, **case)
+
+    def test_a_release_without_its_signing_record_is_not_pinned(self):
+        release = self.release('0.2.0')
+        release['assets'] = [a for a in release['assets'] if a['name'] != 'SIGNING.json']
+        self.assertEqual(self.u.relay_release([release], self.platforms), (None, None, None))
 
 
 class MacPhaseTests(unittest.TestCase):
@@ -258,7 +386,10 @@ class MacPhaseTests(unittest.TestCase):
         self.assertIn('DEST="$HOME/.local/libexec/relay-agent"', source)
         self.assertIn('shasum -a 256 "$ARCHIVE"', source)
         self.assertIn('codesign --verify --strict -R="identifier \\"$LABEL\\""', source)
+        self.assertIn('codesign --verify --strict -R="$REQUIREMENT" "$AGENT"', source)
+        self.assertIn('[[ "$(requirement_hex "$(designated_requirement "$AGENT")")" == "$(requirement_hex "$REQUIREMENT")" ]]', source)
         self.assertLess(source.index('codesign --verify'), source.index('launchctl bootstrap'))
+        self.assertLess(source.index('-R="$REQUIREMENT"'), source.index('launchctl bootstrap'))
         self.assertIn('LABEL=com.wezzard.relay-agent', source)
         self.assertIn('PLIST="$HOME/Library/LaunchAgents/$LABEL.plist"', source)
         self.assertLess(source.index('grep -Fq'), source.index('tar -xzf'))
@@ -294,18 +425,21 @@ class MacGrantTests(unittest.TestCase):
                 source = (REPO / 'images' / line / 'guest/65-automation.zsh').read_text()
                 self.assertIn('CLIENTS=("$CLIENT" "$AGENT")', source)
                 self.assertIn('AGENT="$HOME/.local/libexec/relay-agent/relay-agent"', source)
-                self.assertIn('CLIENT_REQ[$AGENT]=$(identifier_req_hex "$AGENT_ID")', source)
+                self.assertIn('CLIENT_REQ[$AGENT]=$(requirement_hex "$AGENT_REQ")', source)
+                self.assertIn('AGENT_REQ=$(relay_agent_signing "$PACKAGE" requirement)', source)
+                self.assertIn('[[ "$(requirement_hex "$(designated_requirement "$AGENT")")" == "${CLIENT_REQ[$AGENT]}" ]]', source)
                 self.assertIn('CLIENT_REQ[$CLIENT]=$(csreq_hex "$CLIENT")', source)
                 self.assertEqual(source.count('for c in "${CLIENTS[@]}"; do'), 3, 'Apple Events rows, data-class rows, verification')
 
-    def test_the_agent_requirement_names_only_its_signing_identifier(self):
-        for line in MACOS:
-            with self.subTest(line=line):
-                lib = (REPO / 'images' / line / 'guest/lib.zsh').read_text()
-                function = re.search(r'^identifier_req_hex\(\) \{.*?^\}', lib, re.M | re.S).group(0)
-                self.assertIn('csreq -r="identifier \\"$1\\"" -b "$blob"', function)
-        reference = re.search(r'^identifier_req_hex\(\) \{.*?^\}', (REPO / 'images/macos26/guest/lib.zsh').read_text(), re.M | re.S).group(0)
-        self.assertIn(reference, (REPO / 'images/macos27/guest/lib.zsh').read_text())
+    def test_the_requirement_helpers_are_the_same_on_every_line(self):
+        names = ('requirement_hex', 'identifier_req_hex', 'designated_requirement', 'relay_agent_signing')
+        for name in names:
+            reference = re.search(r'^%s\(\) \{.*?^\}' % name, (REPO / 'images/macos26/guest/lib.zsh').read_text(), re.M | re.S).group(0)
+            with self.subTest(function=name):
+                self.assertIn(reference, (REPO / 'images/macos27/guest/lib.zsh').read_text())
+        lib = (REPO / 'images/macos26/guest/lib.zsh').read_text()
+        self.assertIn('csreq -r="$1" -b "$blob"', lib)
+        self.assertIn('requirement_hex "identifier \\"$1\\""', lib)
 
     @unittest.skipUnless(Path('/usr/bin/csreq').exists(), 'needs macOS csreq')
     def test_the_requirement_compiles_to_the_blob_tcc_stores(self):
@@ -330,7 +464,8 @@ class UbuntuPhaseTests(unittest.TestCase):
         (payload / 'relay-agent.sha256').write_text(hashlib.sha256(data).hexdigest() + '\n')
         named = (package_sha or hashlib.sha256(data).hexdigest())
         (payload / 'relay-agent-package.json').write_text(json.dumps(
-            {'version': None, 'platform': 'linux-arm64', 'sha256': named, 'executableSha256': 'c' * 64, 'source': 'local'}) + '\n')
+            {'version': None, 'platform': 'linux-arm64', 'sha256': named, 'executableSha256': 'c' * 64, 'source': 'local',
+             'signing': None}) + '\n')
         systemctl = ('echo "$*" >> "$FIXTURE_LOG"\n'
                      'case "$*" in "--user daemon-reload") exit %d ;; "--user enable relay-agent.service")\n'
                      '  mkdir -p "$HOME/.config/systemd/user/graphical-session.target.wants"\n'
@@ -385,7 +520,8 @@ class GateTests(unittest.TestCase):
 
     def package_record(self, **changes):
         value = {'version': '0.2.0', 'platform': 'darwin-arm64', 'sha256': self.archive,
-                 'executableSha256': self.exe, 'source': 'pinned'}
+                 'executableSha256': self.exe, 'source': 'pinned',
+                 'signing': {'kind': 'developer-id', 'team': TEAM, 'requirement': self.package.developer_id_requirement(TEAM)}}
         value.update(changes)
         return json.dumps(value)
 
@@ -419,7 +555,8 @@ class GateTests(unittest.TestCase):
         value = json.loads(self.evidence().read_text())
         self.assertEqual(value, {'schemaVersion': 1, 'platform': 'darwin-arm64',
                                  'archive': {'version': '0.2.0', 'source': 'pinned', 'sha256': self.archive},
-                                 'archiveExecutableSha256': self.exe, 'installedSha256': self.exe})
+                                 'archiveExecutableSha256': self.exe, 'installedSha256': self.exe,
+                                 'signing': {'kind': 'developer-id', 'team': TEAM}})
         local = json.loads(self.evidence(package=self.package_record(version=None, source='local')).read_text())
         self.assertEqual(local['archive'], {'version': None, 'source': 'local', 'sha256': self.archive})
 
@@ -427,7 +564,12 @@ class GateTests(unittest.TestCase):
         cases = {'other platform': dict(uname='Linux aarch64'), 'unknown platform': dict(uname='Darwin x86_64'),
                  'no installed hash': dict(installed='missing'),
                  'pinned without a version': dict(package=self.package_record(version=None)),
-                 'extra field': dict(package=self.package_record(note='x'))}
+                 'extra field': dict(package=self.package_record(note='x')),
+                 'no signing': dict(package=self.package_record(signing=None)),
+                 'a requirement of another team': dict(package=self.package_record(signing={
+                     'kind': 'developer-id', 'team': TEAM, 'requirement': self.package.developer_id_requirement('OTHER45678')})),
+                 'ad hoc with a team': dict(package=self.package_record(signing={
+                     'kind': 'adhoc', 'team': TEAM, 'requirement': 'identifier "com.wezzard.relay-agent"'}))}
         for name, case in cases.items():
             with self.subTest(name=name), self.assertRaises(ValueError):
                 self.evidence(**case)
@@ -450,6 +592,10 @@ class GateTests(unittest.TestCase):
                               ('other archive', self.package_record(sha256='e' * 64))):
             with self.subTest(name=name):
                 self.refused(lock, self.receipt(self.evidence(package=package)), 'is not the release the lock pins, 0.2.0')
+
+    def test_an_agent_signed_otherwise_than_the_lock_pins_is_refused(self):
+        ad_hoc = self.package_record(signing={'kind': 'adhoc', 'team': None, 'requirement': 'identifier "com.wezzard.relay-agent"'})
+        self.refused(self.lock(), self.receipt(self.evidence(package=ad_hoc)), 'is signed adhoc, the lock pins developer-id')
 
     def test_an_installed_executable_that_is_not_the_pin_is_refused(self):
         receipt = self.receipt(self.evidence(installed='f' * 64))

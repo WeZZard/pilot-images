@@ -1,0 +1,2 @@
+Executable=/tmp/relay-agent
+# designated => cdhash H"5be7fbc3f6304caaa7c89fe820136eb89ec321b6" or cdhash H"1cbcedfebee2b3a898210cd6f31246b799f0c4a4" or cdhash H"f845d3476c20934188deed0d49d4f12fe2d76153"

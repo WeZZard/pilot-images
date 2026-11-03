@@ -183,15 +183,35 @@ SWIFT
   "$_CSREQ_BIN" "$1"
 }
 
-# The hex blob TCC stores in `csreq` for the requirement that names only a
-# signing identifier: `identifier "<id>"`. Phase 65 pins the relay agent's rows
-# to it, because every build vm-service signs carries the identifier while its
-# ad hoc designated requirement is a code hash that each build changes.
-identifier_req_hex() {  # identifier_req_hex <signing-identifier>
+# The hex blob TCC stores in `csreq` for the requirement text $1. Two texts
+# that differ only in quoting compile to the same blob.
+requirement_hex() {  # requirement_hex <requirement text>
   local blob
   blob=$(mktemp) || return 1
-  csreq -r="identifier \"$1\"" -b "$blob" || { rm -f "$blob"; return 1; }
+  csreq -r="$1" -b "$blob" || { rm -f "$blob"; return 1; }
   xxd -p "$blob" | tr -d '\n'
   rm -f "$blob"
+}
+
+# The blob for the requirement that names only a signing identifier:
+# `identifier "<id>"`, which every build vm-service signs satisfies.
+identifier_req_hex() {  # identifier_req_hex <signing-identifier>
+  requirement_hex "identifier \"$1\""
+}
+
+# The designated requirement of the code at $1, as `codesign -dr -` prints it.
+designated_requirement() {  # designated_requirement <path>
+  codesign -d -r- "$1" 2>/dev/null | sed -n 's/^#* *designated => //p'
+}
+
+# The relay agent's signature, as the package record that phase 62 keeps
+# beside it names it (host/relay-agent-package.py): `kind` (developer-id or
+# adhoc) or `requirement`, the requirement its privacy grants are pinned to:
+# the full designated requirement of a Developer ID build, whose team the
+# pinned executable's own signature carries, and the identifier alone for an
+# ad hoc build, whose designated requirement changes with every build
+# (vm-service DC-224, docs/relay-agent.md RA-I4).
+relay_agent_signing() {  # relay_agent_signing <package.json> kind|requirement
+  plutil -extract "signing.$2" raw -o - "$1" 2>/dev/null
 }
 

@@ -2,6 +2,7 @@
  "schemaVersion": 1,
  "repository": "WeZZard/vm-service",
  "version": null,
+ "signing": null,
  "platforms": {
   "darwin-arm64": {
    "url": null,

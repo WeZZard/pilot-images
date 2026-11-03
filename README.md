@@ -423,7 +423,7 @@ Unity in your own purpose clone; the base stays credential-free, and
 
 Every image ships vm-service's relay agent and starts it in the desktop session, so actions run as the logged-in user instead of over SSH. See [docs/relay-agent.md](docs/relay-agent.md).
 
-- Guest phase 62 installs the build that `guest/relay-agent.lock.json` pins at `~/.local/libexec/relay-agent/relay-agent`, with a LaunchAgent (`com.wezzard.relay-agent`, Aqua only) on macOS and a systemd user unit wanted by `graphical-session.target` on ubuntu2404. Phase 65 grants it the Apple Events and data-class permissions that `sshd-keygen-wrapper` has, matched on its signing identifier.
+- Guest phase 62 installs the build that `guest/relay-agent.lock.json` pins at `~/.local/libexec/relay-agent/relay-agent`, with a LaunchAgent (`com.wezzard.relay-agent`, Aqua only) on macOS and a systemd user unit wanted by `graphical-session.target` on ubuntu2404. Phase 65 grants it the Apple Events and data-class permissions that `sshd-keygen-wrapper` has, pinned to its full designated requirement (identifier and team) when the pinned release is Developer ID signed, or to its signing identifier for an ad hoc pre-release or local build. `RELAY_AGENT_TEAM_ID`, when set, refuses a Developer ID build of any other team.
 - Until vm-service publishes a relay agent release, the lock is unpinned and a build needs a local archive:
 
   ```bash

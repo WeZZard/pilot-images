@@ -9,9 +9,12 @@
 # login and restarts it if it exits. The agent waits, idle, for
 # ~/.config/relay-agent/config.json, which machine-service writes at lease time
 # and no image holds. Beside the agent it keeps package.json, the record of the
-# archive it came from (RA-I7). Phase 65 grants the agent its privacy permissions, matched
-# on its signing identifier, which is the job's label, so a replaced build keeps
-# them (vm-service RA-6).
+# archive it came from (RA-I7), whose `signing` names how the executable is
+# signed: with Developer ID, by the team its own signature carries, or, for a
+# pre-release only, ad hoc. The executable must carry the identifier, the job's
+# label, and meet the requirement the record names; a Developer ID build's
+# designated requirement must be that requirement exactly. Phase 65 pins the
+# agent's privacy grants to it (RA-I4, vm-service DC-224).
 source "${0:A:h}/lib.zsh"
 
 LABEL=com.wezzard.relay-agent
@@ -40,6 +43,17 @@ install -m 644 "$PACKAGE" "$DEST/package.json"
 rm -rf "$unpacked" "$ARCHIVE" "$SUM" "$PACKAGE"
 codesign --verify --strict -R="identifier \"$LABEL\"" "$AGENT" \
   || { glog "relay agent is not signed with the identifier $LABEL"; exit 1 }
+KIND=$(relay_agent_signing "$DEST/package.json" kind) && REQUIREMENT=$(relay_agent_signing "$DEST/package.json" requirement) \
+  || { glog "the relay agent package record names no signing"; exit 1 }
+codesign --verify --strict -R="$REQUIREMENT" "$AGENT" \
+  || { glog "relay agent does not meet the requirement its package names ($KIND)"; exit 1 }
+if [[ "$KIND" == developer-id ]]; then
+  [[ "$(requirement_hex "$(designated_requirement "$AGENT")")" == "$(requirement_hex "$REQUIREMENT")" ]] \
+    || { glog "relay agent's designated requirement is not the Developer ID requirement its package names"; exit 1 }
+elif [[ "$KIND" != adhoc ]]; then
+  glog "relay agent package names an unknown signing $KIND"; exit 1
+fi
+glog "relay agent signed $KIND"
 glog "installed $("$AGENT" --version) ($got)"
 
 mkdir -p "${PLIST:h}" "$HOME/Library/Logs"

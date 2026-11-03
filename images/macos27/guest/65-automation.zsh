@@ -23,12 +23,14 @@
 #
 # The relay agent (phase 62) gets the same rows (docs/relay-agent.md RA-I4):
 # every action it runs is its child, so macOS attributes the action to it. Its
-# rows are pinned to the requirement `identifier "com.wezzard.relay-agent"`, not
-# to its designated requirement: an ad hoc signature's designated requirement
-# is its code hash, which every new build changes, and machine-service replaces
-# the build at lease time. vm-service signs every build with that identifier
-# (vm-service DC-1xx-REL-1). sshd-keygen-wrapper keeps its rows while SSH is a
-# fallback link.
+# rows are pinned to the requirement its package record names (phase 62): for
+# a Developer ID build, its full designated requirement, the identifier
+# `com.wezzard.relay-agent` and the team, so a VM's grant is as strict as a
+# durable Mac's and holds for every build that team signs; for an ad hoc
+# pre-release build, `identifier "com.wezzard.relay-agent"` alone, because an
+# ad hoc designated requirement is its code hash, which every new build
+# changes, and machine-service replaces the build at lease time (vm-service
+# DC-224). sshd-keygen-wrapper keeps its rows while SSH is a fallback link.
 source "${0:A:h}/lib.zsh"
 
 if ! csrutil status 2>/dev/null | grep -qi 'disabled'; then
@@ -39,6 +41,7 @@ fi
 CLIENT=/usr/libexec/sshd-keygen-wrapper
 AGENT="$HOME/.local/libexec/relay-agent/relay-agent"
 AGENT_ID=com.wezzard.relay-agent
+PACKAGE="$HOME/.local/libexec/relay-agent/package.json"
 [[ -x "$CLIENT" ]] || { glog "missing Apple Events client $CLIENT"; exit 1 }
 [[ -x "$AGENT" ]] || { glog "missing Apple Events client $AGENT (phase 62)"; exit 1 }
 DB=$(user_tcc_db) || { glog "no single user TCC database owned by $USER under /private/var/containers/Data/ProtectedSystem"; exit 1 }
@@ -85,13 +88,23 @@ CLIENTS=("$CLIENT" "$AGENT")
 CLIENT_REQ[$CLIENT]=$(csreq_hex "$CLIENT") || { glog "cannot compute the designated requirement of $CLIENT"; exit 1 }
 codesign --verify --strict -R="identifier \"$AGENT_ID\"" "$AGENT" \
   || { glog "$AGENT is not signed with the identifier $AGENT_ID"; exit 1 }
-CLIENT_REQ[$AGENT]=$(identifier_req_hex "$AGENT_ID") || { glog "cannot compile the requirement for $AGENT_ID"; exit 1 }
+AGENT_KIND=$(relay_agent_signing "$PACKAGE" kind) && AGENT_REQ=$(relay_agent_signing "$PACKAGE" requirement) \
+  || { glog "no relay agent signing in $PACKAGE (phase 62)"; exit 1 }
+codesign --verify --strict -R="$AGENT_REQ" "$AGENT" \
+  || { glog "$AGENT does not meet its package's requirement ($AGENT_KIND)"; exit 1 }
+CLIENT_REQ[$AGENT]=$(requirement_hex "$AGENT_REQ") || { glog "cannot compile the requirement for $AGENT_ID"; exit 1 }
+if [[ "$AGENT_KIND" == developer-id ]]; then
+  # Both through csreq: the blob Security.framework makes for the designated
+  # requirement nests its `and`s otherwise than csreq compiles the same text.
+  [[ "$(requirement_hex "$(designated_requirement "$AGENT")")" == "${CLIENT_REQ[$AGENT]}" ]] \
+    || { glog "$AGENT's designated requirement is not the one its package names"; exit 1 }
+fi
 
 # --- rows ---------------------------------------------------------------------
 # service           kTCCServiceAppleEvents            (Automation)
 # client            path, client_type 1               (sshd-keygen-wrapper, relay agent)
 # auth_value 2      allowed; auth_reason 2 user consent; auth_version 1
-# csreq             client's requirement (designated; identifier for the agent)
+# csreq             client's requirement (designated; the package's for the agent)
 # indirect object   target bundle id (type 0) + target's designated requirement
 SQL=$(mktemp)
 print -r -- 'BEGIN;' > "$SQL"
