@@ -1,6 +1,6 @@
 #!/bin/zsh
 # Phase 65 — Apple Events (Automation) grants for osascript run over SSH and
-# by the relay agent.
+# in relayed commands, which macOS charges to /bin/zsh.
 #
 # macOS attributes Apple Events sent from an SSH session to the session's
 # responsible process, /usr/libexec/sshd-keygen-wrapper, and the first script
@@ -14,20 +14,19 @@
 # store — valid only because the CI image has SIP disabled. Automation rows
 # (kTCCServiceAppleEvents) live in the USER database (on macOS 27 inside a
 # protected container, see user_tcc_db), one per (client, target
-# app). Only sshd-keygen-wrapper is granted, and only towards app bundles that
-# ship in the image; both sides are pinned to their designated code requirement
+# app). Only sshd-keygen-wrapper and /bin/zsh are granted, and only towards app
+# bundles that ship in the image; both sides are pinned to their designated code requirement
 # so a replaced binary does not inherit the grant. Apps whose data TCC classes
 # as private (Reminders, Contacts, Calendar, Photos, Music library) sit behind a
 # second, per-user data-class consent; the same client gets those five rows
 # too. Idempotent: reruns replace.
 #
-# The relay agent (phase 62) gets the same rows (docs/relay-agent.md RA-I4):
-# every action it runs is its child, so macOS attributes the action to it. Its
-# rows are pinned to the requirement `identifier "com.wezzard.relay-agent"`, not
-# to its designated requirement: an ad hoc signature's designated requirement
-# is its code hash, which every new build changes, and machine-service replaces
-# the build at lease time. vm-service signs every build with that identifier
-# (vm-service DC-1xx-REL-1). sshd-keygen-wrapper keeps its rows while SSH is a
+# A relayed command gets the same rows through /bin/zsh (vm-service DC-310,
+# DC-332): the relay agent runs each macOS command as a launchd job of its own
+# whose first program is the user's shell, and macOS charges an Apple Event to
+# that first program, /bin/zsh, never to the relay agent, which holds no grant
+# (vm-service DC-309). /bin/zsh is pinned to its designated requirement, as
+# sshd-keygen-wrapper is. sshd-keygen-wrapper keeps its rows while SSH is a
 # fallback link.
 source "${0:A:h}/lib.zsh"
 
@@ -37,10 +36,9 @@ if ! csrutil status 2>/dev/null | grep -qi 'disabled'; then
 fi
 
 CLIENT=/usr/libexec/sshd-keygen-wrapper
-AGENT="$HOME/.local/libexec/relay-agent/relay-agent"
-AGENT_ID=com.wezzard.relay-agent
+ZSH=/bin/zsh
 [[ -x "$CLIENT" ]] || { glog "missing Apple Events client $CLIENT"; exit 1 }
-[[ -x "$AGENT" ]] || { glog "missing Apple Events client $AGENT (phase 62)"; exit 1 }
+[[ -x "$ZSH" ]] || { glog "missing Apple Events client $ZSH"; exit 1 }
 DB=$(user_tcc_db) || { glog "no single user TCC database owned by $USER under /private/var/containers/Data/ProtectedSystem"; exit 1 }
 
 # --- schema gate --------------------------------------------------------------
@@ -81,17 +79,16 @@ done
 
 typeset -a CLIENTS
 typeset -A CLIENT_REQ
-CLIENTS=("$CLIENT" "$AGENT")
-CLIENT_REQ[$CLIENT]=$(csreq_hex "$CLIENT") || { glog "cannot compute the designated requirement of $CLIENT"; exit 1 }
-codesign --verify --strict -R="identifier \"$AGENT_ID\"" "$AGENT" \
-  || { glog "$AGENT is not signed with the identifier $AGENT_ID"; exit 1 }
-CLIENT_REQ[$AGENT]=$(identifier_req_hex "$AGENT_ID") || { glog "cannot compile the requirement for $AGENT_ID"; exit 1 }
+CLIENTS=("$CLIENT" "$ZSH")
+for c in "${CLIENTS[@]}"; do
+  CLIENT_REQ[$c]=$(csreq_hex "$c") || { glog "cannot compute the designated requirement of $c"; exit 1 }
+done
 
 # --- rows ---------------------------------------------------------------------
 # service           kTCCServiceAppleEvents            (Automation)
-# client            path, client_type 1               (sshd-keygen-wrapper, relay agent)
+# client            path, client_type 1               (sshd-keygen-wrapper, /bin/zsh)
 # auth_value 2      allowed; auth_reason 2 user consent; auth_version 1
-# csreq             client's requirement (designated; identifier for the agent)
+# csreq             client's designated requirement
 # indirect object   target bundle id (type 0) + target's designated requirement
 SQL=$(mktemp)
 print -r -- 'BEGIN;' > "$SQL"

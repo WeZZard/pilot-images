@@ -185,6 +185,16 @@ if [[ -z "$_ae_missing" ]]; then
 else
   bad "data-class grant rows missing for sshd-keygen-wrapper:$_ae_missing — scripting those apps would prompt"
 fi
+# A relayed command is a launchd job whose first program is /bin/zsh, which
+# macOS charges for its Apple Events (vm-service DC-310, DC-332): /bin/zsh holds
+# the same rows as sshd-keygen-wrapper, pinned to its designated requirement.
+_zs_rows=$(sqlite3 "$_ae_db" "SELECT count(*) FROM access WHERE service='kTCCServiceAppleEvents' AND client='/bin/zsh' AND client_type=1 AND auth_value=2;" 2>/dev/null)
+_zs_data=$(sqlite3 "$_ae_db" "SELECT count(*) FROM access WHERE client='/bin/zsh' AND client_type=1 AND auth_value=2 AND service IN ('kTCCServiceReminders','kTCCServiceAddressBook','kTCCServiceCalendar','kTCCServicePhotos','kTCCServiceMediaLibrary');" 2>/dev/null)
+if [[ "${_zs_rows:-0}" -gt 0 && "$_zs_rows" == "$_ae_rows" && "$_zs_data" == 5 ]]; then
+  ok "Apple Events rows for /bin/zsh ($_zs_rows targets) and data-class rows (5), for relayed commands"
+else
+  bad "/bin/zsh TCC rows: Apple Events ${_zs_rows:-0} (sshd-keygen-wrapper ${_ae_rows:-0}), data-class ${_zs_data:-0}/5 — relayed osascript would prompt"
+fi
 for _ae_probe in "System Events:get name of every process" "Finder:get name of startup disk"; do
   _ae_app="${_ae_probe%%:*}"
   if perl -e 'alarm 20; exec @ARGV' osascript -e "tell application \"$_ae_app\" to ${_ae_probe#*:}" >/dev/null 2>&1; then
@@ -196,8 +206,7 @@ done
 # --- relay agent (phases 62 and 65; docs/relay-agent.md RA-I2, RA-I4, RA-I6) ---
 # launchd starts the agent in the Aqua session of the automatic login and keeps
 # it there, waiting idle for the configuration machine-service writes at lease
-# time. Its Apple Events and data-class rows are pinned to its signing
-# identifier, the job's label, which the installed build must carry.
+# time. The installed build must carry its signing identifier, the job's label.
 _ra_label=com.wezzard.relay-agent
 _ra_agent="$HOME/.local/libexec/relay-agent/relay-agent"
 _ra_plist="$HOME/Library/LaunchAgents/$_ra_label.plist"
@@ -239,16 +248,13 @@ if [[ ! -e "$HOME/.config/relay-agent/config.json" ]] && grep -q 'waiting for it
 else
   bad "relay agent is not waiting for its configuration (see ~/Library/Logs/relay-agent.log)"
 fi
-_ra_req=$(sqlite3 "$_ae_db" "SELECT DISTINCT hex(csreq) FROM access WHERE client='$_ra_agent' AND client_type=1 AND auth_value=2;" 2>/dev/null)
-_ra_rows=$(sqlite3 "$_ae_db" "SELECT count(*) FROM access WHERE service='kTCCServiceAppleEvents' AND client='$_ra_agent' AND client_type=1 AND auth_value=2;" 2>/dev/null)
-_ra_data=$(sqlite3 "$_ae_db" "SELECT count(*) FROM access WHERE client='$_ra_agent' AND client_type=1 AND auth_value=2 AND service IN ('kTCCServiceReminders','kTCCServiceAddressBook','kTCCServiceCalendar','kTCCServicePhotos','kTCCServiceMediaLibrary');" 2>/dev/null)
-_ra_blob=$(mktemp)
-_ra_want=$(csreq -r="identifier \"$_ra_label\"" -b "$_ra_blob" 2>/dev/null && xxd -p "$_ra_blob" | tr -d '\n' | tr a-f A-F)
-rm -f "$_ra_blob"
-if [[ "${_ra_rows:-0}" -gt 0 && "$_ra_rows" == "$_ae_rows" && "$_ra_data" == 5 && -n "$_ra_want" && "$_ra_req" == "$_ra_want" ]]; then
-  ok "relay agent Apple Events rows ($_ra_rows targets) and data-class rows (5), pinned to identifier $_ra_label"
+# The relay agent holds no privacy grant (vm-service DC-309): a relayed command
+# is never its child, so a row for it would only widen what it could do.
+_ra_rows=$(sqlite3 "$_ae_db" "SELECT count(*) FROM access WHERE client='$_ra_agent';" 2>/dev/null)
+if [[ "${_ra_rows:-0}" == 0 ]]; then
+  ok "relay agent holds no TCC rows"
 else
-  bad "relay agent TCC rows: Apple Events ${_ra_rows:-0} (sshd-keygen-wrapper ${_ae_rows:-0}), data-class ${_ra_data:-0}/5, requirement ${_ra_req:-none}"
+  bad "relay agent holds $_ra_rows TCC rows; it should hold none (vm-service DC-309)"
 fi
 if pi list 2>/dev/null | grep -q "pi-web-access"; then ok "pi extensions synced"; else bad "pi extensions not synced"; fi
 if "$HOME/.local/bin/claude" mcp list 2>/dev/null | grep -q "cua-driver"; then ok "claude MCP registrations"; else bad "claude MCP registrations"; fi

@@ -43,10 +43,10 @@
 
 ## RA-I4: Privacy permissions on macOS
 
-- macOS attributes the privacy permissions of an action to the relay agent's signed executable, because every action runs as the relay agent's child.
-- A guest phase grants the relay agent the Apple Events and data-class permissions that phase 65 grants to `sshd-keygen-wrapper` today, written to the user's TCC database the same way.
+- The relay agent holds no privacy permission (vm-service DC-309). It runs each macOS command as a launchd job of its own whose first program is the user's shell, so macOS attributes the command's privacy requests to `/bin/zsh`, never to the relay agent (vm-service DC-310).
+- Phase 65 grants `/bin/zsh` the Apple Events and data-class permissions it grants `sshd-keygen-wrapper`, written to the user's TCC database the same way and pinned to `/bin/zsh`'s designated requirement (owner, 2026-11-11, vm-service DC-332).
 - Phase 65's grants for `sshd-keygen-wrapper` stay while SSH remains a fallback link.
-- Phase 65 writes both clients' rows. The relay agent's rows name it by path, as `sshd-keygen-wrapper`'s do, and are pinned to the code requirement `identifier "com.wezzard.relay-agent"` rather than to its designated requirement. vm-service signs the macOS relay agent ad hoc with that identifier, the LaunchAgent's label; an ad hoc signature's designated requirement is its code hash, which changes with every build, so a grant pinned to it would end when machine-service replaces the executable. Phase 62 and phase 65 refuse an executable that does not meet the requirement.
+- Acceptance checks that `/bin/zsh` holds as many Apple Events rows as `sshd-keygen-wrapper` and the five data-class rows, and that the relay agent holds no row.
 
 ## RA-I5: The Ubuntu desktop session
 

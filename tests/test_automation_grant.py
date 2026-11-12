@@ -1,4 +1,4 @@
-"""Phase 65 (Apple Events grants for SSH-run osascript and the relay agent) and its acceptance probe.
+"""Phase 65 (Apple Events grants for SSH-run osascript and relayed commands, through /bin/zsh) and its acceptance probe.
 
 Text-level contracts only: the live TCC row format is verified in-guest by the
 phase itself and by acceptance, both over SSH so the client is the real one.
@@ -25,12 +25,12 @@ class AutomationGrantPhaseTests(unittest.TestCase):
         self.assertIn('csreq_hex /Applications/CuaDriver.app', driver)
         self.assertNotIn('SecCodeCopyDesignatedRequirement', driver)
 
-    def test_grant_is_sip_off_only_and_scoped_to_the_ssh_client_and_the_relay_agent(self):
+    def test_grant_is_sip_off_only_and_scoped_to_the_ssh_client_and_zsh(self):
         source = PHASE.read_text()
         self.assertIn("csrutil status", source)
         self.assertIn("CLIENT=/usr/libexec/sshd-keygen-wrapper", source)
-        self.assertIn('AGENT="$HOME/.local/libexec/relay-agent/relay-agent"', source)
-        self.assertIn('CLIENTS=("$CLIENT" "$AGENT")', source)
+        self.assertIn('ZSH=/bin/zsh', source)
+        self.assertIn('CLIENTS=("$CLIENT" "$ZSH")', source)
         # Every row written names one of those two clients by path; no
         # bundle-id or wildcard client anywhere.
         self.assertEqual(source.count("VALUES ("), source.count("'$c',1,"))

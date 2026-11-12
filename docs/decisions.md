@@ -369,3 +369,9 @@ Owner decisions that shape the images in this repo. Newest first.
 
 - **Found (agent, live):** a fresh macos27 build on a VM host whose only display is a 1x 1080p panel failed acceptance on one row, `display not 1920x1080 HiDPI @ 60Hz (got: 1920x1080 px=1920x1080 @60)`, and phase 25 logged `this display offers no 1920x1080 HiDPI (2x) mode`. The line sets `--display 1920x1080`, which Tart reads as points and converts to pixels with the backing scale of the host's main screen, so on a 1x host the guest is given 1920x1080 pixels and has no 2x mode to select. The same build input on a host with a 4K main display at 2x gives the guest 3840x2160 pixels. A clone booted on a 1x host meets the same display, whatever base it came from.
 - **Decision (agent):** build and accept the macOS lines on a host whose main display is Retina, and copy the promoted base to other hosts with `host/sync-images.zsh`. The host's display setting is not the image's to change, and the HiDPI acceptance row stays: it is what proves the Retina contract.
+
+## 2026-11-11 — Relayed commands get their Apple Events grant through /bin/zsh
+
+- **Context (vm-service DC-309, DC-310):** since vm-service 0.2.0 the relay agent runs each macOS command as a launchd job of its own whose first program is the user's shell, and macOS charges the command's Apple Events to that program, `/bin/zsh`, never to the relay agent; the relay layer holds no privacy grant.
+- **Decision (owner, 2026-11-11, vm-service DC-332):** "Grant zsh in images". Phase 65 grants `/bin/zsh` the Apple Events and data-class rows it grants `sshd-keygen-wrapper`, pinned to its designated requirement, so an `osascript` task keeps working after the deploy. The relay agent's rows are removed, and acceptance checks that it holds none. `sshd-keygen-wrapper` keeps its rows while SSH is a fallback link.
+

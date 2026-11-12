@@ -338,15 +338,28 @@ class MacPhaseTests(unittest.TestCase):
 
 
 class MacGrantTests(unittest.TestCase):
-    def test_phase_65_grants_the_agent_the_rows_it_grants_sshd_keygen_wrapper(self):
+    def test_phase_65_grants_zsh_and_never_the_agent(self):
+        # vm-service DC-309, DC-310, DC-332: a relayed command is a launchd job
+        # whose first program is /bin/zsh, which macOS charges; the relay agent
+        # holds no grant.
         for line in MACOS:
             with self.subTest(line=line):
                 source = (REPO / 'images' / line / 'guest/65-automation.zsh').read_text()
-                self.assertIn('CLIENTS=("$CLIENT" "$AGENT")', source)
-                self.assertIn('AGENT="$HOME/.local/libexec/relay-agent/relay-agent"', source)
-                self.assertIn('CLIENT_REQ[$AGENT]=$(identifier_req_hex "$AGENT_ID")', source)
-                self.assertIn('CLIENT_REQ[$CLIENT]=$(csreq_hex "$CLIENT")', source)
-                self.assertEqual(source.count('for c in "${CLIENTS[@]}"; do'), 3, 'Apple Events rows, data-class rows, verification')
+                self.assertIn('CLIENTS=("$CLIENT" "$ZSH")', source)
+                self.assertIn('ZSH=/bin/zsh', source)
+                self.assertIn('CLIENT_REQ[$c]=$(csreq_hex "$c")', source)
+                self.assertNotIn('relay-agent/relay-agent', source)
+                self.assertNotIn('identifier_req_hex', source)
+                self.assertEqual(source.count('for c in "${CLIENTS[@]}"; do'), 4, 'requirements, Apple Events rows, data-class rows, verification')
+
+    def test_acceptance_wants_zsh_rows_and_no_agent_rows(self):
+        for line in MACOS:
+            with self.subTest(line=line):
+                source = (REPO / 'images' / line / 'checks/acceptance.zsh').read_text()
+                self.assertIn("client='/bin/zsh'", source)
+                self.assertIn('"$_zs_rows" == "$_ae_rows" && "$_zs_data" == 5', source)
+                self.assertIn("SELECT count(*) FROM access WHERE client='$_ra_agent';", source)
+                self.assertIn('ok "relay agent holds no TCC rows"', source)
 
     def test_the_agent_requirement_names_only_its_signing_identifier(self):
         for line in MACOS:
