@@ -5,7 +5,7 @@
     "schemaVersion": 1,
     "os": "linux",
     "architecture": "arm64",
-    "collectedAt": "2026-11-02T16:16:50.797856Z",
+    "collectedAt": "2026-11-12T15:38:43.220151Z",
     "sources": [
       {
         "id": "dpkg-query",
@@ -9915,8 +9915,8 @@
   },
   "provenance": {
     "extractionMode": "work",
-    "evidenceId": "ubuntu2404-5VNmuYWY",
-    "rawSha256": "6a4bc33316e38578b93b34564206f55343bbcc9e4eb96d20d7cab0f56379b837",
+    "evidenceId": "ubuntu2404-JNCjWZ3b",
+    "rawSha256": "597d2133af930e60baccbfd5aeeab86ab62e32ad01035d130f84127c5c5b27d9",
     "collectorSha256": "54497d48f69d6b12f653a3a6efbbe87310345329edd17d0894570f243fec4e40",
     "aliasesSha256": "fb88e6b824c4d17578f498a265333f56a580d974c8f07a547d715a2744cdbed5"
   }
