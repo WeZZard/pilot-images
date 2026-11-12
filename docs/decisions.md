@@ -375,3 +375,9 @@ Owner decisions that shape the images in this repo. Newest first.
 - **Context (vm-service DC-309, DC-310):** since vm-service 0.2.0 the relay agent runs each macOS command as a launchd job of its own whose first program is the user's shell, and macOS charges the command's Apple Events to that program, `/bin/zsh`, never to the relay agent; the relay layer holds no privacy grant.
 - **Decision (owner, 2026-11-11, vm-service DC-332):** "Grant zsh in images". Phase 65 grants `/bin/zsh` the Apple Events and data-class rows it grants `sshd-keygen-wrapper`, pinned to its designated requirement, so an `osascript` task keeps working after the deploy. The relay agent's rows are removed, and acceptance checks that it holds none. `sshd-keygen-wrapper` keeps its rows while SSH is a fallback link.
 
+
+## 2026-11-12 — The relay agent lock pins machine-service 0.2.0
+
+- **Decision (owner, 2026-11-12):** "Go ahead and merge it, then rebuild the bases." The bases are rebuilt with relay agent `v0.2.0`, refining the 2026-11-02 pin of `v0.2.0-rc.3`.
+- **Repository (agent, taken under the standing default):** vm-service was renamed `WeZZard/machine-service`; the lock names the new repository, because `update-software.py` refuses an asset whose URL names another.
+- **Former grant (agent, taken under the standing default):** phase 65 deletes the TCC rows a base from before vm-service DC-309 gave the relay agent, and fails if any remain.
