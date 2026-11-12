@@ -5,7 +5,7 @@
     "schemaVersion": 1,
     "os": "macos",
     "architecture": "arm64",
-    "collectedAt": "2026-11-03T14:46:11.701665Z",
+    "collectedAt": "2026-11-12T15:51:01.726779Z",
     "sources": [
       {
         "id": "bundles",
@@ -1196,8 +1196,8 @@
   },
   "provenance": {
     "extractionMode": "work",
-    "evidenceId": "macos27-Nfws15UI",
-    "rawSha256": "856f9c9116ad705cbafe0185b9377d7bb0867d3f5a4806b4669babf94b16a43c",
+    "evidenceId": "macos27-h2Q0zCla",
+    "rawSha256": "8fb30127db45ce066180741b1d1a749cfccf9800baa4c7bf6f25c53298eee7ba",
     "collectorSha256": "54497d48f69d6b12f653a3a6efbbe87310345329edd17d0894570f243fec4e40",
     "aliasesSha256": "fb88e6b824c4d17578f498a265333f56a580d974c8f07a547d715a2744cdbed5"
   }
