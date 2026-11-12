@@ -5,7 +5,7 @@
     "schemaVersion": 1,
     "os": "linux",
     "architecture": "arm64",
-    "collectedAt": "2026-09-22T01:24:52.545781Z",
+    "collectedAt": "2026-11-02T16:16:50.797856Z",
     "sources": [
       {
         "id": "dpkg-query",
@@ -43,7 +43,7 @@
         "aliases": [
           "Chromium Browser"
         ],
-        "version": "153.0.8010.36"
+        "version": "156.0.8078.47"
       },
       {
         "id": "dpkg:accountsservice",
@@ -85,7 +85,7 @@
         "id": "dpkg:alsa-ucm-conf",
         "name": "alsa-ucm-conf",
         "aliases": [],
-        "version": "1.2.10-1ubuntu5.14"
+        "version": "1.2.10-1ubuntu5.15"
       },
       {
         "id": "dpkg:alsa-utils",
@@ -109,7 +109,7 @@
         "id": "dpkg:apparmor",
         "name": "apparmor",
         "aliases": [],
-        "version": "4.0.1really4.0.1-0ubuntu0.24.04.7"
+        "version": "4.0.1really4.0.1-0ubuntu0.24.04.9"
       },
       {
         "id": "dpkg:apport",
@@ -259,19 +259,19 @@
         "id": "dpkg:bind9-dnsutils",
         "name": "bind9-dnsutils",
         "aliases": [],
-        "version": "1:9.18.39-0ubuntu0.24.04.7"
+        "version": "1:9.18.39-0ubuntu0.24.04.8"
       },
       {
         "id": "dpkg:bind9-host",
         "name": "bind9-host",
         "aliases": [],
-        "version": "1:9.18.39-0ubuntu0.24.04.7"
+        "version": "1:9.18.39-0ubuntu0.24.04.8"
       },
       {
         "id": "dpkg:bind9-libs:arm64",
         "name": "bind9-libs:arm64",
         "aliases": [],
-        "version": "1:9.18.39-0ubuntu0.24.04.7"
+        "version": "1:9.18.39-0ubuntu0.24.04.8"
       },
       {
         "id": "dpkg:binutils",
@@ -295,19 +295,19 @@
         "id": "dpkg:bluez",
         "name": "bluez",
         "aliases": [],
-        "version": "5.72-0ubuntu5.5"
+        "version": "5.72-0ubuntu5.8"
       },
       {
         "id": "dpkg:bluez-cups",
         "name": "bluez-cups",
         "aliases": [],
-        "version": "5.72-0ubuntu5.5"
+        "version": "5.72-0ubuntu5.8"
       },
       {
         "id": "dpkg:bluez-obexd",
         "name": "bluez-obexd",
         "aliases": [],
-        "version": "5.72-0ubuntu5.5"
+        "version": "5.72-0ubuntu5.8"
       },
       {
         "id": "dpkg:bolt",
@@ -379,7 +379,7 @@
         "id": "dpkg:ca-certificates",
         "name": "ca-certificates",
         "aliases": [],
-        "version": "20260601~24.04.1"
+        "version": "20260816ubuntu0.24.04.1"
       },
       {
         "id": "dpkg:cloud-guest-utils",
@@ -391,7 +391,7 @@
         "id": "dpkg:cloud-init",
         "name": "cloud-init",
         "aliases": [],
-        "version": "26.1-0ubuntu1~24.04.1"
+        "version": "26.2-0ubuntu1~24.04.2"
       },
       {
         "id": "dpkg:cloud-initramfs-copymods",
@@ -595,7 +595,7 @@
         "id": "dpkg:curl",
         "name": "curl",
         "aliases": [],
-        "version": "8.5.0-2ubuntu10.13"
+        "version": "8.5.0-2ubuntu10.16"
       },
       {
         "id": "dpkg:dash",
@@ -733,7 +733,7 @@
         "id": "dpkg:distro-info-data",
         "name": "distro-info-data",
         "aliases": [],
-        "version": "0.72-0ubuntu0.24.04.1"
+        "version": "2026.10.12-0ubuntu0.24.04.1"
       },
       {
         "id": "dpkg:dmeventd",
@@ -745,7 +745,7 @@
         "id": "dpkg:dmidecode",
         "name": "dmidecode",
         "aliases": [],
-        "version": "3.5-3ubuntu0.1"
+        "version": "3.5-3ubuntu0.2"
       },
       {
         "id": "dpkg:dmsetup",
@@ -769,7 +769,7 @@
         "id": "dpkg:dnsmasq-base",
         "name": "dnsmasq-base",
         "aliases": [],
-        "version": "2.91-0ubuntu0.24.04.1"
+        "version": "2.91-0ubuntu0.24.04.2"
       },
       {
         "id": "dpkg:docbook-xml",
@@ -793,7 +793,7 @@
         "id": "dpkg:dracut-install",
         "name": "dracut-install",
         "aliases": [],
-        "version": "060+5-1ubuntu3.3"
+        "version": "060+5-1ubuntu3.4"
       },
       {
         "id": "dpkg:e2fsprogs",
@@ -1201,7 +1201,7 @@
         "id": "dpkg:ghostscript",
         "name": "ghostscript",
         "aliases": [],
-        "version": "10.02.1~dfsg1-0ubuntu7.9"
+        "version": "10.02.1~dfsg1-0ubuntu7.10"
       },
       {
         "id": "dpkg:gir1.2-accountsservice-1.0:arm64",
@@ -1279,7 +1279,7 @@
         "id": "dpkg:gir1.2-glib-2.0:arm64",
         "name": "gir1.2-glib-2.0:arm64",
         "aliases": [],
-        "version": "2.80.0-6ubuntu3.9"
+        "version": "2.80.0-6ubuntu3.10"
       },
       {
         "id": "dpkg:gir1.2-gmenu-3.0:arm64",
@@ -1381,7 +1381,7 @@
         "id": "dpkg:gir1.2-mutter-14:arm64",
         "name": "gir1.2-mutter-14:arm64",
         "aliases": [],
-        "version": "46.2-1ubuntu0.24.04.16"
+        "version": "46.2-1ubuntu0.24.04.18"
       },
       {
         "id": "dpkg:gir1.2-nm-1.0:arm64",
@@ -1429,7 +1429,7 @@
         "id": "dpkg:gir1.2-rsvg-2.0:arm64",
         "name": "gir1.2-rsvg-2.0:arm64",
         "aliases": [],
-        "version": "2.58.0+dfsg-1build1"
+        "version": "2.58.0+dfsg-1ubuntu0.1"
       },
       {
         "id": "dpkg:gir1.2-secret-1:arm64",
@@ -1447,7 +1447,7 @@
         "id": "dpkg:gir1.2-soup-3.0:arm64",
         "name": "gir1.2-soup-3.0:arm64",
         "aliases": [],
-        "version": "3.4.4-5ubuntu0.8"
+        "version": "3.4.4-5ubuntu0.9"
       },
       {
         "id": "dpkg:gir1.2-upowerglib-1.0:arm64",
@@ -1483,13 +1483,13 @@
         "id": "dpkg:git",
         "name": "git",
         "aliases": [],
-        "version": "1:2.43.0-1ubuntu7.3"
+        "version": "1:2.43.0-1ubuntu7.4"
       },
       {
         "id": "dpkg:git-man",
         "name": "git-man",
         "aliases": [],
-        "version": "1:2.43.0-1ubuntu7.3"
+        "version": "1:2.43.0-1ubuntu7.4"
       },
       {
         "id": "dpkg:gjs",
@@ -1675,13 +1675,13 @@
         "id": "dpkg:gnome-shell",
         "name": "gnome-shell",
         "aliases": [],
-        "version": "46.0-0ubuntu6~24.04.14"
+        "version": "46.0-0ubuntu6~24.04.16"
       },
       {
         "id": "dpkg:gnome-shell-common",
         "name": "gnome-shell-common",
         "aliases": [],
-        "version": "46.0-0ubuntu6~24.04.14"
+        "version": "46.0-0ubuntu6~24.04.16"
       },
       {
         "id": "dpkg:gnome-shell-extension-appindicator",
@@ -1903,7 +1903,7 @@
         "id": "dpkg:gstreamer1.0-plugins-good:arm64",
         "name": "gstreamer1.0-plugins-good:arm64",
         "aliases": [],
-        "version": "1.24.2-1ubuntu1.7"
+        "version": "1.24.2-1ubuntu1.8"
       },
       {
         "id": "dpkg:gstreamer1.0-tools",
@@ -1939,37 +1939,37 @@
         "id": "dpkg:gvfs-backends",
         "name": "gvfs-backends",
         "aliases": [],
-        "version": "1.54.4-0ubuntu1~24.04.2"
+        "version": "1.54.4-0ubuntu1~24.04.4"
       },
       {
         "id": "dpkg:gvfs-common",
         "name": "gvfs-common",
         "aliases": [],
-        "version": "1.54.4-0ubuntu1~24.04.2"
+        "version": "1.54.4-0ubuntu1~24.04.4"
       },
       {
         "id": "dpkg:gvfs-daemons",
         "name": "gvfs-daemons",
         "aliases": [],
-        "version": "1.54.4-0ubuntu1~24.04.2"
+        "version": "1.54.4-0ubuntu1~24.04.4"
       },
       {
         "id": "dpkg:gvfs-fuse",
         "name": "gvfs-fuse",
         "aliases": [],
-        "version": "1.54.4-0ubuntu1~24.04.2"
+        "version": "1.54.4-0ubuntu1~24.04.4"
       },
       {
         "id": "dpkg:gvfs-libs:arm64",
         "name": "gvfs-libs:arm64",
         "aliases": [],
-        "version": "1.54.4-0ubuntu1~24.04.2"
+        "version": "1.54.4-0ubuntu1~24.04.4"
       },
       {
         "id": "dpkg:gvfs:arm64",
         "name": "gvfs:arm64",
         "aliases": [],
-        "version": "1.54.4-0ubuntu1~24.04.2"
+        "version": "1.54.4-0ubuntu1~24.04.4"
       },
       {
         "id": "dpkg:gzip",
@@ -1987,13 +1987,13 @@
         "id": "dpkg:heif-gdk-pixbuf:arm64",
         "name": "heif-gdk-pixbuf:arm64",
         "aliases": [],
-        "version": "1.17.6-1ubuntu4.8"
+        "version": "1.17.6-1ubuntu4.9"
       },
       {
         "id": "dpkg:heif-thumbnailer",
         "name": "heif-thumbnailer",
         "aliases": [],
-        "version": "1.17.6-1ubuntu4.8"
+        "version": "1.17.6-1ubuntu4.9"
       },
       {
         "id": "dpkg:hicolor-icon-theme",
@@ -2341,7 +2341,7 @@
         "id": "dpkg:libapparmor1:arm64",
         "name": "libapparmor1:arm64",
         "aliases": [],
-        "version": "4.0.1really4.0.1-0ubuntu0.24.04.7"
+        "version": "4.0.1really4.0.1-0ubuntu0.24.04.9"
       },
       {
         "id": "dpkg:libappstream5:arm64",
@@ -2359,7 +2359,7 @@
         "id": "dpkg:libarchive13t64:arm64",
         "name": "libarchive13t64:arm64",
         "aliases": [],
-        "version": "3.7.2-2ubuntu0.8"
+        "version": "3.7.2-2ubuntu0.9"
       },
       {
         "id": "dpkg:libargon2-1:arm64",
@@ -2461,19 +2461,19 @@
         "id": "dpkg:libaudit-common",
         "name": "libaudit-common",
         "aliases": [],
-        "version": "1:3.1.2-2.1build1.1"
+        "version": "1:3.1.2-2.1ubuntu0.1"
       },
       {
         "id": "dpkg:libaudit1:arm64",
         "name": "libaudit1:arm64",
         "aliases": [],
-        "version": "1:3.1.2-2.1build1.1"
+        "version": "1:3.1.2-2.1ubuntu0.1"
       },
       {
         "id": "dpkg:libauthen-sasl-perl",
         "name": "libauthen-sasl-perl",
         "aliases": [],
-        "version": "2.1700-1"
+        "version": "2.1700-1ubuntu0.1"
       },
       {
         "id": "dpkg:libavahi-client3:arm64",
@@ -2623,7 +2623,7 @@
         "id": "dpkg:libbluetooth3:arm64",
         "name": "libbluetooth3:arm64",
         "aliases": [],
-        "version": "5.72-0ubuntu5.5"
+        "version": "5.72-0ubuntu5.8"
       },
       {
         "id": "dpkg:libbpf1:arm64",
@@ -2647,7 +2647,7 @@
         "id": "dpkg:libbrotli1:arm64",
         "name": "libbrotli1:arm64",
         "aliases": [],
-        "version": "1.1.0-2build2"
+        "version": "1.1.0-2ubuntu0.1"
       },
       {
         "id": "dpkg:libbsd0:arm64",
@@ -2803,7 +2803,7 @@
         "id": "dpkg:libcares2:arm64",
         "name": "libcares2:arm64",
         "aliases": [],
-        "version": "1.27.0-1.0ubuntu1"
+        "version": "1.27.0-1.0ubuntu1.1"
       },
       {
         "id": "dpkg:libcbor0.10:arm64",
@@ -2965,13 +2965,13 @@
         "id": "dpkg:libcurl3t64-gnutls:arm64",
         "name": "libcurl3t64-gnutls:arm64",
         "aliases": [],
-        "version": "8.5.0-2ubuntu10.13"
+        "version": "8.5.0-2ubuntu10.16"
       },
       {
         "id": "dpkg:libcurl4t64:arm64",
         "name": "libcurl4t64:arm64",
         "aliases": [],
-        "version": "8.5.0-2ubuntu10.13"
+        "version": "8.5.0-2ubuntu10.16"
       },
       {
         "id": "dpkg:libdaemon0:arm64",
@@ -3241,7 +3241,7 @@
         "id": "dpkg:libegl-mesa0:arm64",
         "name": "libegl-mesa0:arm64",
         "aliases": [],
-        "version": "25.2.8-0ubuntu0.24.04.2"
+        "version": "25.2.8-0ubuntu0.24.04.4"
       },
       {
         "id": "dpkg:libegl1:arm64",
@@ -3319,7 +3319,7 @@
         "id": "dpkg:libevent-core-2.1-7t64:arm64",
         "name": "libevent-core-2.1-7t64:arm64",
         "aliases": [],
-        "version": "2.1.12-stable-9ubuntu2.1"
+        "version": "2.1.12-stable-9ubuntu2.2"
       },
       {
         "id": "dpkg:libevview3-3t64:arm64",
@@ -3349,7 +3349,7 @@
         "id": "dpkg:libexpat1:arm64",
         "name": "libexpat1:arm64",
         "aliases": [],
-        "version": "2.6.1-2ubuntu0.5"
+        "version": "2.6.1-2ubuntu0.6"
       },
       {
         "id": "dpkg:libext2fs2t64:arm64",
@@ -3457,13 +3457,13 @@
         "id": "dpkg:libfprint-2-2",
         "name": "libfprint-2-2",
         "aliases": [],
-        "version": "1:1.94.7+tod1-0ubuntu5~24.04.8"
+        "version": "1:1.94.7+tod1-0ubuntu5~24.04.9"
       },
       {
         "id": "dpkg:libfprint-2-tod1:arm64",
         "name": "libfprint-2-tod1:arm64",
         "aliases": [],
-        "version": "1:1.94.7+tod1-0ubuntu5~24.04.8"
+        "version": "1:1.94.7+tod1-0ubuntu5~24.04.9"
       },
       {
         "id": "dpkg:libfreeaptx0:arm64",
@@ -3475,19 +3475,19 @@
         "id": "dpkg:libfreerdp-server3-3:arm64",
         "name": "libfreerdp-server3-3:arm64",
         "aliases": [],
-        "version": "3.31.0+dfsg-0ubuntu0.24.04.1"
+        "version": "3.32.1+dfsg-0ubuntu0.24.04.1"
       },
       {
         "id": "dpkg:libfreerdp3-3:arm64",
         "name": "libfreerdp3-3:arm64",
         "aliases": [],
-        "version": "3.31.0+dfsg-0ubuntu0.24.04.1"
+        "version": "3.32.1+dfsg-0ubuntu0.24.04.1"
       },
       {
         "id": "dpkg:libfreetype6:arm64",
         "name": "libfreetype6:arm64",
         "aliases": [],
-        "version": "2.13.2+dfsg-1ubuntu0.1"
+        "version": "2.13.2+dfsg-1ubuntu0.2"
       },
       {
         "id": "dpkg:libfribidi0:arm64",
@@ -3541,7 +3541,7 @@
         "id": "dpkg:libgbm1:arm64",
         "name": "libgbm1:arm64",
         "aliases": [],
-        "version": "25.2.8-0ubuntu0.24.04.2"
+        "version": "25.2.8-0ubuntu0.24.04.4"
       },
       {
         "id": "dpkg:libgcc-13-dev:arm64",
@@ -3691,7 +3691,7 @@
         "id": "dpkg:libgl1-mesa-dri:arm64",
         "name": "libgl1-mesa-dri:arm64",
         "aliases": [],
-        "version": "25.2.8-0ubuntu0.24.04.2"
+        "version": "25.2.8-0ubuntu0.24.04.4"
       },
       {
         "id": "dpkg:libgl1:arm64",
@@ -3721,19 +3721,19 @@
         "id": "dpkg:libglib2.0-0t64:arm64",
         "name": "libglib2.0-0t64:arm64",
         "aliases": [],
-        "version": "2.80.0-6ubuntu3.9"
+        "version": "2.80.0-6ubuntu3.10"
       },
       {
         "id": "dpkg:libglib2.0-bin",
         "name": "libglib2.0-bin",
         "aliases": [],
-        "version": "2.80.0-6ubuntu3.9"
+        "version": "2.80.0-6ubuntu3.10"
       },
       {
         "id": "dpkg:libglib2.0-data",
         "name": "libglib2.0-data",
         "aliases": [],
-        "version": "2.80.0-6ubuntu3.9"
+        "version": "2.80.0-6ubuntu3.10"
       },
       {
         "id": "dpkg:libglibmm-2.68-1t64:arm64",
@@ -3757,7 +3757,7 @@
         "id": "dpkg:libglx-mesa0:arm64",
         "name": "libglx-mesa0:arm64",
         "aliases": [],
-        "version": "25.2.8-0ubuntu0.24.04.2"
+        "version": "25.2.8-0ubuntu0.24.04.4"
       },
       {
         "id": "dpkg:libglx0:arm64",
@@ -3925,19 +3925,19 @@
         "id": "dpkg:libgs-common",
         "name": "libgs-common",
         "aliases": [],
-        "version": "10.02.1~dfsg1-0ubuntu7.9"
+        "version": "10.02.1~dfsg1-0ubuntu7.10"
       },
       {
         "id": "dpkg:libgs10-common",
         "name": "libgs10-common",
         "aliases": [],
-        "version": "10.02.1~dfsg1-0ubuntu7.9"
+        "version": "10.02.1~dfsg1-0ubuntu7.10"
       },
       {
         "id": "dpkg:libgs10:arm64",
         "name": "libgs10:arm64",
         "aliases": [],
-        "version": "10.02.1~dfsg1-0ubuntu7.9"
+        "version": "10.02.1~dfsg1-0ubuntu7.10"
       },
       {
         "id": "dpkg:libgsf-1-114:arm64",
@@ -4003,7 +4003,7 @@
         "id": "dpkg:libgstreamer-plugins-good1.0-0:arm64",
         "name": "libgstreamer-plugins-good1.0-0:arm64",
         "aliases": [],
-        "version": "1.24.2-1ubuntu1.7"
+        "version": "1.24.2-1ubuntu1.8"
       },
       {
         "id": "dpkg:libgstreamer1.0-0:arm64",
@@ -4183,19 +4183,19 @@
         "id": "dpkg:libheif-plugin-aomdec:arm64",
         "name": "libheif-plugin-aomdec:arm64",
         "aliases": [],
-        "version": "1.17.6-1ubuntu4.8"
+        "version": "1.17.6-1ubuntu4.9"
       },
       {
         "id": "dpkg:libheif-plugin-aomenc:arm64",
         "name": "libheif-plugin-aomenc:arm64",
         "aliases": [],
-        "version": "1.17.6-1ubuntu4.8"
+        "version": "1.17.6-1ubuntu4.9"
       },
       {
         "id": "dpkg:libheif1:arm64",
         "name": "libheif1:arm64",
         "aliases": [],
-        "version": "1.17.6-1ubuntu4.8"
+        "version": "1.17.6-1ubuntu4.9"
       },
       {
         "id": "dpkg:libhogweed6t64:arm64",
@@ -4459,7 +4459,7 @@
         "id": "dpkg:libisns0t64:arm64",
         "name": "libisns0t64:arm64",
         "aliases": [],
-        "version": "0.101-0.3build3"
+        "version": "0.101-0.3ubuntu0.1"
       },
       {
         "id": "dpkg:libitm1:arm64",
@@ -4645,7 +4645,7 @@
         "id": "dpkg:libldb2:arm64",
         "name": "libldb2:arm64",
         "aliases": [],
-        "version": "2:2.8.0+samba4.19.5+dfsg-4ubuntu9.7"
+        "version": "2:2.8.0+samba4.19.5+dfsg-4ubuntu9.8"
       },
       {
         "id": "dpkg:liblerc4:arm64",
@@ -4759,7 +4759,7 @@
         "id": "dpkg:liblzma5:arm64",
         "name": "liblzma5:arm64",
         "aliases": [],
-        "version": "5.6.1+really5.4.5-1ubuntu0.3"
+        "version": "5.6.1+really5.4.5-1ubuntu0.4"
       },
       {
         "id": "dpkg:liblzo2-2:arm64",
@@ -4933,7 +4933,7 @@
         "id": "dpkg:libmutter-14-0:arm64",
         "name": "libmutter-14-0:arm64",
         "aliases": [],
-        "version": "46.2-1ubuntu0.24.04.16"
+        "version": "46.2-1ubuntu0.24.04.18"
       },
       {
         "id": "dpkg:libnautilus-extension4:arm64",
@@ -5125,13 +5125,13 @@
         "id": "dpkg:libnss-systemd:arm64",
         "name": "libnss-systemd:arm64",
         "aliases": [],
-        "version": "255.4-1ubuntu8.17"
+        "version": "255.4-1ubuntu8.18"
       },
       {
         "id": "dpkg:libnss3:arm64",
         "name": "libnss3:arm64",
         "aliases": [],
-        "version": "2:3.98-1ubuntu0.2"
+        "version": "2:3.98-1ubuntu0.3"
       },
       {
         "id": "dpkg:libntfs-3g89t64:arm64",
@@ -5173,7 +5173,7 @@
         "id": "dpkg:libopeniscsiusr",
         "name": "libopeniscsiusr",
         "aliases": [],
-        "version": "2.1.9-3ubuntu5.4"
+        "version": "2.1.9-3ubuntu5.5"
       },
       {
         "id": "dpkg:libopenjp2-7:arm64",
@@ -5257,7 +5257,7 @@
         "id": "dpkg:libpam-systemd:arm64",
         "name": "libpam-systemd:arm64",
         "aliases": [],
-        "version": "255.4-1ubuntu8.17"
+        "version": "255.4-1ubuntu8.18"
       },
       {
         "id": "dpkg:libpam0g:arm64",
@@ -5323,7 +5323,7 @@
         "id": "dpkg:libpcap0.8t64:arm64",
         "name": "libpcap0.8t64:arm64",
         "aliases": [],
-        "version": "1.10.4-4.1ubuntu3"
+        "version": "1.10.4-4.1ubuntu3.1"
       },
       {
         "id": "dpkg:libpcaudio0:arm64",
@@ -5341,7 +5341,7 @@
         "id": "dpkg:libpciaccess0:arm64",
         "name": "libpciaccess0:arm64",
         "aliases": [],
-        "version": "0.17-3ubuntu0.24.04.2"
+        "version": "0.17-3ubuntu0.24.04.3"
       },
       {
         "id": "dpkg:libpcre2-32-0:arm64",
@@ -5437,7 +5437,7 @@
         "id": "dpkg:libpng16-16t64:arm64",
         "name": "libpng16-16t64:arm64",
         "aliases": [],
-        "version": "1.6.43-5ubuntu0.6"
+        "version": "1.6.43-5ubuntu0.7"
       },
       {
         "id": "dpkg:libpolkit-agent-1-0:arm64",
@@ -5455,19 +5455,19 @@
         "id": "dpkg:libpoppler-cpp0t64:arm64",
         "name": "libpoppler-cpp0t64:arm64",
         "aliases": [],
-        "version": "24.02.0-1ubuntu9.9"
+        "version": "24.02.0-1ubuntu9.11"
       },
       {
         "id": "dpkg:libpoppler-glib8t64:arm64",
         "name": "libpoppler-glib8t64:arm64",
         "aliases": [],
-        "version": "24.02.0-1ubuntu9.9"
+        "version": "24.02.0-1ubuntu9.11"
       },
       {
         "id": "dpkg:libpoppler134:arm64",
         "name": "libpoppler134:arm64",
         "aliases": [],
-        "version": "24.02.0-1ubuntu9.9"
+        "version": "24.02.0-1ubuntu9.11"
       },
       {
         "id": "dpkg:libpopt0:arm64",
@@ -5521,7 +5521,7 @@
         "id": "dpkg:libprotobuf32t64:arm64",
         "name": "libprotobuf32t64:arm64",
         "aliases": [],
-        "version": "3.21.12-8.2ubuntu0.3"
+        "version": "3.21.12-8.2ubuntu0.4"
       },
       {
         "id": "dpkg:libproxy1-plugin-gsettings:arm64",
@@ -5677,13 +5677,13 @@
         "id": "dpkg:librsvg2-2:arm64",
         "name": "librsvg2-2:arm64",
         "aliases": [],
-        "version": "2.58.0+dfsg-1build1"
+        "version": "2.58.0+dfsg-1ubuntu0.1"
       },
       {
         "id": "dpkg:librsvg2-common:arm64",
         "name": "librsvg2-common:arm64",
         "aliases": [],
-        "version": "2.58.0+dfsg-1build1"
+        "version": "2.58.0+dfsg-1ubuntu0.1"
       },
       {
         "id": "dpkg:librtmp1:arm64",
@@ -5788,6 +5788,12 @@
         "version": "0.21.4-1build3"
       },
       {
+        "id": "dpkg:libsecret-tools",
+        "name": "libsecret-tools",
+        "aliases": [],
+        "version": "0.21.4-1build3"
+      },
+      {
         "id": "dpkg:libselinux1:arm64",
         "name": "libselinux1:arm64",
         "aliases": [],
@@ -5833,7 +5839,7 @@
         "id": "dpkg:libsgutils2-1.46-2:arm64",
         "name": "libsgutils2-1.46-2:arm64",
         "aliases": [],
-        "version": "1.46-3ubuntu4"
+        "version": "1.46-3ubuntu4.1"
       },
       {
         "id": "dpkg:libsharpyuv0:arm64",
@@ -5887,7 +5893,7 @@
         "id": "dpkg:libsmbclient0:arm64",
         "name": "libsmbclient0:arm64",
         "aliases": [],
-        "version": "2:4.19.5+dfsg-4ubuntu9.7"
+        "version": "2:4.19.5+dfsg-4ubuntu9.8"
       },
       {
         "id": "dpkg:libsnapd-glib-2-1:arm64",
@@ -5941,25 +5947,25 @@
         "id": "dpkg:libsoup-2.4-1:arm64",
         "name": "libsoup-2.4-1:arm64",
         "aliases": [],
-        "version": "2.74.3-6ubuntu1.8"
+        "version": "2.74.3-6ubuntu1.9"
       },
       {
         "id": "dpkg:libsoup-3.0-0:arm64",
         "name": "libsoup-3.0-0:arm64",
         "aliases": [],
-        "version": "3.4.4-5ubuntu0.8"
+        "version": "3.4.4-5ubuntu0.9"
       },
       {
         "id": "dpkg:libsoup-3.0-common",
         "name": "libsoup-3.0-common",
         "aliases": [],
-        "version": "3.4.4-5ubuntu0.8"
+        "version": "3.4.4-5ubuntu0.9"
       },
       {
         "id": "dpkg:libsoup2.4-common",
         "name": "libsoup2.4-common",
         "aliases": [],
-        "version": "2.74.3-6ubuntu1.8"
+        "version": "2.74.3-6ubuntu1.9"
       },
       {
         "id": "dpkg:libsource-highlight-common",
@@ -6037,7 +6043,7 @@
         "id": "dpkg:libssl3t64:arm64",
         "name": "libssl3t64:arm64",
         "aliases": [],
-        "version": "3.0.13-0ubuntu3.15"
+        "version": "3.0.13-0ubuntu3.16"
       },
       {
         "id": "dpkg:libsss-certmap0",
@@ -6103,13 +6109,13 @@
         "id": "dpkg:libsystemd-shared:arm64",
         "name": "libsystemd-shared:arm64",
         "aliases": [],
-        "version": "255.4-1ubuntu8.17"
+        "version": "255.4-1ubuntu8.18"
       },
       {
         "id": "dpkg:libsystemd0:arm64",
         "name": "libsystemd0:arm64",
         "aliases": [],
-        "version": "255.4-1ubuntu8.17"
+        "version": "255.4-1ubuntu8.18"
       },
       {
         "id": "dpkg:libtag1v5-vanilla:arm64",
@@ -6397,7 +6403,7 @@
         "id": "dpkg:libudev1:arm64",
         "name": "libudev1:arm64",
         "aliases": [],
-        "version": "255.4-1ubuntu8.17"
+        "version": "255.4-1ubuntu8.18"
       },
       {
         "id": "dpkg:libudisks2-0:arm64",
@@ -6631,7 +6637,7 @@
         "id": "dpkg:libwbclient0:arm64",
         "name": "libwbclient0:arm64",
         "aliases": [],
-        "version": "2:4.19.5+dfsg-4ubuntu9.7"
+        "version": "2:4.19.5+dfsg-4ubuntu9.8"
       },
       {
         "id": "dpkg:libwebkit2gtk-4.1-0:arm64",
@@ -6685,7 +6691,7 @@
         "id": "dpkg:libwinpr3-3:arm64",
         "name": "libwinpr3-3:arm64",
         "aliases": [],
-        "version": "3.31.0+dfsg-0ubuntu0.24.04.1"
+        "version": "3.32.1+dfsg-0ubuntu0.24.04.1"
       },
       {
         "id": "dpkg:libwireplumber-0.4-0:arm64",
@@ -6751,13 +6757,13 @@
         "id": "dpkg:libx11-6:arm64",
         "name": "libx11-6:arm64",
         "aliases": [],
-        "version": "2:1.8.7-1build1"
+        "version": "2:1.8.7-1ubuntu0.1"
       },
       {
         "id": "dpkg:libx11-data",
         "name": "libx11-data",
         "aliases": [],
-        "version": "2:1.8.7-1build1"
+        "version": "2:1.8.7-1ubuntu0.1"
       },
       {
         "id": "dpkg:libx11-protocol-perl",
@@ -6769,7 +6775,7 @@
         "id": "dpkg:libx11-xcb1:arm64",
         "name": "libx11-xcb1:arm64",
         "aliases": [],
-        "version": "2:1.8.7-1build1"
+        "version": "2:1.8.7-1ubuntu0.1"
       },
       {
         "id": "dpkg:libx264-164:arm64",
@@ -7027,7 +7033,7 @@
         "id": "dpkg:libxml2:arm64",
         "name": "libxml2:arm64",
         "aliases": [],
-        "version": "2.9.14+dfsg-1.3ubuntu3.9"
+        "version": "2.9.14+dfsg-1.3ubuntu3.10"
       },
       {
         "id": "dpkg:libxmlb2:arm64",
@@ -7063,7 +7069,7 @@
         "id": "dpkg:libxpm4:arm64",
         "name": "libxpm4:arm64",
         "aliases": [],
-        "version": "1:3.5.17-1ubuntu0.24.04.1"
+        "version": "1:3.5.17-1ubuntu0.24.04.2"
       },
       {
         "id": "dpkg:libxrandr2:arm64",
@@ -7117,7 +7123,7 @@
         "id": "dpkg:libxtst6:arm64",
         "name": "libxtst6:arm64",
         "aliases": [],
-        "version": "2:1.2.3-1.1build1"
+        "version": "2:1.2.3-1.1ubuntu0.1"
       },
       {
         "id": "dpkg:libxv1:arm64",
@@ -7273,7 +7279,7 @@
         "id": "dpkg:linux-libc-dev:arm64",
         "name": "linux-libc-dev:arm64",
         "aliases": [],
-        "version": "6.8.0-139.139"
+        "version": "6.8.0-147.147"
       },
       {
         "id": "dpkg:linux-modules-6.8.0-136-generic",
@@ -7315,7 +7321,7 @@
         "id": "dpkg:linux-tools-common",
         "name": "linux-tools-common",
         "aliases": [],
-        "version": "6.8.0-139.139"
+        "version": "6.8.0-147.147"
       },
       {
         "id": "dpkg:linux-virtual",
@@ -7423,13 +7429,13 @@
         "id": "dpkg:mesa-libgallium:arm64",
         "name": "mesa-libgallium:arm64",
         "aliases": [],
-        "version": "25.2.8-0ubuntu0.24.04.2"
+        "version": "25.2.8-0ubuntu0.24.04.4"
       },
       {
         "id": "dpkg:mesa-vulkan-drivers:arm64",
         "name": "mesa-vulkan-drivers:arm64",
         "aliases": [],
-        "version": "25.2.8-0ubuntu0.24.04.2"
+        "version": "25.2.8-0ubuntu0.24.04.4"
       },
       {
         "id": "dpkg:mobile-broadband-provider-info",
@@ -7495,13 +7501,13 @@
         "id": "dpkg:mutter-common",
         "name": "mutter-common",
         "aliases": [],
-        "version": "46.2-1ubuntu0.24.04.16"
+        "version": "46.2-1ubuntu0.24.04.18"
       },
       {
         "id": "dpkg:mutter-common-bin",
         "name": "mutter-common-bin",
         "aliases": [],
-        "version": "46.2-1ubuntu0.24.04.16"
+        "version": "46.2-1ubuntu0.24.04.18"
       },
       {
         "id": "dpkg:nano",
@@ -7645,7 +7651,7 @@
         "id": "dpkg:nodejs",
         "name": "nodejs",
         "aliases": [],
-        "version": "22.23.2-1nodesource1"
+        "version": "22.23.4-1nodesource1"
       },
       {
         "id": "dpkg:ntfs-3g",
@@ -7669,13 +7675,13 @@
         "id": "dpkg:open-iscsi",
         "name": "open-iscsi",
         "aliases": [],
-        "version": "2.1.9-3ubuntu5.4"
+        "version": "2.1.9-3ubuntu5.5"
       },
       {
         "id": "dpkg:open-vm-tools",
         "name": "open-vm-tools",
         "aliases": [],
-        "version": "2:13.0.10-0ubuntu0.24.04.1"
+        "version": "2:13.0.10-0ubuntu0.24.04.2"
       },
       {
         "id": "dpkg:openprinting-ppds",
@@ -7687,31 +7693,31 @@
         "id": "dpkg:openssh-client",
         "name": "openssh-client",
         "aliases": [],
-        "version": "1:9.6p1-3ubuntu13.19"
+        "version": "1:9.6p1-3ubuntu13.20"
       },
       {
         "id": "dpkg:openssh-server",
         "name": "openssh-server",
         "aliases": [],
-        "version": "1:9.6p1-3ubuntu13.19"
+        "version": "1:9.6p1-3ubuntu13.20"
       },
       {
         "id": "dpkg:openssh-sftp-server",
         "name": "openssh-sftp-server",
         "aliases": [],
-        "version": "1:9.6p1-3ubuntu13.19"
+        "version": "1:9.6p1-3ubuntu13.20"
       },
       {
         "id": "dpkg:openssl",
         "name": "openssl",
         "aliases": [],
-        "version": "3.0.13-0ubuntu3.15"
+        "version": "3.0.13-0ubuntu3.16"
       },
       {
         "id": "dpkg:openvpn",
         "name": "openvpn",
         "aliases": [],
-        "version": "2.6.19-0ubuntu0.24.04.3"
+        "version": "2.6.19-0ubuntu0.24.04.5"
       },
       {
         "id": "dpkg:orca",
@@ -7927,7 +7933,7 @@
         "id": "dpkg:poppler-utils",
         "name": "poppler-utils",
         "aliases": [],
-        "version": "24.02.0-1ubuntu9.9"
+        "version": "24.02.0-1ubuntu9.11"
       },
       {
         "id": "dpkg:power-profiles-daemon",
@@ -8347,7 +8353,7 @@
         "id": "dpkg:python3-jwt",
         "name": "python3-jwt",
         "aliases": [],
-        "version": "2.7.0-1ubuntu0.1"
+        "version": "2.7.0-1ubuntu0.4"
       },
       {
         "id": "dpkg:python3-launchpadlib",
@@ -8515,7 +8521,7 @@
         "id": "dpkg:python3-requests",
         "name": "python3-requests",
         "aliases": [],
-        "version": "2.31.0+dfsg-1ubuntu1.1"
+        "version": "2.31.0+dfsg-1ubuntu1.2"
       },
       {
         "id": "dpkg:python3-rich",
@@ -8605,7 +8611,7 @@
         "id": "dpkg:python3-urllib3",
         "name": "python3-urllib3",
         "aliases": [],
-        "version": "2.0.7-1ubuntu0.7"
+        "version": "2.0.7-1ubuntu0.8"
       },
       {
         "id": "dpkg:python3-wadllib",
@@ -8701,7 +8707,7 @@
         "id": "dpkg:samba-libs:arm64",
         "name": "samba-libs:arm64",
         "aliases": [],
-        "version": "2:4.19.5+dfsg-4ubuntu9.7"
+        "version": "2:4.19.5+dfsg-4ubuntu9.8"
       },
       {
         "id": "dpkg:sane-airscan",
@@ -8761,13 +8767,13 @@
         "id": "dpkg:sg3-utils",
         "name": "sg3-utils",
         "aliases": [],
-        "version": "1.46-3ubuntu4"
+        "version": "1.46-3ubuntu4.1"
       },
       {
         "id": "dpkg:sg3-utils-udev",
         "name": "sg3-utils-udev",
         "aliases": [],
-        "version": "1.46-3ubuntu4"
+        "version": "1.46-3ubuntu4.1"
       },
       {
         "id": "dpkg:sgml-base",
@@ -8797,7 +8803,7 @@
         "id": "dpkg:snapd",
         "name": "snapd",
         "aliases": [],
-        "version": "2.76.3+ubuntu24.04"
+        "version": "2.77.1+ubuntu24.04"
       },
       {
         "id": "dpkg:socat",
@@ -8821,7 +8827,7 @@
         "id": "dpkg:sosreport",
         "name": "sosreport",
         "aliases": [],
-        "version": "4.10.2-0ubuntu0~24.04.1"
+        "version": "4.11.2-0ubuntu0~24.04.1"
       },
       {
         "id": "dpkg:sound-icons",
@@ -8941,7 +8947,7 @@
         "id": "dpkg:sudo",
         "name": "sudo",
         "aliases": [],
-        "version": "1.9.15p5-3ubuntu5.24.04.2"
+        "version": "1.9.15p5-3ubuntu5.24.04.4"
       },
       {
         "id": "dpkg:switcheroo-control",
@@ -8971,13 +8977,13 @@
         "id": "dpkg:systemd",
         "name": "systemd",
         "aliases": [],
-        "version": "255.4-1ubuntu8.17"
+        "version": "255.4-1ubuntu8.18"
       },
       {
         "id": "dpkg:systemd-dev",
         "name": "systemd-dev",
         "aliases": [],
-        "version": "255.4-1ubuntu8.17"
+        "version": "255.4-1ubuntu8.18"
       },
       {
         "id": "dpkg:systemd-hwe-hwdb",
@@ -8989,25 +8995,25 @@
         "id": "dpkg:systemd-oomd",
         "name": "systemd-oomd",
         "aliases": [],
-        "version": "255.4-1ubuntu8.17"
+        "version": "255.4-1ubuntu8.18"
       },
       {
         "id": "dpkg:systemd-resolved",
         "name": "systemd-resolved",
         "aliases": [],
-        "version": "255.4-1ubuntu8.17"
+        "version": "255.4-1ubuntu8.18"
       },
       {
         "id": "dpkg:systemd-sysv",
         "name": "systemd-sysv",
         "aliases": [],
-        "version": "255.4-1ubuntu8.17"
+        "version": "255.4-1ubuntu8.18"
       },
       {
         "id": "dpkg:systemd-timesyncd",
         "name": "systemd-timesyncd",
         "aliases": [],
-        "version": "255.4-1ubuntu8.17"
+        "version": "255.4-1ubuntu8.18"
       },
       {
         "id": "dpkg:sysvinit-utils",
@@ -9085,7 +9091,7 @@
         "id": "dpkg:tmux",
         "name": "tmux",
         "aliases": [],
-        "version": "3.4-1ubuntu0.1"
+        "version": "3.4-1ubuntu0.2"
       },
       {
         "id": "dpkg:tnftp",
@@ -9127,13 +9133,13 @@
         "id": "dpkg:tzdata",
         "name": "tzdata",
         "aliases": [],
-        "version": "2026c-0ubuntu0.24.04.1"
+        "version": "2026e-0ubuntu0.24.04.1"
       },
       {
         "id": "dpkg:u-boot-tools",
         "name": "u-boot-tools",
         "aliases": [],
-        "version": "2025.10-0ubuntu0.24.04.2"
+        "version": "2025.10-0ubuntu0.24.04.4"
       },
       {
         "id": "dpkg:ubuntu-advantage-desktop-daemon",
@@ -9187,13 +9193,13 @@
         "id": "dpkg:ubuntu-pro-client",
         "name": "ubuntu-pro-client",
         "aliases": [],
-        "version": "37.2ubuntu~24.04.1"
+        "version": "38ubuntu0~24.04"
       },
       {
         "id": "dpkg:ubuntu-pro-client-l10n",
         "name": "ubuntu-pro-client-l10n",
         "aliases": [],
-        "version": "37.2ubuntu~24.04.1"
+        "version": "38ubuntu0~24.04"
       },
       {
         "id": "dpkg:ubuntu-release-upgrader-core",
@@ -9259,7 +9265,7 @@
         "id": "dpkg:udev",
         "name": "udev",
         "aliases": [],
-        "version": "255.4-1ubuntu8.17"
+        "version": "255.4-1ubuntu8.18"
       },
       {
         "id": "dpkg:udisks2",
@@ -9529,7 +9535,7 @@
         "id": "dpkg:xdg-desktop-portal",
         "name": "xdg-desktop-portal",
         "aliases": [],
-        "version": "1.18.4-1ubuntu2.24.04.2"
+        "version": "1.18.4-1ubuntu2.24.04.3"
       },
       {
         "id": "dpkg:xdg-desktop-portal-gnome",
@@ -9637,13 +9643,13 @@
         "id": "dpkg:xserver-common",
         "name": "xserver-common",
         "aliases": [],
-        "version": "2:21.1.12-1ubuntu1.6"
+        "version": "2:21.1.12-1ubuntu1.9"
       },
       {
         "id": "dpkg:xserver-xephyr",
         "name": "xserver-xephyr",
         "aliases": [],
-        "version": "2:21.1.12-1ubuntu1.6"
+        "version": "2:21.1.12-1ubuntu1.9"
       },
       {
         "id": "dpkg:xserver-xorg",
@@ -9655,7 +9661,7 @@
         "id": "dpkg:xserver-xorg-core",
         "name": "xserver-xorg-core",
         "aliases": [],
-        "version": "2:21.1.12-1ubuntu1.6"
+        "version": "2:21.1.12-1ubuntu1.9"
       },
       {
         "id": "dpkg:xserver-xorg-input-all",
@@ -9679,7 +9685,7 @@
         "id": "dpkg:xserver-xorg-legacy",
         "name": "xserver-xorg-legacy",
         "aliases": [],
-        "version": "2:21.1.12-1ubuntu1.6"
+        "version": "2:21.1.12-1ubuntu1.9"
       },
       {
         "id": "dpkg:xserver-xorg-video-all",
@@ -9727,7 +9733,7 @@
         "id": "dpkg:xvfb",
         "name": "xvfb",
         "aliases": [],
-        "version": "2:21.1.12-1ubuntu1.6"
+        "version": "2:21.1.12-1ubuntu1.9"
       },
       {
         "id": "dpkg:xwayland",
@@ -9745,7 +9751,7 @@
         "id": "dpkg:xz-utils",
         "name": "xz-utils",
         "aliases": [],
-        "version": "5.6.1+really5.4.5-1ubuntu0.3"
+        "version": "5.6.1+really5.4.5-1ubuntu0.4"
       },
       {
         "id": "dpkg:yaru-theme-gnome-shell",
@@ -9811,7 +9817,7 @@
         "id": "dpkg:zlib1g:arm64",
         "name": "zlib1g:arm64",
         "aliases": [],
-        "version": "1:1.3.dfsg-3.1ubuntu2.2"
+        "version": "1:1.3.dfsg-3.1ubuntu2.3"
       },
       {
         "id": "dpkg:zstd",
@@ -9825,13 +9831,13 @@
         "aliases": [
           "Mozilla Firefox"
         ],
-        "version": "156.0-1"
+        "version": "159.0-1"
       },
       {
         "id": "npm:@earendil-works/pi-coding-agent",
         "name": "@earendil-works/pi-coding-agent",
         "aliases": [],
-        "version": "0.87.0"
+        "version": "1.5.0"
       },
       {
         "id": "npm:@playwright/cli",
@@ -9849,13 +9855,13 @@
         "id": "npm:corepack",
         "name": "corepack",
         "aliases": [],
-        "version": "0.34.6"
+        "version": "0.36.0"
       },
       {
         "id": "npm:npm",
         "name": "npm",
         "aliases": [],
-        "version": "10.9.8"
+        "version": "10.9.9"
       },
       {
         "id": "snap:bare",
@@ -9864,28 +9870,28 @@
         "version": "1.0"
       },
       {
-        "id": "snap:core22",
-        "name": "core22",
-        "aliases": [],
-        "version": "20260824"
-      },
-      {
         "id": "snap:core24",
         "name": "core24",
         "aliases": [],
         "version": "20260824"
       },
       {
+        "id": "snap:core26",
+        "name": "core26",
+        "aliases": [],
+        "version": "20260925"
+      },
+      {
         "id": "snap:cups",
         "name": "cups",
         "aliases": [],
-        "version": "2.4.19-2"
+        "version": "2.4.20-1"
       },
       {
         "id": "snap:gnome-46-2404",
         "name": "gnome-46-2404",
         "aliases": [],
-        "version": "0+git.f1cd5fa-sdk0+git.ca9c59c"
+        "version": "0+git.b31ceab-sdk0+git.ef6f7e9"
       },
       {
         "id": "snap:gtk-common-themes",
@@ -9903,14 +9909,14 @@
         "id": "snap:snapd",
         "name": "snapd",
         "aliases": [],
-        "version": "2.76.3"
+        "version": "2.77.1"
       }
     ]
   },
   "provenance": {
     "extractionMode": "work",
-    "evidenceId": "ubuntu2404-o8QGozuL",
-    "rawSha256": "e3e781ab58268c44139639de8b0e065ad93b3e216b9b7aa79186b61d58d114bd",
+    "evidenceId": "ubuntu2404-5VNmuYWY",
+    "rawSha256": "6a4bc33316e38578b93b34564206f55343bbcc9e4eb96d20d7cab0f56379b837",
     "collectorSha256": "54497d48f69d6b12f653a3a6efbbe87310345329edd17d0894570f243fec4e40",
     "aliasesSha256": "fb88e6b824c4d17578f498a265333f56a580d974c8f07a547d715a2744cdbed5"
   }

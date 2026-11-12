@@ -13,6 +13,14 @@ glog "installing GNOME desktop + GDM3 (seed is headless; doctrine base is GUI)"
 apt_q install ubuntu-desktop-minimal gdm3
 sudo systemctl set-default graphical.target
 
+glog "boot without waiting for systemd-networkd"
+# The desktop's netplan renders through NetworkManager, so systemd-networkd
+# manages no link and its wait-online unit times out after 120 s on every
+# boot. gdm and sshd both wait behind it, so a lease answered SSH two minutes
+# late and its desktop session arrived later still.
+# NetworkManager-wait-online still orders network-online.target.
+sudo systemctl disable systemd-networkd-wait-online.service
+
 glog "common packages"
 apt_q install curl wget git vim htop ca-certificates gnupg lsb-release \
   net-tools dconf-cli x11-utils fontconfig unzip jq gh

@@ -17,6 +17,11 @@ else
   echo "PASS  no credential material in pi settings"
 fi
 absent "$HOME/.config/zsh/secrets.zsh"
+# The relay agent's configuration holds the lease's agent credential and
+# arrives at lease time; its state holds a lease's execution records
+# (docs/relay-agent.md RA-I3).
+absent "$HOME/.config/relay-agent/config.json"
+absent "$HOME/.local/state/relay-agent"
 
 if find "$HOME/snap/firefox" -name logins.json 2>/dev/null | grep -q .; then
   echo "FAIL  firefox saved logins present"; FAIL=1
@@ -62,6 +67,21 @@ if find "$HOME/.cache/ms-playwright" \( -name cookies.sqlite -o -name Cookies \)
   echo "FAIL  a browser profile under ~/.cache/ms-playwright holds cookies"; FAIL=1
 else
   echo "PASS  no cookie store under ~/.cache/ms-playwright"
+fi
+
+# The login keyring ships unencrypted so the auto-login session can use it
+# without a password (guest phase 30); any item stored in it would sit in the
+# base in plain text. It must hold only its [keyring] header.
+LOGIN_KEYRING="$HOME/.local/share/keyrings/login.keyring"
+if [ -f "$LOGIN_KEYRING" ] && grep -v '^\[keyring\]$' "$LOGIN_KEYRING" | grep -q '^\['; then
+  echo "FAIL  login keyring holds items: $LOGIN_KEYRING"; FAIL=1
+else
+  echo "PASS  login keyring holds no items"
+fi
+if find "$HOME/.local/share/keyrings" -type f ! -name login.keyring ! -name default 2>/dev/null | grep -q .; then
+  echo "FAIL  extra keyring files under ~/.local/share/keyrings"; FAIL=1
+else
+  echo "PASS  no other keyrings"
 fi
 
 if [ "$FAIL" != 0 ]; then echo "NO-SECRETS SCAN FAILED — do not promote / do not clone"; fi

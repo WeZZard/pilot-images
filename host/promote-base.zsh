@@ -21,6 +21,14 @@ inventory_init
 # Missing/stale evidence fails before any rename, deletion, or publication change.
 inventory_verify_work
 inventory_verify_fresh_work
+# Only the release the line's lock pins may reach a base (docs/relay-agent.md
+# RA-I7): the relay agent recorded in the evidence bound to the stopped work
+# image must be that release's executable for the guest's platform.
+RELAY_LOCK="$REPO_ROOT/images/$LINE/guest/relay-agent.lock.json"
+if [[ -f "$RELAY_LOCK" ]]; then
+  python3 "$SCRIPT_DIR/relay-agent-package.py" gate --lock "$RELAY_LOCK" --receipt "$WORK_ACCEPTANCE" \
+    || die "$WORK_VM cannot be promoted: its relay agent is not the release $RELAY_LOCK pins"
+fi
 python3 "$INVENTORY_TOOL" invalidate --output "$BASE_INVENTORY"
 RAW_INVENTORY="$PENDING_INVENTORY"
 tart rename "$WORK_VM" "$BASE_VM"

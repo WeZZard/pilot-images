@@ -182,3 +182,16 @@ SWIFT
   fi
   "$_CSREQ_BIN" "$1"
 }
+
+# The hex blob TCC stores in `csreq` for the requirement that names only a
+# signing identifier: `identifier "<id>"`. Phase 65 pins the relay agent's rows
+# to it, because every build vm-service signs carries the identifier while its
+# ad hoc designated requirement is a code hash that each build changes.
+identifier_req_hex() {  # identifier_req_hex <signing-identifier>
+  local blob
+  blob=$(mktemp) || return 1
+  csreq -r="identifier \"$1\"" -b "$blob" || { rm -f "$blob"; return 1; }
+  xxd -p "$blob" | tr -d '\n'
+  rm -f "$blob"
+}
+

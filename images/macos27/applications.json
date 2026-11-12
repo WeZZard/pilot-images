@@ -5,7 +5,7 @@
     "schemaVersion": 1,
     "os": "macos",
     "architecture": "arm64",
-    "collectedAt": "2026-11-01T07:10:07.886028Z",
+    "collectedAt": "2026-11-03T14:46:11.701665Z",
     "sources": [
       {
         "id": "bundles",
@@ -456,7 +456,7 @@
         "id": "brew-formula:svt-av1",
         "name": "svt-av1",
         "aliases": [],
-        "version": "4.2.0"
+        "version": "4.3.0"
       },
       {
         "id": "brew-formula:unzip",
@@ -990,7 +990,7 @@
         "id": "bundle:com.trycua.driver",
         "name": "Cua Driver",
         "aliases": [],
-        "version": "0.38.0"
+        "version": "0.12.6"
       },
       {
         "id": "bundle:com.zenflow.desktop",
@@ -1040,7 +1040,7 @@
         "id": "npm:@earendil-works/pi-coding-agent",
         "name": "@earendil-works/pi-coding-agent",
         "aliases": [],
-        "version": "1.4.0"
+        "version": "1.5.0"
       },
       {
         "id": "npm:@getpochi/cli",
@@ -1196,8 +1196,8 @@
   },
   "provenance": {
     "extractionMode": "work",
-    "evidenceId": "macos27-DvQq6bLd",
-    "rawSha256": "13cc49a3d86517cc85fc3a6907064cc8370cfbf55859ec72b5e50eb133f371ea",
+    "evidenceId": "macos27-Nfws15UI",
+    "rawSha256": "856f9c9116ad705cbafe0185b9377d7bb0867d3f5a4806b4669babf94b16a43c",
     "collectorSha256": "54497d48f69d6b12f653a3a6efbbe87310345329edd17d0894570f243fec4e40",
     "aliasesSha256": "fb88e6b824c4d17578f498a265333f56a580d974c8f07a547d715a2744cdbed5"
   }

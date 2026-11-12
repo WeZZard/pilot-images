@@ -77,6 +77,20 @@ inventory_extract() { # <ip>; sets RAW_INVENTORY (original preserved on all fail
       --name "$name" --script "$script" --returncode "$check_rc" || return 1
     (( check_rc == 0 )) || { warn "$name failed; retained evidence: $evidence"; return 1; }
   done
+  inventory_relay_agent "$ip" "$evidence"
+}
+
+# The evidence of the relay agent the image carries (docs/relay-agent.md RA-I7):
+# the guest's platform, the package record phase 62 kept, and the SHA-256 of the
+# installed executable, read after the last check. The acceptance receipt binds
+# it to the stopped work image, and promote-base holds it against the lock.
+inventory_relay_agent() { # <ip> <evidence>
+  local ip=$1 evidence=$2
+  [[ -f "$REPO_ROOT/images/$LINE/guest/relay-agent.lock.json" ]] || return 0
+  vssh "$ip" 'd="$HOME/.local/libexec/relay-agent"; uname -sm && head -n 1 "$d/package.json" && { shasum -a 256 "$d/relay-agent" 2>/dev/null || sha256sum "$d/relay-agent"; } | cut -d " " -f 1' \
+    > "$evidence/relay-agent.observed" || { warn "cannot read the installed relay agent; retained evidence: $evidence"; return 1; }
+  python3 "$REPO_ROOT/host/relay-agent-package.py" record --observed "$evidence/relay-agent.observed" \
+    --output "$evidence/relay-agent.json" || { warn "invalid relay agent evidence; retained evidence: $evidence"; return 1; }
 }
 
 inventory_bind() { # <vm> <output> [previous association]

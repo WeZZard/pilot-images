@@ -3,6 +3,7 @@ Only common.zsh's external boundary is replaced. No guest/collector is executed.
 """
 import json
 import hashlib
+import importlib.util
 import os
 from pathlib import Path
 import shutil
@@ -60,6 +61,7 @@ vssh() {
     *'no-secrets.'*) [[ "${FAIL:-}" != secrets ]] ;;
     *'collect.py --aliases'*) [[ "${FAIL:-}" != extract ]] ;;
     'cat /tmp/payload/inventory/installed.json') print -r -- "$FIXTURE_JSON" ;;
+    *'libexec/relay-agent'*) [[ "${FAIL:-}" != relay ]] && print -r -- "$FIXTURE_RELAY" ;;
     *'python3 /tmp/payload/applications/check.py '*) [[ "${FAIL:-}" != apps ]] ;;
     'cat /tmp/payload/application-report.json') python3 "$REPO_ROOT/make-report.py" "$RAW_INVENTORY" ;;
   esac
@@ -310,6 +312,62 @@ elif args[0] not in ('exec','push'): raise RuntimeError(args)
         self.assertEqual(base_receipt['rawSha256'], original['rawSha256'])
         self.assertFalse(self.work.exists())
         self.assertEqual(json.loads(self.base.read_text())['base']['base_vm'], 'base')
+
+    def relay_fixture(self, pinned=True, installed=None):
+        """A line with a relay agent lock, and a guest that reports the agent phase 62 installed."""
+        exe, archive = 'b' * 64, 'a' * 64
+        spec = importlib.util.spec_from_file_location('relay_agent_package', REPO / 'host/relay-agent-package.py')
+        package = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(package)
+        lock = dict(schemaVersion=1, repository='WeZZard/vm-service', version='0.2.0' if pinned else None,
+                    platforms={p: dict(url=package.release_url('WeZZard/vm-service', '0.2.0', p) if pinned else None,
+                                       sha256=archive if pinned else None, executableSha256=exe if pinned else None)
+                               for p in package.PLATFORMS})
+        (self.root / 'images/fixture/guest/relay-agent.lock.json').write_text(json.dumps(lock))
+        record = dict(version='0.2.0' if pinned else None, platform='darwin-arm64', sha256=archive,
+                      executableSha256=exe, source='pinned' if pinned else 'local')
+        self.env['FIXTURE_RELAY'] = 'Darwin arm64\n%s\n%s' % (json.dumps(record), installed or exe)
+
+    def promote(self):
+        (self.root / 'state').write_text('stopped\n')
+        return subprocess.run(['zsh', str(self.root / 'host/promote-base.zsh'), 'fixture'],
+                              env=self.env, text=True, capture_output=True)
+
+    def test_extraction_records_the_relay_agent_and_promotion_takes_only_the_pinned_one(self):
+        for case in ('pinned', 'local', 'replaced'):
+            with self.subTest(case=case):
+                fixture = ShellLifecycleTests()
+                fixture.setUp()
+                try:
+                    fixture.relay_fixture(pinned=case != 'local', installed='c' * 64 if case == 'replaced' else None)
+                    fixture.run_script('extract-work-inventory.zsh')
+                    receipt = json.loads((fixture.store / 'acceptance/work/fixture.json').read_text())
+                    evidence = json.loads(Path(receipt['relayAgent']['path']).read_text())
+                    self.assertEqual(evidence['archive']['source'], 'local' if case == 'local' else 'pinned')
+                    self.assertEqual(Path(receipt['relayAgent']['path']).parent.name,
+                                     json.loads((fixture.store / 'pending/fixture.json').read_text())['provenance']['evidenceId'])
+                    fixture.certify()
+                    result = fixture.promote()
+                    events = (fixture.root / 'events').read_text()
+                    if case == 'pinned':
+                        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+                        base = json.loads((fixture.store / 'acceptance/base/fixture.json').read_text())
+                        self.assertEqual(base['relayAgent'], receipt['relayAgent'])
+                        continue
+                    self.assertNotEqual(result.returncode, 0)
+                    self.assertIn('work cannot be promoted: its relay agent is not the release', result.stderr)
+                    self.assertIn('pins no release' if case == 'local' else 'executable hashes to ' + 'c' * 64, result.stderr)
+                    self.assertNotIn('tart rename', events)
+                    self.assertTrue(fixture.work.exists())
+                    self.assertTrue(fixture.fresh_receipt.exists())
+                finally:
+                    fixture.doCleanups()
+
+    def test_an_extraction_that_cannot_read_the_relay_agent_binds_nothing(self):
+        self.relay_fixture()
+        events = self.run_script('extract-work-inventory.zsh', fail='relay', success=False)
+        self.assertNotIn('tart stop work', events)
+        self.assertFalse(self.work.exists())
 
     def test_fresh_clone_failures_release_owned_clone_without_receipt(self):
         for failure in ('source', 'inventory', 'report', 'cleanup', 'mutation', 'plan', 'running'):

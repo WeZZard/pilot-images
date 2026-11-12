@@ -1,4 +1,4 @@
-"""Phase 65 (Apple Events grant for SSH-run osascript) and its acceptance probe.
+"""Phase 65 (Apple Events grants for SSH-run osascript and relayed commands, through /bin/zsh) and its acceptance probe.
 
 Text-level contracts only: the live TCC row format is verified in-guest by the
 phase itself and by acceptance, both over SSH so the client is the real one.
@@ -25,13 +25,15 @@ class AutomationGrantPhaseTests(unittest.TestCase):
         self.assertIn('csreq_hex /Applications/CuaDriver.app', driver)
         self.assertNotIn('SecCodeCopyDesignatedRequirement', driver)
 
-    def test_grant_is_sip_off_only_and_scoped_to_the_ssh_client(self):
+    def test_grant_is_sip_off_only_and_scoped_to_the_ssh_client_and_zsh(self):
         source = PHASE.read_text()
         self.assertIn("csrutil status", source)
         self.assertIn("CLIENT=/usr/libexec/sshd-keygen-wrapper", source)
-        # Every row written names that one client by path; no bundle-id or
-        # wildcard client anywhere.
-        self.assertEqual(source.count("VALUES ("), source.count("'$CLIENT',1,"))
+        self.assertIn('ZSH=/bin/zsh', source)
+        self.assertIn('CLIENTS=("$CLIENT" "$ZSH")', source)
+        # Every row written names one of those two clients by path; no
+        # bundle-id or wildcard client anywhere.
+        self.assertEqual(source.count("VALUES ("), source.count("'$c',1,"))
         self.assertEqual(source.count("VALUES ("), 2)
         self.assertNotIn('com.openssh', source)
         self.assertIn('kTCCServiceAppleEvents', source)
@@ -43,7 +45,7 @@ class AutomationGrantPhaseTests(unittest.TestCase):
         self.assertIn('INSERT OR REPLACE INTO access', source)
         self.assertNotIn('INSERT INTO access', source)
         self.assertIn('PRAGMA table_info(access)', source)
-        row = re.search(r"VALUES \('kTCCServiceAppleEvents','\$CLIENT',1,2,2,1,X'\$CLIENT_REQ',0,'\$bid',X'\$req',0,", source)
+        row = re.search(r"VALUES \('kTCCServiceAppleEvents','\$c',1,2,2,1,X'\$\{CLIENT_REQ\[\$c\]\}',0,'\$bid',X'\$req',0,", source)
         self.assertIsNotNone(row, 'row shape: auth_value 2, path client, bundle-id target, both code identities pinned')
         self.assertIn('com.apple.tccd', source)
         for target in ('/Applications', '/System/Applications', 'System Events.app', 'Finder.app', 'Shortcuts Events.app'):
@@ -53,7 +55,7 @@ class AutomationGrantPhaseTests(unittest.TestCase):
         source = PHASE.read_text()
         for service in ('kTCCServiceReminders', 'kTCCServiceAddressBook', 'kTCCServiceCalendar', 'kTCCServicePhotos', 'kTCCServiceMediaLibrary'):
             self.assertIn(service, source)
-        row = re.search(r"VALUES \('\$svc','\$CLIENT',1,2,2,1,X'\$CLIENT_REQ',0,0,", source)
+        row = re.search(r"VALUES \('\$svc','\$c',1,2,2,1,X'\$\{CLIENT_REQ\[\$c\]\}',0,0,", source)
         self.assertIsNotNone(row, 'data-class rows: same client, path type, allowed, pinned, no indirect object')
         self.assertIn('DATA_ROWS == ${#DATA_SERVICES}', source)
 

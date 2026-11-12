@@ -11,7 +11,7 @@ REPO=Path(__file__).resolve().parents[1]
 
 
 class ConfigurationTests(unittest.TestCase):
-    def run_phase(self, name):
+    def run_phase(self, name, prepare=None):
         temporary=tempfile.TemporaryDirectory(); self.addCleanup(temporary.cleanup)
         root=Path(temporary.name).resolve(); bin_dir=root/'bin';bin_dir.mkdir()
         source=REPO/'images/ubuntu2404/guest'/name
@@ -20,7 +20,8 @@ class ConfigurationTests(unittest.TestCase):
         for tool,text in {'sudo':'exec "$@"','systemctl':'exit 0','snap':'exit 0','dconf':'printf "dconf %s\\n" "$*" >> "$FIXTURE_LOG"','sync':'printf "sync\\n" >> "$FIXTURE_LOG"'}.items():
             p=bin_dir/tool;p.write_text('#!/bin/sh\n'+text+'\n');p.chmod(0o755)
         profile=root/'etc/dconf/profile/user';profile.parent.mkdir(parents=True);profile.touch()
-        env={**os.environ,'PATH':str(bin_dir)+os.pathsep+os.environ['PATH'],'FIXTURE_LOG':str(root/'calls')}
+        if prepare: prepare(root)
+        env={**os.environ,'PATH':str(bin_dir)+os.pathsep+os.environ['PATH'],'FIXTURE_LOG':str(root/'calls'),'HOME':str(root/'home')}
         result=subprocess.run(['/bin/bash',str(script)],env=env,capture_output=True,text=True)
         self.assertEqual(result.returncode,0,result.stdout+result.stderr)
         return root
@@ -32,6 +33,65 @@ class ConfigurationTests(unittest.TestCase):
         self.assertIn('scaling-factor=uint32 2',settings)
         self.assertIn('lock-enabled=false',settings)
         self.assertEqual((root/'calls').read_text(),'dconf update\nsync\n')
+
+    def test_login_keyring_is_passwordless_empty_and_unlocked_at_login(self):
+        root=self.run_phase('30-desktop.sh')
+        keyrings=root/'home/.local/share/keyrings'
+        login=(keyrings/'login.keyring').read_text()
+        self.assertEqual(re.findall(r'^\[.*\]$',login,re.M),['[keyring]'])
+        self.assertIn('display-name=Login\n',login)
+        self.assertEqual((keyrings/'default').read_text(),'login')
+        self.assertEqual(keyrings.stat().st_mode&0o777,0o700)
+        for name in ('login.keyring','default'):
+            self.assertEqual((keyrings/name).stat().st_mode&0o777,0o600)
+        entry=(root/'etc/xdg/autostart/pilot-keyring-unlock.desktop').read_text()
+        self.assertIn('Exec=busctl --user call org.freedesktop.secrets /org/freedesktop/secrets '
+                      'org.freedesktop.Secret.Service Unlock ao 1 /org/freedesktop/secrets/collection/login\n',entry)
+
+    def test_existing_login_keyring_is_kept(self):
+        def existing(root):
+            keyrings=root/'home/.local/share/keyrings'; keyrings.mkdir(parents=True)
+            (keyrings/'login.keyring').write_text('kept\n'); (keyrings/'default').write_text('login')
+        root=self.run_phase('30-desktop.sh',existing)
+        self.assertEqual((root/'home/.local/share/keyrings/login.keyring').read_text(),'kept\n')
+
+    def test_desktop_session_selects_local_active_graphical_session_of_the_user(self):
+        source=(REPO/'images/ubuntu2404/checks/acceptance.sh').read_text()
+        function=re.search(r'^desktop_session\(\) \{.*?^\}',source,re.M|re.S).group(0)
+        user=subprocess.check_output(['id','-un'],text=True).strip()
+        def session(sid,**changes):
+            props=dict(Name=user,Type='x11',Remote='no',Active='yes',Class='user'); props.update(changes)
+            return sid,props
+        cases=(([session('3')],'3'),
+               ([session('1',Type='tty',Remote='yes'),session('7',Type='wayland')],'7'),
+               ([session('2',Class='greeter',Name='gdm'),session('4')],'4'),
+               ([session('1',Type='tty')],''),([session('3',Remote='yes')],''),
+               ([session('3',Active='no')],''),([session('3',Name='someone-else')],''),
+               ([session('3',Class='greeter')],''),([],''))
+        for sessions,expected in cases:
+            with self.subTest(sessions=sessions), tempfile.TemporaryDirectory() as directory:
+                bin_dir=Path(directory)
+                table={sid:'\n'.join(f'{k}={v}' for k,v in props.items()) for sid,props in sessions}
+                listing=''.join(f'{sid} 1000 {props["Name"]} - - active no -\n' for sid,props in sessions)
+                script=['#!/bin/sh','if [ "$1" = list-sessions ]; then printf %s "$LISTING"; exit 0; fi','case "$2" in']
+                script+=[f"  {sid}) printf '%s\\n' '{text}' ;;" for sid,text in table.items()]
+                script+=['esac']
+                (bin_dir/'loginctl').write_text('\n'.join(script)+'\n'); (bin_dir/'loginctl').chmod(0o755)
+                env={**os.environ,'PATH':str(bin_dir)+os.pathsep+os.environ['PATH'],'LISTING':listing}
+                out=subprocess.check_output(['/bin/bash','-c',function+'; desktop_session'],env=env,text=True)
+                self.assertEqual(out.strip(),expected)
+
+    def test_no_secrets_fails_on_a_login_keyring_item(self):
+        script=REPO/'images/ubuntu2404/checks/no-secrets.sh'
+        header='[keyring]\ndisplay-name=Login\nctime=0\nmtime=0\nlock-on-idle=false\nlock-after=false\n'
+        for body,extra,failed in (('',None,False),('\n[2]\nitem-type=0\nsecret=x\n',None,True),('','other.keyring',True)):
+            with self.subTest(body=body,extra=extra), tempfile.TemporaryDirectory() as directory:
+                keyrings=Path(directory)/'.local/share/keyrings'; keyrings.mkdir(parents=True)
+                (keyrings/'login.keyring').write_text(header+body); (keyrings/'default').write_text('login')
+                if extra: (keyrings/extra).write_text('x')
+                result=subprocess.run(['/bin/bash',str(script)],env={**os.environ,'HOME':directory},capture_output=True,text=True)
+                self.assertEqual(result.returncode!=0,failed,result.stdout)
+                self.assertEqual('FAIL  login keyring holds items' in result.stdout,bool(body))
 
     def test_browser_policy_is_valid_json_and_flushed(self):
         root=self.run_phase('20-browsers.sh')

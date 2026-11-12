@@ -135,14 +135,33 @@ def seal(report, association, portable, output, image, raw=None, image_receipt=N
     validate_image_checks(records, image, inventory.read_json(portable)['provenance']['evidenceId'])
     value = dict(schemaVersion=1, image=image, association=pair, imageChecks=records,
         report=str(Path(report).resolve()), reportSha256=inventory.digest(inventory.read_bytes(report)))
+    # The relay agent the image carries (docs/relay-agent.md RA-I7): from the
+    # extraction's evidence, or carried over from the work receipt on promotion.
+    if image_receipt:
+        relay = inventory.read_json(image_receipt).get('relayAgent')
+    else:
+        path = Path(report).parent / 'relay-agent.json'
+        relay = dict(path=str(path.resolve()), sha256=inventory.digest(inventory.read_bytes(path))) if path.exists() else None
+    if relay is not None:
+        value['relayAgent'] = verify_relay_agent(relay)
     if raw:
         value.update(raw=str(Path(raw).resolve()), rawSha256=inventory.digest(inventory.read_bytes(raw)))
     inventory.atomic_write(output, inventory.encode(value))
 
 
+def verify_relay_agent(relay):
+    inventory.fields(relay, ('path', 'sha256'))
+    if relay['sha256'] != inventory.digest(inventory.read_bytes(relay['path'])):
+        raise ValueError('relay agent evidence changed')
+    return relay
+
+
 def verify(receipt, association, portable, image):
     value = inventory.read_json(receipt)
-    inventory.fields(value, ('schemaVersion', 'image', 'association', 'report', 'reportSha256', 'imageChecks'), ('raw', 'rawSha256'))
+    inventory.fields(value, ('schemaVersion', 'image', 'association', 'report', 'reportSha256', 'imageChecks'),
+        ('raw', 'rawSha256', 'relayAgent'))
+    if 'relayAgent' in value:
+        verify_relay_agent(value['relayAgent'])
     if value['schemaVersion'] != 1 or value['image'] != image or value['association'] != inventory.read_json(association):
         raise ValueError('acceptance does not match stopped work association')
     if value['reportSha256'] != inventory.digest(inventory.read_bytes(value['report'])):
