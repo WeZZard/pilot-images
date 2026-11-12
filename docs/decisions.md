@@ -381,3 +381,9 @@ Owner decisions that shape the images in this repo. Newest first.
 - **Decision (owner, 2026-11-12):** "Go ahead and merge it, then rebuild the bases." The bases are rebuilt with relay agent `v0.2.0`, refining the 2026-11-02 pin of `v0.2.0-rc.3`.
 - **Repository (agent, taken under the standing default):** vm-service was renamed `WeZZard/machine-service`; the lock names the new repository, because `update-software.py` refuses an asset whose URL names another.
 - **Former grant (agent, taken under the standing default):** phase 65 deletes the TCC rows a base from before vm-service DC-309 gave the relay agent, and fails if any remain.
+
+## 2026-11-12 — The 0.2.0 rebuild: phase 62 is not accepted without phase 65
+
+- **Found (agent, live):** on a clone of a base from before vm-service DC-309, `--phase 62` alone fails acceptance on two rows, the `/bin/zsh` grant and the agent's former rows, because both are phase 65's work; `--phase 65` on the same work VM then passes every row (macos26 357, macos27 345). A relay-agent update on macOS runs `--phase 62`, accepts that failure, then `--phase 65`.
+- **Found (agent, live):** a macOS `--phase` run still stages the host's `CuaDriver.app`, which only phase 60 installs; the host .6 no longer has one, so the run took `CUA_DRIVER_APP` pointing at a copy from .4, with `--skip-xcode`.
+- **State (agent):** `pilot-{macos26,macos27,ubuntu2404}-work` hold relay agent 0.2.0 with extracted inventory, not promoted: promotion and `check-clone --source work`, which leases through the service on .6, wait for the vm-service deploy. The stale Nov 2 `pilot-macos27-work` is kept as `pilot-macos27-work-stale-20261102`.
