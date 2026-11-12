@@ -375,3 +375,17 @@ Owner decisions that shape the images in this repo. Newest first.
 - **Context (vm-service DC-309, DC-310):** since vm-service 0.2.0 the relay agent runs each macOS command as a launchd job of its own whose first program is the user's shell, and macOS charges the command's Apple Events to that program, `/bin/zsh`, never to the relay agent; the relay layer holds no privacy grant.
 - **Decision (owner, 2026-11-11, vm-service DC-332):** "Grant zsh in images". Phase 65 grants `/bin/zsh` the Apple Events and data-class rows it grants `sshd-keygen-wrapper`, pinned to its designated requirement, so an `osascript` task keeps working after the deploy. The relay agent's rows are removed, and acceptance checks that it holds none. `sshd-keygen-wrapper` keeps its rows while SSH is a fallback link.
 
+
+## 2026-11-12 — The relay agent lock pins machine-service 0.2.0
+
+- **Decision (owner, 2026-11-12):** "Go ahead and merge it, then rebuild the bases." The bases are rebuilt with relay agent `v0.2.0`, refining the 2026-11-02 pin of `v0.2.0-rc.3`.
+- **Repository (agent, taken under the standing default):** vm-service was renamed `WeZZard/machine-service`; the lock names the new repository, because `update-software.py` refuses an asset whose URL names another.
+- **Former grant (agent, taken under the standing default):** phase 65 deletes the TCC rows a base from before vm-service DC-309 gave the relay agent, and fails if any remain.
+
+## 2026-11-12 — The 0.2.0 rebuild: phase 62 is not accepted without phase 65
+
+- **Found (agent, live):** on a clone of a base from before vm-service DC-309, `--phase 62` alone fails acceptance on two rows, the `/bin/zsh` grant and the agent's former rows, because both are phase 65's work; `--phase 65` on the same work VM then passes every row (macos26 357, macos27 345). Updating such a base therefore runs `--phase 62`, accepts those two rows, then `--phase 65`.
+- **Found (agent, live):** a macOS `--phase` run still stages the host's `CuaDriver.app`, which only phase 60 installs; this VM host no longer has one, so the run took `CUA_DRIVER_APP` pointing at a copy from another host, with `--skip-xcode`; in a clone, `/tmp/payload` is gone and Cua Driver is still 0.12.6.
+- **State (agent):** `pilot-{macos26,macos27,ubuntu2404}-work` hold relay agent 0.2.0 with extracted inventory, not promoted: promotion and `check-clone --source work`, which leases through this host's production service, wait for the vm-service deploy. 
+- **Proof (agent, live):** in a throwaway clone of the macos26 work VM, a `gui/502` launchd job whose program is `/bin/zsh -c 'osascript …'` told Finder and Reminders without a prompt (exit 0); an approximation of a relayed command, not one through the relay.
+- **Kept (agent):** the stale Nov 2 `pilot-macos27-work` is kept as `pilot-macos27-work-stale-20261102`.

@@ -92,6 +92,10 @@ done
 # indirect object   target bundle id (type 0) + target's designated requirement
 SQL=$(mktemp)
 print -r -- 'BEGIN;' > "$SQL"
+# A base from before vm-service DC-309 granted the relay agent; it holds no
+# grant now, so its rows go.
+FORMER_AGENT="$HOME/.local/libexec/relay-agent/relay-agent"
+print -r -- "DELETE FROM access WHERE client='$FORMER_AGENT';" >> "$SQL"
 GRANTED=0
 SKIPPED=0
 for app in "${TARGETS[@]}"; do
@@ -151,5 +155,7 @@ for probe in 'tell application "System Events" to get name of every process' \
     exit 1
   fi
 done
+FORMER=$(sqlite3 "$DB" "SELECT count(*) FROM access WHERE client='$FORMER_AGENT';")
+(( FORMER == 0 )) || { glog "the relay agent still holds $FORMER TCC rows"; exit 1 }
 glog "osascript over SSH reaches System Events and Finder without a consent modal"
 glog "phase 65 done"

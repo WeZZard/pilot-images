@@ -50,7 +50,7 @@ def archive(members):
 
 def unpinned_lock():
     """The lock before vm-service published a release: every pin null."""
-    return {'schemaVersion': 1, 'repository': 'WeZZard/vm-service', 'version': None,
+    return {'schemaVersion': 1, 'repository': 'WeZZard/machine-service', 'version': None,
             'platforms': {p: {'url': None, 'sha256': None, 'executableSha256': None}
                           for p in ('darwin-arm64', 'linux-arm64', 'linux-x86_64')}}
 
@@ -64,8 +64,8 @@ def write_unpinned(directory):
 def pinned_lock(version='0.2.0', digests=None, executables=None):
     package = load('relay_agent_package', 'host/relay-agent-package.py')
     digests, executables = digests or {}, executables or {}
-    return {'schemaVersion': 1, 'repository': 'WeZZard/vm-service', 'version': version,
-            'platforms': {p: {'url': package.release_url('WeZZard/vm-service', version, p), 'sha256': digests.get(p, 'a' * 64),
+    return {'schemaVersion': 1, 'repository': 'WeZZard/machine-service', 'version': version,
+            'platforms': {p: {'url': package.release_url('WeZZard/machine-service', version, p), 'sha256': digests.get(p, 'a' * 64),
                               'executableSha256': executables.get(p, 'b' * 64)}
                           for p in package.PLATFORMS}}
 
@@ -111,7 +111,7 @@ class LockTests(unittest.TestCase):
     def test_a_pinned_lock_names_the_release_assets(self):
         lock = pinned_lock()
         self.assertEqual(self.check(lock)['platforms']['linux-arm64']['url'],
-                         'https://github.com/WeZZard/vm-service/releases/download/v0.2.0/relay-agent-0.2.0-linux-arm64.tar.gz')
+                         'https://github.com/WeZZard/machine-service/releases/download/v0.2.0/relay-agent-0.2.0-linux-arm64.tar.gz')
 
     def test_malformed_locks_are_refused(self):
         unpinned = unpinned_lock()
@@ -221,7 +221,7 @@ class UpdateSoftwareTests(unittest.TestCase):
 
     def release(self, version, platforms=None, draft=False, prerelease=False, published='2026-11-01T00:00:00Z'):
         names = ['relay-agent-%s-%s.tar.gz' % (version, p) for p in (self.platforms if platforms is None else platforms)]
-        assets = [{'name': n, 'browser_download_url': 'https://github.com/WeZZard/vm-service/releases/download/v%s/%s' % (version, n)}
+        assets = [{'name': n, 'browser_download_url': 'https://github.com/WeZZard/machine-service/releases/download/v%s/%s' % (version, n)}
                   for n in names + ['SHA256SUMS']]
         return {'tag_name': 'v' + version, 'draft': draft, 'prerelease': prerelease, 'published_at': published, 'assets': assets}
 
@@ -274,7 +274,7 @@ class UpdateSoftwareTests(unittest.TestCase):
             for platform in self.platforms:
                 data = archive([('relay-agent', executable(platform), 0o755)])
                 name = 'relay-agent-0.2.0-%s.tar.gz' % platform
-                files[self.package.release_url('WeZZard/vm-service', '0.2.0', platform)] = Path(directory) / name
+                files[self.package.release_url('WeZZard/machine-service', '0.2.0', platform)] = Path(directory) / name
                 (Path(directory) / name).write_bytes(data)
                 sums.append('%s  %s' % (hashlib.sha256(data).hexdigest(), name))
             _, assets, _ = self.u.relay_release([self.release('0.2.0')], self.platforms)
@@ -348,7 +348,12 @@ class MacGrantTests(unittest.TestCase):
                 self.assertIn('CLIENTS=("$CLIENT" "$ZSH")', source)
                 self.assertIn('ZSH=/bin/zsh', source)
                 self.assertIn('CLIENT_REQ[$c]=$(csreq_hex "$c")', source)
-                self.assertNotIn('relay-agent/relay-agent', source)
+                # The agent's path appears only to remove the rows an older
+                # base gave it.
+                self.assertEqual(source.count('relay-agent/relay-agent'), 1)
+                self.assertIn('FORMER_AGENT="$HOME/.local/libexec/relay-agent/relay-agent"', source)
+                self.assertIn("DELETE FROM access WHERE client='$FORMER_AGENT';", source)
+                self.assertNotIn('"$FORMER_AGENT"' + ')', source.split('CLIENTS=')[1].split('\n')[0])
                 self.assertNotIn('identifier_req_hex', source)
                 self.assertEqual(source.count('for c in "${CLIENTS[@]}"; do'), 4, 'requirements, Apple Events rows, data-class rows, verification')
 

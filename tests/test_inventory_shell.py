@@ -319,8 +319,8 @@ elif args[0] not in ('exec','push'): raise RuntimeError(args)
         spec = importlib.util.spec_from_file_location('relay_agent_package', REPO / 'host/relay-agent-package.py')
         package = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(package)
-        lock = dict(schemaVersion=1, repository='WeZZard/vm-service', version='0.2.0' if pinned else None,
-                    platforms={p: dict(url=package.release_url('WeZZard/vm-service', '0.2.0', p) if pinned else None,
+        lock = dict(schemaVersion=1, repository='WeZZard/machine-service', version='0.2.0' if pinned else None,
+                    platforms={p: dict(url=package.release_url('WeZZard/machine-service', '0.2.0', p) if pinned else None,
                                        sha256=archive if pinned else None, executableSha256=exe if pinned else None)
                                for p in package.PLATFORMS})
         (self.root / 'images/fixture/guest/relay-agent.lock.json').write_text(json.dumps(lock))

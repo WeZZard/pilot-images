@@ -1,22 +1,22 @@
 {
  "schemaVersion": 1,
- "repository": "WeZZard/vm-service",
- "version": "0.2.0-rc.3",
+ "repository": "WeZZard/machine-service",
+ "version": "0.2.0",
  "platforms": {
   "darwin-arm64": {
-   "url": "https://github.com/WeZZard/vm-service/releases/download/v0.2.0-rc.3/relay-agent-0.2.0-rc.3-darwin-arm64.tar.gz",
-   "sha256": "ee73e514b9b981636fef24f3ece7ce94fa72a28efe2dea8af7415485b967127f",
-   "executableSha256": "0cb0cfe91412e6852220d94d2bdfbf65993674ed1fed162467216dd5dad987c2"
+   "url": "https://github.com/WeZZard/machine-service/releases/download/v0.2.0/relay-agent-0.2.0-darwin-arm64.tar.gz",
+   "sha256": "50a5dcdcdf635c4be6b162d919229b876c7e7f1df3f36973c4a7345756b8ce70",
+   "executableSha256": "8bbf2e776cf9120c34c3bac5f7fca4819ec2ed9e7fed1e583b18c918e67f1c9d"
   },
   "linux-arm64": {
-   "url": "https://github.com/WeZZard/vm-service/releases/download/v0.2.0-rc.3/relay-agent-0.2.0-rc.3-linux-arm64.tar.gz",
-   "sha256": "60ae03401f95834d5f3f9d820f3133b328d62adb512a4807aafa750a98ccee48",
-   "executableSha256": "ba022792b560e3d7e3ff0c5ecc6b558c271df6e51b7b5284704a952b10123758"
+   "url": "https://github.com/WeZZard/machine-service/releases/download/v0.2.0/relay-agent-0.2.0-linux-arm64.tar.gz",
+   "sha256": "b75bf51e46629a833f7a96b9f321defdf30c9b29805bfe993f7061adfa77d501",
+   "executableSha256": "1cdc777ba9680cc7006b2089e4d726fc699493b86c16458d41fa67b66866fe4b"
   },
   "linux-x86_64": {
-   "url": "https://github.com/WeZZard/vm-service/releases/download/v0.2.0-rc.3/relay-agent-0.2.0-rc.3-linux-x86_64.tar.gz",
-   "sha256": "103dbbe1bce3804c3d21062bfb37a48a4f6ac1d72615516cf366cea93cfa10f8",
-   "executableSha256": "e2d5f69ee7ec5441c8ed6b997f461c95f8c9741efd77569ff8abe453b1894ef8"
+   "url": "https://github.com/WeZZard/machine-service/releases/download/v0.2.0/relay-agent-0.2.0-linux-x86_64.tar.gz",
+   "sha256": "a43112bfc9c65299600d089805877998bcb18fe9d30f5c5aeff2b4bcd3358d88",
+   "executableSha256": "0db72c7115469d9f473c2426a05004cc8b90bba1589817e1a021f5e3eaa0e3ea"
   }
  }
 }
