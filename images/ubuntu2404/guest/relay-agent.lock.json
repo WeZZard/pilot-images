@@ -5,18 +5,18 @@
  "platforms": {
   "darwin-arm64": {
    "url": "https://github.com/WeZZard/machine-service/releases/download/v0.2.0/relay-agent-0.2.0-darwin-arm64.tar.gz",
-   "sha256": "50a5dcdcdf635c4be6b162d919229b876c7e7f1df3f36973c4a7345756b8ce70",
-   "executableSha256": "8bbf2e776cf9120c34c3bac5f7fca4819ec2ed9e7fed1e583b18c918e67f1c9d"
+   "sha256": "371097b2f13d73424e87285e96ef987fb794fc85f58a48afcc95a314eb9aab31",
+   "executableSha256": "0351e9a20c78610f9375346b51806e083f440f77a823223322d8156d8def69f1"
   },
   "linux-arm64": {
    "url": "https://github.com/WeZZard/machine-service/releases/download/v0.2.0/relay-agent-0.2.0-linux-arm64.tar.gz",
-   "sha256": "b75bf51e46629a833f7a96b9f321defdf30c9b29805bfe993f7061adfa77d501",
-   "executableSha256": "1cdc777ba9680cc7006b2089e4d726fc699493b86c16458d41fa67b66866fe4b"
+   "sha256": "e893198e642fac06e4142981fa978692a9d5bd1834eff05e606c786aad87f862",
+   "executableSha256": "f67e9eb561ea3d66d8ec0d85ab9e77573dbb07cd766285ee986d0ecb52abd847"
   },
   "linux-x86_64": {
    "url": "https://github.com/WeZZard/machine-service/releases/download/v0.2.0/relay-agent-0.2.0-linux-x86_64.tar.gz",
-   "sha256": "a43112bfc9c65299600d089805877998bcb18fe9d30f5c5aeff2b4bcd3358d88",
-   "executableSha256": "0db72c7115469d9f473c2426a05004cc8b90bba1589817e1a021f5e3eaa0e3ea"
+   "sha256": "281b4feda1848cfe53e084f71654d4092f7ca23abcfe8d0db0a22dcbcbb6b8ee",
+   "executableSha256": "b27930a813c227c5f31a3dff706f9d430396ba244aa7e6cd47c503748633195d"
   }
  }
 }
